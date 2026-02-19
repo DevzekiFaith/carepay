@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CarePay — Fix it. Book it. Done. | Ogun",
+  title: "CarePay — Book it. Fix it. Done. | Ogun",
   description:
     "Plumbers, electricians, carpenters & more. Book in 2 mins. Vetted pros across Lagos.",
 };
