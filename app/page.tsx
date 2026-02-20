@@ -134,8 +134,8 @@ export default function Home() {
                         setSelectedService(isActive ? null : label)
                       }
                       className={`card-hover interactive-tap group flex flex-col items-center justify-center gap-1 rounded-xl border-2 px-2 py-2 text-center text-xs font-semibold transition-all sm:px-3 sm:py-3 sm:text-sm ${isActive
-                          ? "border-violet-500 bg-violet-50 text-violet-700 shadow-lg ring-2 ring-violet-200/60"
-                          : "border-stone-200 bg-white text-stone-700 hover:border-violet-300 hover:bg-violet-50/50"
+                        ? "border-violet-500 bg-violet-50 text-violet-700 shadow-lg ring-2 ring-violet-200/60"
+                        : "border-stone-200 bg-white text-stone-700 hover:border-violet-300 hover:bg-violet-50/50"
                         }`}
                     >
                       <div className="flex items-center gap-1.5">
