@@ -1,26 +1,28 @@
- "use client";
+"use client";
 
 import Image from "next/image";
 import Link from "next/link";
-import { FormEvent, useState } from "react";
 import { PAYMENT_ACCOUNT } from "@/lib/payment-details";
+import ModernCalendar from "../components/ModernCalendar";
+import { FormEvent, useState } from "react";
 
-const REQUEST_HERO_IMAGE = "/su4.jpg";
+const REQUEST_HERO_IMAGE = "/su3.jpg";
 
 const SERVICES = [
-  { label: "Plumber", emoji: "🔧" },
-  { label: "Electrician", emoji: "💡" },
-  { label: "Carpenter", emoji: "🪚" },
-  { label: "Furniture Maker", emoji: "🪑" },
-  { label: "AC & Fridge Repair", emoji: "❄️" },
-  { label: "Painter", emoji: "🎨" },
-  { label: "General Handyman", emoji: "🔨" },
+  { label: "Plumber", emoji: "🔧", basePrice: "₦5,000" },
+  { label: "Electrician", emoji: "💡", basePrice: "₦4,500" },
+  { label: "Carpenter", emoji: "🪚", basePrice: "₦6,000" },
+  { label: "Furniture Maker", emoji: "🪑", basePrice: "₦8,000" },
+  { label: "AC & Fridge Repair", emoji: "❄️", basePrice: "₦10,000" },
+  { label: "Painter", emoji: "🎨", basePrice: "₦5,500" },
+  { label: "General Handyman", emoji: "🔨", basePrice: "₦3,000" },
 ];
-
 export default function RequestPage() {
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [scheduledDate, setScheduledDate] = useState<Date | null>(null);
+  const [showPayment, setShowPayment] = useState(false);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -32,240 +34,253 @@ export default function RequestPage() {
       setSubmitted(true);
       (e.target as HTMLFormElement).reset();
       setSelectedService(null);
-    }, 800);
+    }, 1200);
   };
 
   return (
-    <div className="min-h-screen vibe-bg text-stone-900 antialiased">
-      <div className="mx-auto flex min-w-0 max-w-5xl flex-col px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <header className="mb-6 flex flex-col gap-4 opacity-0 animate-fade-in sm:mb-8 sm:flex-row sm:items-start sm:justify-between">
+    <div className="min-h-screen vibe-bg text-stone-900 antialiased selection:bg-emerald-100 pb-20">
+      <div className="mx-auto flex min-w-0 max-w-6xl flex-col px-4 py-8 sm:px-6 lg:px-8">
+
+        {/* Breadcrumbs / Header */}
+        <header className="mb-10 flex flex-col gap-4 animate-fade-in sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <span className="pill-vibe inline-flex rounded-full px-3 py-1 text-xs">
-              New request
-            </span>
-            <h1 className="mt-3 text-2xl font-bold tracking-tight text-stone-900 sm:text-3xl">
-              Book a pro in Lagos
+            <div className="flex items-center gap-2">
+              <Link href="/" className="text-[10px] font-black uppercase tracking-widest text-stone-400 hover:text-emerald-600 transition-colors">Home</Link>
+              <span className="text-stone-300 text-[10px]">/</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600">New Request</span>
+            </div>
+            <h1 className="mt-3 text-3xl font-black tracking-tight text-stone-900 sm:text-4xl">
+              Professional Service <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-green-500">Booking</span>
             </h1>
-            <p className="mt-1 text-sm text-stone-600">
-              Pick a service, drop your details—we&apos;ll match you with a nearby pro.
+            <p className="mt-1 text-sm font-medium text-stone-500">
+              Licensed technicians at your doorstep in under 2 hours.
             </p>
           </div>
           <Link
             href="/"
-            className="flex min-h-[44px] items-center text-sm font-medium text-stone-500 underline-offset-2 hover:text-stone-800 hover:underline"
+            className="group flex h-11 items-center gap-2 text-[10px] font-black uppercase tracking-widest text-stone-500 hover:text-stone-900 transition-all border-2 border-stone-200 rounded-full px-5 bg-white sm:h-auto sm:py-2.5"
           >
-            ← Back
+            <span className="transition-transform group-hover:-translate-x-0.5">←</span> Back Home
           </Link>
         </header>
 
-        {/* Step indicator */}
-        <div className="mb-6 flex items-center gap-2 opacity-0 animate-slide-up">
-          <span
-            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${
-              selectedService
-                ? "bg-violet-100 text-violet-700"
-                : "bg-stone-100 text-stone-600"
-            }`}
-          >
-            {selectedService ? "1 ✓" : "1"} Service
-          </span>
-          <span className="h-px w-4 bg-stone-200" />
-          <span className="rounded-full bg-stone-100 px-3 py-1.5 text-xs font-semibold text-stone-600">
-            2 Details
-          </span>
-        </div>
+        {/* Form Container */}
+        <main className="grid flex-1 gap-8 lg:grid-cols-[1.4fr_1fr]">
 
-        <main className="grid flex-1 gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-          <section className="card-vibe card-hover space-y-8 rounded-2xl p-5 opacity-0 animate-slide-up delay-1 sm:p-7">
-            <div>
-              <h2 className="text-sm font-bold uppercase tracking-wider text-stone-500">
-                Pick what you need
-              </h2>
-              <p className="mt-1 text-sm text-stone-500">
-                Tap one—we&apos;ll find the right pro.
-              </p>
-              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {SERVICES.map(({ label, emoji }) => {
-                  const isActive = selectedService === label;
-                  return (
-                    <button
-                      key={label}
-                      type="button"
-                      onClick={() =>
-                        setSelectedService(isActive ? null : label)
-                      }
-                      className={`card-hover interactive-tap group flex items-center justify-center gap-2 rounded-xl border-2 px-2 py-2 text-center text-xs font-semibold transition-all sm:px-3 sm:py-3 sm:text-sm ${
-                        isActive
-                          ? "border-violet-500 bg-violet-50 text-violet-700 shadow-lg ring-2 ring-violet-200/60"
-                          : "border-stone-200 bg-white text-stone-700 hover:border-violet-300 hover:bg-violet-50/50"
-                      }`}
-                    >
-                      <span className="text-base sm:text-lg" aria-hidden>{emoji}</span>
-                      {isActive && (
-                        <span className="flex h-4 w-4 items-center justify-center rounded-full bg-violet-500 text-[10px] font-bold text-white" aria-hidden>✓</span>
-                      )}
-                      {label}
-                    </button>
-                  );
-                })}
+          <section className="card-vibe animate-slide-up delay-1 overflow-hidden rounded-3xl border border-stone-100 shadow-2xl shadow-stone-200/50">
+            <div className="bg-gradient-to-br from-emerald-50/30 to-emerald-50/20 px-6 py-8 sm:px-10">
+
+              <div className="mb-8">
+                <h2 className="text-sm font-black uppercase tracking-widest text-stone-400 mb-6 flex items-center gap-2">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-[10px] text-white">1</span>
+                  Identify the Service
+                </h2>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-3">
+                  {SERVICES.map(({ label, emoji }) => {
+                    const isActive = selectedService === label;
+                    return (
+                      <button
+                        key={label}
+                        type="button"
+                        onClick={() => setSelectedService(isActive ? null : label)}
+                        className={`card-hover interactive-tap group relative flex flex-col items-center justify-center rounded-2xl border-2 p-3 text-center transition-all ${isActive
+                          ? "border-emerald-500 bg-white shadow-lg ring-2 ring-emerald-200/60"
+                          : "border-stone-100 bg-white/60 hover:border-emerald-200 hover:bg-white"
+                          }`}
+                      >
+                        <span className="text-2xl sm:text-3xl filter drop-shadow-sm mb-1" aria-hidden>{emoji}</span>
+                        <span className={`text-[11px] font-black uppercase tracking-tight ${isActive ? "text-emerald-900" : "text-stone-700"}`}>{label}</span>
+                        {isActive && (
+                          <div className="absolute top-1.5 right-1.5 h-3.5 w-3.5 rounded-full bg-emerald-600 flex items-center justify-center text-[8px] text-white font-black">
+                            ✓
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
 
-            <div className="border-t border-stone-100 pt-6">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-stone-500">
-                Your details
-              </h2>
-              <p className="mt-1 text-sm text-stone-500">
-                We&apos;ll use this to confirm your booking and share updates.
-              </p>
+              <form onSubmit={handleSubmit} className="space-y-6 pt-6 border-t border-stone-100">
+                <h2 className="text-sm font-black uppercase tracking-widest text-stone-400 mb-6 flex items-center gap-2">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-[10px] text-white">2</span>
+                  Service Details
+                </h2>
 
-              <form
-                onSubmit={handleSubmit}
-                className="mt-5 space-y-4 text-sm"
-              >
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-6 sm:grid-cols-2">
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500">
-                      Full name
-                    </label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-stone-700 ml-1">Full Name</label>
                     <input
                       required
                       name="fullName"
-                      placeholder="John Doe"
-                      className="input-vibe w-full rounded-xl border-2 border-stone-200 bg-stone-50/80 px-3 py-2 text-sm text-stone-900 outline-none transition focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100"
+                      placeholder="Chioma Adebayo"
+                      className="input-vibe w-full rounded-2xl border-2 border-stone-100 bg-white px-4 py-4 text-base outline-none transition-all focus:border-emerald-300 focus:ring-4 focus:ring-emerald-500/5 sm:py-3 sm:text-sm"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500">
-                      Phone number
-                    </label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-stone-700 ml-1">Phone / WhatsApp</label>
                     <input
                       required
                       type="tel"
                       name="phone"
                       placeholder="+234 812 345 6789"
-                      className="input-vibe w-full rounded-xl border-2 border-stone-200 bg-stone-50/80 px-3 py-2 text-sm text-stone-900 outline-none transition focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100"
+                      className="input-vibe w-full rounded-2xl border-2 border-stone-100 bg-white px-4 py-4 text-base outline-none transition-all focus:border-emerald-300 focus:ring-4 focus:ring-emerald-500/5 sm:py-3 sm:text-sm"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500">
-                    Address
-                  </label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-700 ml-1">Service Address</label>
                   <input
                     required
                     name="address"
-                    placeholder="House number, street, area"
-                    className="input-vibe w-full rounded-xl border-2 border-stone-200 bg-stone-50/80 px-3 py-2 text-sm text-stone-900 outline-none transition focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100"
+                    placeholder="E.g. Number, street, area in your city"
+                    className="input-vibe w-full rounded-2xl border-2 border-stone-100 bg-white px-4 py-4 text-base outline-none transition-all focus:border-emerald-300 focus:ring-4 focus:ring-emerald-500/5 sm:py-3 sm:text-sm"
                   />
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-6 sm:grid-cols-2">
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500">
-                      Service type
-                    </label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-stone-700 ml-1">Service Category</label>
                     <select
                       required
                       name="service"
                       value={selectedService ?? ""}
-                      onChange={(e) =>
-                        setSelectedService(
-                          e.target.value || null,
-                        )
-                      }
-                      className="input-vibe w-full rounded-xl border-2 border-stone-200 bg-stone-50/80 px-3 py-2 text-sm text-stone-900 outline-none transition focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100"
+                      onChange={(e) => setSelectedService(e.target.value || null)}
+                      className="input-vibe w-full rounded-2xl border-2 border-stone-100 bg-white px-4 py-4 text-base outline-none transition-all appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[right_1rem_center] bg-no-repeat sm:py-3 sm:text-sm"
                     >
                       <option value="">Select a service</option>
                       {SERVICES.map(({ label }) => (
-                        <option key={label} value={label}>
-                          {label}
-                        </option>
+                        <option key={label} value={label}>{label}</option>
                       ))}
                     </select>
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500">
-                      Preferred time
-                    </label>
-                    <input
-                      type="datetime-local"
-                      name="preferredTime"
-                      className="input-vibe w-full rounded-xl border-2 border-stone-200 bg-stone-50/80 px-3 py-2 text-sm text-stone-900 outline-none transition focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100"
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-stone-700 ml-1">Preferred Time</label>
+                    <ModernCalendar
+                      selectedDate={scheduledDate}
+                      onSelect={setScheduledDate}
                     />
+                    {scheduledDate && (
+                      <div className="rounded-2xl bg-emerald-50 px-4 py-3 border border-emerald-100 animate-fade-in">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600">Selected Schedule</p>
+                        <p className="text-sm font-bold text-emerald-900 mt-1">
+                          {scheduledDate.toLocaleString('en-US', {
+                            weekday: 'long',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500">
-                    What needs to be done?
-                  </label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-700 ml-1">Additional Notes</label>
                   <textarea
                     required
                     name="details"
                     rows={4}
-                    placeholder="Describe the issue—photos on WhatsApp help. We'll match the right pro."
-                    className="input-vibe w-full resize-none rounded-xl border-2 border-stone-200 bg-stone-50/80 px-3 py-2 text-sm text-stone-900 outline-none transition focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100"
+                    placeholder="Describe the issue in detail—this helps us send the right tools."
+                    className="input-vibe w-full resize-none rounded-2xl border-2 border-stone-100 bg-white px-4 py-4 text-base outline-none transition-all focus:border-emerald-300 focus:ring-4 focus:ring-emerald-500/5 sm:py-3 sm:text-sm"
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="flex items-center gap-2 text-xs text-stone-600">
-                    <input
-                      type="checkbox"
-                      name="whatsapp"
-                      defaultChecked
-                      className="h-3.5 w-3.5 rounded border-stone-300 text-violet-600 focus:ring-violet-500"
-                    />
-                    Contact me on WhatsApp for faster updates
-                  </label>
-                </div>
+                <div className="pt-4 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                  {selectedService && (
+                    <div className="flex flex-col gap-1 animate-fade-in">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">Estimated Base Price</p>
+                      <p className="text-2xl font-black text-emerald-600">{SERVICES.find(s => s.label === selectedService)?.basePrice}</p>
+                    </div>
+                  )}
+                  {!showPayment ? (
+                    <button
+                      type="button"
+                      disabled={!scheduledDate || !selectedService}
+                      onClick={() => setShowPayment(true)}
+                      className="btn-gradient relative h-16 rounded-full px-12 text-base font-black shadow-xl shadow-emerald-200/50 flex items-center justify-center gap-3 min-w-[240px] disabled:opacity-50 ml-auto transition-all hover:-translate-y-1"
+                    >
+                      <span>Add to Cart & Review</span>
+                      <span className="text-lg">→</span>
+                    </button>
+                  ) : (
+                    <div className="space-y-6 animate-slide-up w-full max-w-sm ml-auto">
+                      <div className="rounded-3xl border-2 border-emerald-100 bg-emerald-50/50 p-6 shadow-sm">
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-4">Secured Booking</h4>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-stone-600">Commitment Fee</span>
+                          <span className="text-sm font-black text-stone-900">₦2,500</span>
+                        </div>
+                        <p className="text-[10px] text-stone-500 font-medium leading-relaxed italic">
+                          * This fee ensures your pro is secured. It will be deducted from your final bill.
+                        </p>
+                      </div>
 
-                <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="min-w-0 flex-1 text-xs text-stone-500">
-                    We&apos;ll create your request and a pro will confirm before coming.
-                  </p>
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="btn-gradient interactive-tap order-first w-full min-h-[44px] shrink-0 rounded-full px-4 py-2.5 text-sm sm:order-none sm:ml-4 sm:w-auto disabled:cursor-not-allowed disabled:scale-100 disabled:opacity-70"
-                  >
-                    {submitting ? (
-                      <span className="animate-pulse-soft">Sending…</span>
-                    ) : (
-                      "Submit request"
-                    )}
-                  </button>
+                      <div className="flex flex-col gap-3">
+                        <button
+                          type="submit"
+                          disabled={submitting}
+                          className="btn-gradient flex h-16 items-center justify-center rounded-full text-sm font-black uppercase tracking-widest text-white shadow-xl shadow-emerald-200/50 transition-all active:scale-95"
+                        >
+                          {submitting ? "Securing Pro..." : "Pay Commitment Fee"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowPayment(false)}
+                          className="flex h-12 items-center justify-center rounded-full text-[10px] font-black uppercase tracking-widest text-stone-400 hover:text-stone-900 transition-colors"
+                        >
+                          ← Change Schedule
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {submitted && (
-                  <div className="animate-success-pop rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-50 p-4">
-                    <p className="text-base font-bold text-emerald-800">
-                      You&apos;re in! 🎉
-                    </p>
-                    <p className="mt-1 text-sm text-emerald-700">
-                      We&apos;re on it—someone will hit you up soon to confirm time & price.
-                    </p>
-                    <div className="mt-3 rounded-lg border border-emerald-200 bg-white/80 p-2.5 text-xs text-stone-700">
-                      <p className="font-semibold text-stone-800">You&apos;re in — pay before the job:</p>
-                      <p><span className="font-medium">Bank:</span> {PAYMENT_ACCOUNT.bankName}</p>
-                      <p><span className="font-medium">Account:</span> {PAYMENT_ACCOUNT.accountName}</p>
-                      <p><span className="font-medium">Number:</span> {PAYMENT_ACCOUNT.accountNumber}</p>
+                  <div className="animate-success-pop rounded-3xl border-2 border-emerald-200 bg-emerald-50/50 p-6 shadow-xl">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="h-12 w-12 rounded-full bg-emerald-500 flex items-center justify-center text-white text-2xl">✓</div>
+                      <div>
+                        <h3 className="text-xl font-black text-emerald-900 leading-tight">Booking Sent!</h3>
+                        <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest">We'll contact you in 5-10 mins</p>
+                      </div>
                     </div>
-                    <div className="mt-3 flex flex-wrap gap-2">
+
+                    <div className="rounded-2xl bg-white p-6 border border-emerald-100 shadow-sm space-y-4">
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Payment Breakdown</p>
+                      <div className="grid gap-4">
+                        <div className="flex justify-between border-b border-stone-50 pb-2">
+                          <span className="text-xs font-bold text-stone-600 uppercase">Bank</span>
+                          <span className="text-xs font-black text-stone-900">{PAYMENT_ACCOUNT.bankName}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-stone-50 pb-2">
+                          <span className="text-xs font-bold text-stone-600 uppercase">Account No.</span>
+                          <span className="text-xs font-black text-stone-900 tracking-widest font-mono">{PAYMENT_ACCOUNT.accountNumber}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-xs font-bold text-stone-600 uppercase">Account Name</span>
+                          <span className="text-xs font-black text-emerald-700">{PAYMENT_ACCOUNT.accountName}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-8 flex flex-wrap gap-4">
                       <Link
                         href="/customer/dashboard"
-                        className="inline-flex min-h-[44px] items-center rounded-full bg-emerald-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-emerald-700"
+                        className="btn-gradient h-14 rounded-full px-8 flex items-center justify-center text-xs font-black uppercase tracking-widest"
                       >
-                        Track requests
+                        Track Status
                       </Link>
-                      <Link
-                        href="/request"
-                        className="inline-flex min-h-[44px] items-center rounded-full border-2 border-emerald-300 bg-white px-4 py-2.5 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-50"
+                      <button
+                        type="button"
+                        onClick={() => setSubmitted(false)}
+                        className="h-14 rounded-full border-2 border-stone-200 bg-white px-8 text-xs font-black text-stone-700 hover:bg-stone-50 transition-all uppercase tracking-widest"
                       >
-                        Book another
-                      </Link>
+                        Another Booking
+                      </button>
                     </div>
                   </div>
                 )}
@@ -273,90 +288,58 @@ export default function RequestPage() {
             </div>
           </section>
 
-          <aside className="card-vibe space-y-6 rounded-2xl border-2 border-dashed border-violet-200/60 bg-white/80 p-5 text-sm text-stone-700 opacity-0 animate-slide-up delay-2 sm:p-6">
-            <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-stone-200">
+          {/* Sidebar */}
+          <aside className="space-y-8 animate-slide-up delay-2">
+
+            <div className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl border-4 border-white shadow-2xl ring-1 ring-stone-100">
               <Image
                 src={REQUEST_HERO_IMAGE}
-                alt="Handyman with tools"
+                alt="Professional at work"
                 fill
                 className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 400px"
+                sizes="400px"
               />
-            </div>
-            <div>
-              <h2 className="text-sm font-bold uppercase tracking-wider text-stone-500">
-                What happens next
-              </h2>
-              <ol className="mt-3 space-y-3 text-sm">
-                <li className="flex gap-3">
-                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-100 to-amber-100 text-xs font-bold text-violet-700">
-                    1
-                  </span>
-                  <div>
-                    <p className="font-semibold text-stone-800">Request created</p>
-                    <p className="text-xs text-stone-500">
-                      We match you to a nearby pro.
-                    </p>
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-100 to-amber-100 text-xs font-bold text-violet-700">
-                    2
-                  </span>
-                  <div>
-                    <p className="font-semibold text-stone-800">They hit you up</p>
-                    <p className="text-xs text-stone-500">
-                      Confirm time, price & details.
-                    </p>
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-100 to-amber-100 text-xs font-bold text-violet-700">
-                    3
-                  </span>
-                  <div>
-                    <p className="font-semibold text-stone-800">Pay before the job.</p>
-                    <p className="text-xs text-stone-500">
-                      Pay to our bank details, then we send the pro.
-                    </p>
-                  </div>
-                </li>
-              </ol>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-8 text-white">
+                <h3 className="text-2xl font-black leading-tight">Certified Quality</h3>
+                <p className="mt-2 text-xs font-medium text-white/80">Every technician undergoes a background check and skill audit before joining our fleet.</p>
+              </div>
             </div>
 
-            <div className="rounded-xl border border-stone-200 bg-stone-50/80 p-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-stone-500">
-                Pay before the job
-              </h3>
-              <p className="mt-2 text-xs text-stone-700">
-                <span className="font-semibold">Bank:</span> {PAYMENT_ACCOUNT.bankName}
-              </p>
-              <p className="mt-0.5 text-xs text-stone-700">
-                <span className="font-semibold">Account name:</span> {PAYMENT_ACCOUNT.accountName}
-              </p>
-              <p className="mt-0.5 text-xs text-stone-700">
-                <span className="font-semibold">Account no.:</span> {PAYMENT_ACCOUNT.accountNumber}
-              </p>
+            <div className="card-vibe p-8 rounded-3xl border-2 border-dashed border-emerald-200/60 bg-white/80">
+              <h3 className="text-sm font-black uppercase tracking-widest text-stone-400 mb-6">Execution Path</h3>
+              <div className="space-y-6">
+                {[
+                  { step: "1", title: "Job Matching", desc: "AI finds best pro nearby" },
+                  { step: "2", title: "Confirmation", desc: "Pro confirms price on WhatsApp" },
+                  { step: "3", title: "Execution", desc: "Work starts upon arrival" }
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-4">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-[11px] font-black text-white">{item.step}</span>
+                    <div>
+                      <p className="text-sm font-black text-stone-900 leading-none">{item.title}</p>
+                      <p className="mt-1 text-xs text-stone-500 font-medium">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <p className="rounded-xl bg-gradient-to-r from-violet-50 to-amber-50 py-2.5 text-center text-xs font-semibold text-stone-600">
-              🔒 Vetted pros · Lagos-wide
-            </p>
-
-            <div className="border-t border-stone-200 pt-5">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-stone-500">
-                Coming soon
-              </h3>
-              <ul className="mt-3 space-y-2 text-xs text-stone-600">
-                <li>• Live request status</li>
-                <li>• Pro profiles & ratings</li>
-                <li>• In-app payments</li>
-              </ul>
+            <div className="rounded-3xl bg-stone-900 p-8 text-white shadow-xl">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">System Live</span>
+              </div>
+              <p className="text-lg font-bold leading-tight italic text-stone-100">"The fastest way to get things fixed—no drama, just results."</p>
+              <div className="mt-6 flex items-center gap-3">
+                <div className="h-8 w-8 rounded-full bg-stone-800 border border-stone-700 flex items-center justify-center font-black text-[10px]">C</div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">CarePay Operations</p>
+              </div>
             </div>
+
           </aside>
+
         </main>
       </div>
     </div>
   );
 }
-
