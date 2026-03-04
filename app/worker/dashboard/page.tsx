@@ -2,6 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+import { useState } from "react";
+
+const LiveMap = dynamic(() => import("../../components/LiveMap"), {
+  ssr: false,
+  loading: () => <div className="h-[200px] w-full bg-stone-100 animate-pulse rounded-2xl" />
+});
 
 const DEMO_JOBS = [
   {
@@ -29,6 +36,7 @@ const DEMO_JOBS = [
 const WORKER_IMAGE = "/su2.jpg";
 
 export default function WorkerDashboardPage() {
+  const [activeRouteJob, setActiveRouteJob] = useState<string | null>(null);
   return (
     <div className="min-h-screen vibe-bg text-stone-900 antialiased selection:bg-emerald-100 pb-20">
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
@@ -110,32 +118,59 @@ export default function WorkerDashboardPage() {
                 {DEMO_JOBS.map((job) => (
                   <div
                     key={job.id}
-                    className="group relative flex flex-col gap-4 rounded-2xl border-2 border-stone-100 bg-white p-5 transition-all hover:border-emerald-100 hover:shadow-md active:scale-[0.99] sm:flex-row sm:items-center sm:justify-between"
+                    className={`group relative flex flex-col gap-4 rounded-3xl border-2 p-5 transition-all sm:p-6 ${activeRouteJob === job.id ? "border-emerald-500 bg-emerald-50/20" : "border-stone-100 bg-white hover:border-emerald-100 hover:shadow-md"}`}
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-stone-50 text-2xl group-hover:bg-emerald-50 transition-colors">
-                        {job.icon}
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-stone-50 text-2xl group-hover:bg-emerald-50 transition-colors">
+                          {job.icon}
+                        </div>
+                        <div className="space-y-0.5">
+                          <p className="text-sm font-black text-stone-900">
+                            {job.type} · {job.area}
+                          </p>
+                          <p className="text-[11px] font-medium text-stone-500 leading-tight">
+                            {job.customer} • <span className="text-emerald-600 font-bold">{job.time}</span>
+                          </p>
+                        </div>
                       </div>
-                      <div className="space-y-0.5">
-                        <p className="text-sm font-black text-stone-900">
-                          {job.type} · {job.area}
-                        </p>
-                        <p className="text-[11px] font-medium text-stone-500 leading-tight">
-                          {job.customer} • <span className="text-emerald-600 font-bold">{job.time}</span>
-                        </p>
-                        <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-tighter mt-1 italic">
-                          Est. Payout: {job.price}
-                        </p>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setActiveRouteJob(activeRouteJob === job.id ? null : job.id)}
+                          className={`flex h-10 items-center justify-center rounded-full border-2 px-4 text-[10px] font-black uppercase tracking-widest transition-all ${activeRouteJob === job.id ? "border-emerald-500 bg-emerald-500 text-white" : "border-emerald-600 bg-white text-emerald-600 hover:bg-emerald-50 shadow-md shadow-emerald-100"}`}
+                        >
+                          {activeRouteJob === job.id ? "✕ Close Map" : "🗺️ View Job Route"}
+                        </button>
+                        <button className={`inline-block rounded-full px-5 py-2.5 text-[10px] font-black uppercase tracking-widest shadow-sm transition-all ${job.status === "Scheduled"
+                          ? "bg-stone-100 text-stone-400 cursor-default"
+                          : "bg-stone-900 text-white hover:bg-emerald-600 active:scale-95"
+                          }`}>
+                          {job.status === "Scheduled" ? "Accepted" : "Accept →"}
+                        </button>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <button className={`inline-block rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-widest shadow-sm transition-all ${job.status === "Scheduled"
-                        ? "bg-stone-50 text-stone-400 cursor-default"
-                        : "bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shadow-emerald-200 hover:scale-105 active:scale-95"
-                        }`}>
-                        {job.status === "Scheduled" ? "Accepted" : "Accept Job"}
-                      </button>
-                    </div>
+
+                    {activeRouteJob === job.id && (
+                      <div className="mt-4 animate-slide-up space-y-4">
+                        <LiveMap interactive={false} showRoute={true} height="200px" className="rounded-2xl border-emerald-200" />
+                        <div className="flex items-center justify-between rounded-2xl bg-white p-3 border border-emerald-100">
+                          <div className="flex items-center gap-3">
+                            <span className="text-lg">🧭</span>
+                            <div>
+                              <p className="text-[10px] font-black uppercase tracking-widest text-stone-400 leading-none">Direct Route</p>
+                              <p className="text-xs font-bold text-stone-900 mt-1">12 mins away (4.2 km)</p>
+                            </div>
+                          </div>
+                          <a
+                            href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(job.area)}`}
+                            target="_blank"
+                            className="text-[10px] font-black uppercase tracking-widest text-emerald-600 hover:text-emerald-800"
+                          >
+                            Open Maps ↗
+                          </a>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

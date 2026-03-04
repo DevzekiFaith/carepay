@@ -67,6 +67,18 @@ export default function WorkerRegisterPage() {
             </div>
 
             <div className="space-y-1.5">
+              <label className="text-[10px] font-black uppercase tracking-widest text-stone-700 ml-1">NIN (National ID Number)</label>
+              <input
+                required
+                name="nin"
+                autoComplete="off"
+                placeholder="11-digit ID Number"
+                className="input-vibe w-full rounded-2xl border-2 border-stone-100 bg-stone-50/50 px-4 py-3 text-sm outline-none transition-all focus:border-emerald-300 focus:bg-white focus:ring-4 focus:ring-emerald-500/5 group"
+              />
+              <p className="text-[9px] text-stone-400 font-bold uppercase tracking-tighter ml-1">* Required for law enforcement clearance</p>
+            </div>
+
+            <div className="space-y-1.5">
               <label className="text-[10px] font-black uppercase tracking-widest text-stone-700 ml-1">Phone Number</label>
               <input
                 required
