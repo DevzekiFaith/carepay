@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Plus, X } from "lucide-react";
 
 const FAQ_ITEMS = [
     {
@@ -27,7 +28,7 @@ export default function FAQ() {
     return (
         <section id="faq" className="mx-auto mt-16 max-w-5xl px-4 opacity-0 animate-slide-up delay-3 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-bold tracking-tight text-stone-900 sm:text-3xl">
+                <h2 className="text-2xl font-black tracking-tight text-stone-900 sm:text-3xl">
                     Common Questions
                 </h2>
                 <div className="h-1 w-20 bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full"></div>
@@ -45,19 +46,18 @@ export default function FAQ() {
                         role="button"
                         tabIndex={0}
                     >
-                        <div className="flex items-start justify-between gap-4">
-                            <h3 className={`text-sm font-bold leading-snug transition-colors ${activeIndex === index ? "text-emerald-900" : "text-stone-800"
+                        <div className="flex items-start justify-between gap-4 py-1">
+                            <h3 className={`text-base sm:text-lg font-bold leading-tight transition-colors ${activeIndex === index ? "text-emerald-900" : "text-stone-800"
                                 }`}>
                                 {item.question}
                             </h3>
-                            <span className={`text-lg font-bold transition-transform duration-300 shrink-0 ${activeIndex === index ? "rotate-45 text-emerald-600" : "text-stone-400 group-hover:text-stone-600"
-                                }`}>
-                                +
-                            </span>
+                            <div className={`transition-transform duration-300 shrink-0 mt-1 ${activeIndex === index ? "text-emerald-600" : "text-stone-400 group-hover:text-stone-600"}`}>
+                                {activeIndex === index ? <X size={20} strokeWidth={2.5} /> : <Plus size={20} strokeWidth={2.5} />}
+                            </div>
                         </div>
-                        <div className={`overflow-hidden transition-all duration-300 ${activeIndex === index ? "mt-3 max-h-40 opacity-100" : "max-h-0 opacity-0"
+                        <div className={`overflow-hidden transition-all duration-300 ${activeIndex === index ? "mt-4 max-h-60 opacity-100" : "max-h-0 opacity-0"
                             }`}>
-                            <p className="text-xs text-stone-600 leading-relaxed font-medium">
+                            <p className="text-sm sm:text-base text-stone-600 leading-relaxed font-medium">
                                 {item.answer}
                             </p>
                         </div>

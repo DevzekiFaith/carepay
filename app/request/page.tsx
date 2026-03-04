@@ -13,16 +13,18 @@ const LiveMap = dynamic(() => import("../components/LiveMap"), {
   loading: () => <div className="h-[280px] w-full bg-stone-100 animate-pulse rounded-2xl" />
 });
 
+import { Wrench, Lightbulb, Hammer, Sofa, Snowflake, Palette, Settings, MapPin, CheckCircle2, ChevronRight, MessageSquare, Clock, ArrowLeft } from "lucide-react";
+
 const REQUEST_HERO_IMAGE = "/su3.jpg";
 
 const SERVICES = [
-  { label: "Plumber", emoji: "🔧", basePrice: "₦5,000" },
-  { label: "Electrician", emoji: "💡", basePrice: "₦4,500" },
-  { label: "Carpenter", emoji: "🪚", basePrice: "₦6,000" },
-  { label: "Furniture Maker", emoji: "🪑", basePrice: "₦8,000" },
-  { label: "AC & Fridge Repair", emoji: "❄️", basePrice: "₦10,000" },
-  { label: "Painter", emoji: "🎨", basePrice: "₦5,500" },
-  { label: "General Handyman", emoji: "🔨", basePrice: "₦3,000" },
+  { label: "Plumber", icon: Wrench, basePrice: "₦5,000" },
+  { label: "Electrician", icon: Lightbulb, basePrice: "₦4,500" },
+  { label: "Carpenter", icon: Hammer, basePrice: "₦6,000" },
+  { label: "Furniture Maker", icon: Sofa, basePrice: "₦8,000" },
+  { label: "AC & Fridge Repair", icon: Snowflake, basePrice: "₦10,000" },
+  { label: "Painter", icon: Palette, basePrice: "₦5,500" },
+  { label: "General Handyman", icon: Settings, basePrice: "₦3,000" },
 ];
 export default function RequestPage() {
   const [selectedService, setSelectedService] = useState<string | null>(null);
@@ -58,10 +60,10 @@ export default function RequestPage() {
               <span className="text-stone-300 text-[10px]">/</span>
               <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600">New Request</span>
             </div>
-            <h1 className="mt-3 text-3xl font-black tracking-tight text-stone-900 sm:text-4xl">
+            <h1 className="mt-3 text-3xl font-black tracking-tight text-stone-900 sm:text-5xl">
               Professional Service <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-green-500">Booking</span>
             </h1>
-            <p className="mt-1 text-sm font-medium text-stone-500">
+            <p className="mt-2 text-base font-medium text-stone-600 sm:text-lg">
               Licensed technicians at your doorstep in under 2 hours.
             </p>
           </div>
@@ -69,7 +71,7 @@ export default function RequestPage() {
             href="/"
             className="group flex h-11 items-center gap-2 text-[10px] font-black uppercase tracking-widest text-stone-500 hover:text-stone-900 transition-all border-2 border-stone-200 rounded-full px-5 bg-white sm:h-auto sm:py-2.5"
           >
-            <span className="transition-transform group-hover:-translate-x-0.5">←</span> Back Home
+            <ArrowLeft size={12} className="transition-transform group-hover:-translate-x-0.5" /> Back Home
           </Link>
         </header>
 
@@ -80,28 +82,30 @@ export default function RequestPage() {
             <div className="bg-gradient-to-br from-emerald-50/30 to-emerald-50/20 px-6 py-8 sm:px-10">
 
               <div className="mb-8">
-                <h2 className="text-sm font-black uppercase tracking-widest text-stone-400 mb-6 flex items-center gap-2">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-[10px] text-white">1</span>
+                <h2 className="text-base font-black uppercase tracking-widest text-stone-400 mb-6 flex items-center gap-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-600 text-xs text-white">1</span>
                   Identify the Service
                 </h2>
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-3">
-                  {SERVICES.map(({ label, emoji }) => {
-                    const isActive = selectedService === label;
+                  {SERVICES.map((item) => {
+                    const isActive = selectedService === item.label;
                     return (
                       <button
-                        key={label}
+                        key={item.label}
                         type="button"
-                        onClick={() => setSelectedService(isActive ? null : label)}
+                        onClick={() => setSelectedService(isActive ? null : item.label)}
                         className={`card-hover interactive-tap group relative flex flex-col items-center justify-center rounded-2xl border-2 p-3 text-center transition-all ${isActive
                           ? "border-emerald-500 bg-white shadow-lg ring-2 ring-emerald-200/60"
                           : "border-stone-100 bg-white/60 hover:border-emerald-200 hover:bg-white"
                           }`}
                       >
-                        <span className="text-2xl sm:text-3xl filter drop-shadow-sm mb-1" aria-hidden>{emoji}</span>
-                        <span className={`text-[11px] font-black uppercase tracking-tight ${isActive ? "text-emerald-900" : "text-stone-700"}`}>{label}</span>
+                        <span className={`transition-colors mb-1 ${isActive ? "text-emerald-600" : "text-stone-400 group-hover:text-emerald-500"}`}>
+                          <item.icon size={28} strokeWidth={2.5} aria-hidden />
+                        </span>
+                        <span className={`text-xs font-black uppercase tracking-tight ${isActive ? "text-emerald-900" : "text-stone-700"}`}>{item.label}</span>
                         {isActive && (
-                          <div className="absolute top-1.5 right-1.5 h-3.5 w-3.5 rounded-full bg-emerald-600 flex items-center justify-center text-[8px] text-white font-black">
-                            ✓
+                          <div className="absolute top-1.5 right-1.5 rounded-full bg-emerald-600 flex items-center justify-center text-white p-0.5 shadow-md ring-2 ring-white">
+                            <CheckCircle2 size={10} strokeWidth={3} />
                           </div>
                         )}
                       </button>
@@ -111,43 +115,43 @@ export default function RequestPage() {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6 pt-6 border-t border-stone-100">
-                <h2 className="text-sm font-black uppercase tracking-widest text-stone-400 mb-6 flex items-center gap-2">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-[10px] text-white">2</span>
+                <h2 className="text-base font-black uppercase tracking-widest text-stone-400 mb-6 flex items-center gap-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-600 text-xs text-white">2</span>
                   Service Details
                 </h2>
 
                 <div className="grid gap-6 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-stone-700 ml-1">Full Name</label>
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-black uppercase tracking-widest text-stone-700 ml-1">Full Name</label>
                     <input
                       required
                       name="fullName"
                       placeholder="Chioma Adebayo"
-                      className="input-vibe w-full rounded-2xl border-2 border-stone-100 bg-white px-4 py-4 text-base outline-none transition-all focus:border-emerald-300 focus:ring-4 focus:ring-emerald-500/5 sm:py-3 sm:text-sm"
+                      className="input-vibe w-full rounded-2xl border-2 border-stone-100 bg-white px-5 py-5 text-lg outline-none transition-all focus:border-emerald-300 focus:ring-4 focus:ring-emerald-500/5 sm:py-4 sm:text-base"
                     />
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-stone-700 ml-1">Phone / WhatsApp</label>
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-black uppercase tracking-widest text-stone-700 ml-1">Phone / WhatsApp</label>
                     <input
                       required
                       type="tel"
                       name="phone"
                       placeholder="+234 812 345 6789"
-                      className="input-vibe w-full rounded-2xl border-2 border-stone-100 bg-white px-4 py-4 text-base outline-none transition-all focus:border-emerald-300 focus:ring-4 focus:ring-emerald-500/5 sm:py-3 sm:text-sm"
+                      className="input-vibe w-full rounded-2xl border-2 border-stone-100 bg-white px-5 py-5 text-lg outline-none transition-all focus:border-emerald-300 focus:ring-4 focus:ring-emerald-500/5 sm:py-4 sm:text-base"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  <div className="space-y-1.5 relative">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-stone-700 ml-1">Service Address</label>
+                  <div className="space-y-2 relative">
+                    <label className="text-[11px] font-black uppercase tracking-widest text-stone-700 ml-1">Service Address</label>
                     <input
                       required
                       name="address"
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
                       placeholder="E.g. Number, street, area in your city"
-                      className="input-vibe w-full rounded-2xl border-2 border-stone-100 bg-white px-4 py-4 text-base outline-none transition-all focus:border-emerald-300 focus:ring-4 focus:ring-emerald-500/5 sm:py-3 sm:text-sm"
+                      className="input-vibe w-full rounded-2xl border-2 border-stone-100 bg-white px-5 py-5 text-lg outline-none transition-all focus:border-emerald-300 focus:ring-4 focus:ring-emerald-500/5 sm:py-4 sm:text-base"
                     />
                     {suggestions.length > 0 && (
                       <div className="absolute left-0 right-0 z-[3000] mt-2 max-h-48 overflow-y-auto rounded-2xl border-2 border-emerald-100 bg-white shadow-2xl animate-fade-in ring-1 ring-emerald-500/10 backdrop-blur-sm">
@@ -159,10 +163,10 @@ export default function RequestPage() {
                               setAddress(s.display_name);
                               setSuggestions([]);
                             }}
-                            className="flex w-full items-start gap-3 border-b border-stone-50 px-4 py-3 text-left hover:bg-emerald-50 transition-colors last:border-0"
+                            className="flex w-full items-start gap-4 border-b border-stone-50 px-5 py-4 text-left hover:bg-emerald-50 transition-colors last:border-0"
                           >
-                            <span className="text-lg">📍</span>
-                            <span className="text-[11px] font-bold text-stone-900 leading-tight">{s.display_name}</span>
+                            <MapPin size={18} className="text-emerald-500 mt-1 shrink-0" />
+                            <span className="text-sm font-bold text-stone-900 leading-tight">{s.display_name}</span>
                           </button>
                         ))}
                       </div>
@@ -170,8 +174,9 @@ export default function RequestPage() {
                   </div>
                   <div className="group relative overflow-hidden rounded-3xl border-2 border-emerald-100 bg-white p-2 shadow-lg shadow-emerald-100/20 ring-1 ring-emerald-500/10">
                     <div className="absolute left-6 top-6 z-20 flex flex-col gap-1">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-white/95 px-3 py-2 rounded-full shadow-sm backdrop-blur-sm border border-emerald-100 animate-pulse">
-                        📍 Select Work Location on Live Map
+                      <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-white/95 px-3 py-2 rounded-full shadow-sm backdrop-blur-sm border border-emerald-100 animate-pulse">
+                        <MapPin size={12} strokeWidth={3} />
+                        Select Work Location
                       </p>
                     </div>
                     <LiveMap
@@ -186,13 +191,13 @@ export default function RequestPage() {
 
                 <div className="grid gap-6 sm:grid-cols-2">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-stone-700 ml-1">Service Category</label>
+                    <label className="text-[11px] font-black uppercase tracking-widest text-stone-700 ml-1">Service Category</label>
                     <select
                       required
                       name="service"
                       value={selectedService ?? ""}
                       onChange={(e) => setSelectedService(e.target.value || null)}
-                      className="input-vibe w-full rounded-2xl border-2 border-stone-100 bg-white px-4 py-4 text-base outline-none transition-all appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[right_1rem_center] bg-no-repeat sm:py-3 sm:text-sm"
+                      className="input-vibe w-full rounded-2xl border-2 border-stone-100 bg-white px-5 py-5 text-lg outline-none transition-all appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[right_1rem_center] bg-no-repeat sm:py-4 sm:text-base"
                     >
                       <option value="">Select a service</option>
                       {SERVICES.map(({ label }) => (
@@ -249,7 +254,7 @@ export default function RequestPage() {
                       className="btn-gradient relative h-16 rounded-full px-12 text-base font-black shadow-xl shadow-emerald-200/50 flex items-center justify-center gap-3 min-w-[240px] disabled:opacity-50 ml-auto transition-all hover:-translate-y-1"
                     >
                       <span>Add to Cart & Review</span>
-                      <span className="text-lg">→</span>
+                      <ChevronRight size={18} strokeWidth={3} />
                     </button>
                   ) : (
                     <div className="space-y-6 animate-slide-up w-full max-w-sm ml-auto">
@@ -275,9 +280,9 @@ export default function RequestPage() {
                         <button
                           type="button"
                           onClick={() => setShowPayment(false)}
-                          className="flex h-12 items-center justify-center rounded-full text-[10px] font-black uppercase tracking-widest text-stone-400 hover:text-stone-900 transition-colors"
+                          className="flex h-12 items-center justify-center rounded-full text-[10px] font-black uppercase tracking-widest text-stone-400 hover:text-stone-900 transition-colors gap-1.5"
                         >
-                          ← Change Schedule
+                          <ArrowLeft size={12} strokeWidth={3} /> Change Schedule
                         </button>
                       </div>
                     </div>
@@ -287,7 +292,9 @@ export default function RequestPage() {
                 {submitted && (
                   <div className="animate-success-pop rounded-3xl border-2 border-emerald-200 bg-emerald-50/50 p-6 shadow-xl">
                     <div className="flex items-center gap-3 mb-6">
-                      <div className="h-12 w-12 rounded-full bg-emerald-500 flex items-center justify-center text-white text-2xl">✓</div>
+                      <div className="h-12 w-12 rounded-full bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-200">
+                        <CheckCircle2 size={24} strokeWidth={3} />
+                      </div>
                       <div>
                         <h3 className="text-xl font-black text-emerald-900 leading-tight">Booking Sent!</h3>
                         <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest">We'll contact you in 5-10 mins</p>

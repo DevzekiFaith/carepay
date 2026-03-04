@@ -6,6 +6,7 @@ import ServiceGrid from "./ServiceGrid";
 import QuickRequestForm from "./QuickRequestForm";
 import TrustSection from "./TrustSection";
 import FAQ from "./FAQ";
+import { Wrench, Lightbulb, Hammer, Sofa, Snowflake, Palette, Settings } from "lucide-react";
 
 const PRO_IMAGES = [
   { src: "/su1.jpg", alt: "Electrician at work" },
@@ -14,13 +15,13 @@ const PRO_IMAGES = [
 ];
 
 const SERVICES = [
-  { label: "Plumber", emoji: "🔧", price: "₦5k - ₦20k", time: "2-4 hrs" },
-  { label: "Electrician", emoji: "💡", price: "₦8k - ₦25k", time: "2-5 hrs" },
-  { label: "Carpenter", emoji: "🪚", price: "₦10k - ₦40k", time: "3-6 hrs" },
-  { label: "Furniture Maker", emoji: "🪑", price: "₦15k - ₦60k", time: "4-8 hrs" },
-  { label: "AC & Fridge Repair", emoji: "❄️", price: "₦7k - ₦30k", time: "2-4 hrs" },
-  { label: "Painter", emoji: "🎨", price: "₦12k - ₦50k", time: "4-8 hrs" },
-  { label: "General Handyman", emoji: "🔨", price: "₦5k - ₦25k", time: "2-5 hrs" },
+  { label: "Plumber", icon: Wrench, price: "₦5k - ₦20k", time: "2-4 hrs" },
+  { label: "Electrician", icon: Lightbulb, price: "₦8k - ₦25k", time: "2-5 hrs" },
+  { label: "Carpenter", icon: Hammer, price: "₦10k - ₦40k", time: "3-6 hrs" },
+  { label: "Furniture Maker", icon: Sofa, price: "₦15k - ₦60k", time: "4-8 hrs" },
+  { label: "AC & Fridge Repair", icon: Snowflake, price: "₦7k - ₦30k", time: "2-4 hrs" },
+  { label: "Painter", icon: Palette, price: "₦12k - ₦50k", time: "4-8 hrs" },
+  { label: "General Handyman", icon: Settings, price: "₦5k - ₦25k", time: "2-5 hrs" },
 ];
 
 const TESTIMONIALS = [
@@ -126,7 +127,7 @@ export default function HomeClient() {
         <section className="mt-12 lg:hidden">
           {/* Trust elements on mobile below the main content */}
           <div className="space-y-8 mt-16 pt-12 border-t border-stone-100">
-            <h2 className="text-xl font-bold uppercase tracking-tight text-stone-900 px-2">Trust & Community</h2>
+            <h2 className="text-2xl font-black uppercase tracking-tight text-stone-900 px-2 sm:text-3xl">Trust & Community</h2>
             <div className="grid gap-6">
               <TrustSection
                 testimonials={TESTIMONIALS.slice(0, 2)}

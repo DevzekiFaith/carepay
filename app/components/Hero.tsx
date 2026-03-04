@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Zap, ArrowRight, UserCircle } from "lucide-react";
 
 const HERO_IMAGE = "/su9.jpg";
 
@@ -9,13 +10,13 @@ export default function Hero() {
             <div className="flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                     <span className="pill-vibe inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs">
-                        ⚡ 2 min to book
+                        <Zap size={10} className="fill-emerald-500 text-emerald-500" /> 2 min to book
                     </span>
                     <span className="hidden text-[10px] font-medium text-stone-400 sm:inline">
                         Verified · Same-day
                     </span>
                 </div>
-                <h1 className="mt-5 text-4xl font-extrabold tracking-tight text-stone-900 sm:text-5xl lg:text-7xl">
+                <h1 className="mt-5 text-4xl font-black tracking-tight text-stone-900 sm:text-5xl lg:text-7xl">
                     Book it. <span className="text-emerald-600">Fix it.</span> Done.
                 </h1>
                 <p className="mt-4 max-w-xl text-base text-stone-600 leading-snug sm:text-lg sm:leading-relaxed">
@@ -28,17 +29,13 @@ export default function Hero() {
                         className="group btn-gradient interactive-tap inline-flex h-14 items-center justify-center gap-2 rounded-full px-8 text-base font-black uppercase tracking-widest shadow-xl hover:shadow-emerald-200/50"
                     >
                         Book a pro now
-                        <span
-                            className="transition-transform duration-300 group-hover:translate-x-1"
-                            aria-hidden
-                        >
-                            →
-                        </span>
+                        <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-1" />
                     </Link>
                     <Link
                         href="/auth/worker/register"
-                        className="interactive-tap inline-flex h-14 items-center justify-center rounded-full border-2 border-stone-200 bg-white px-8 text-sm font-black uppercase tracking-widest text-stone-800 transition-all duration-200 hover:border-emerald-300 hover:bg-emerald-50/50"
+                        className="interactive-tap inline-flex h-14 items-center justify-center rounded-full border-2 border-stone-200 bg-white px-8 text-sm font-black uppercase tracking-widest text-stone-800 transition-all duration-200 hover:border-emerald-300 hover:bg-emerald-50/50 gap-2"
                     >
+                        <UserCircle size={18} />
                         I&apos;m a handyman
                     </Link>
                 </div>

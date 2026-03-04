@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { BarChart3, CheckCircle2, Zap, Hammer, Lightbulb, MessageCircle, ChevronRight, UserCheck } from "lucide-react";
 
 const DEMO_REQUESTS = [
   {
@@ -11,7 +12,7 @@ const DEMO_REQUESTS = [
     status: "In Progress",
     step: 2,
     date: "Today",
-    icon: "🪚",
+    icon: Hammer,
   },
   {
     id: "REQ-3002",
@@ -20,7 +21,7 @@ const DEMO_REQUESTS = [
     status: "Scheduled",
     step: 1,
     date: "Yesterday",
-    icon: "💡",
+    icon: Lightbulb,
   },
 ];
 
@@ -45,14 +46,15 @@ export default function CustomerDashboardPage() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
+                <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
+                  <UserCheck size={10} />
                   Premium Member
                 </span>
               </div>
-              <h1 className="mt-1 text-3xl font-black tracking-tight text-stone-900">
+              <h1 className="mt-1 text-3xl font-black tracking-tight text-stone-900 sm:text-4xl">
                 Hello, <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-green-500">John!</span>
               </h1>
-              <p className="text-xs font-bold text-stone-500 uppercase tracking-tighter mt-0.5">
+              <p className="text-sm font-bold text-stone-500 uppercase tracking-tighter mt-1">
                 Verified User • 3 requests completed
               </p>
             </div>
@@ -73,29 +75,29 @@ export default function CustomerDashboardPage() {
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
             <div className="card-vibe group relative overflow-hidden rounded-2xl p-6 transition-all hover:scale-[1.02]">
               <div className="relative z-10">
-                <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">Total requests</p>
-                <p className="mt-2 text-4xl font-black text-stone-900">3</p>
+                <p className="text-xs font-black uppercase tracking-widest text-stone-400">Total requests</p>
+                <p className="mt-2 text-5xl font-black text-stone-900">3</p>
               </div>
-              <div className="absolute -right-4 -top-4 text-6xl opacity-[0.03] group-hover:opacity-[0.08] transition-opacity select-none">📊</div>
+              <BarChart3 className="absolute -right-4 -top-4 h-24 w-24 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity select-none -rotate-12" />
             </div>
 
             <div className="card-vibe group relative overflow-hidden rounded-2xl p-6 transition-all hover:scale-[1.02] bg-gradient-to-br from-emerald-50/50 to-emerald-100/30 border-emerald-100">
               <div className="relative z-10">
-                <p className="text-[10px] font-black uppercase tracking-widest text-emerald-700/60">Completed</p>
+                <p className="text-xs font-black uppercase tracking-widest text-emerald-700/60">Completed</p>
                 <div className="flex items-baseline gap-2">
-                  <p className="mt-2 text-4xl font-black text-emerald-700">2</p>
-                  <span className="text-[10px] font-bold text-emerald-600 bg-white/80 px-1.5 py-0.5 rounded-md border border-emerald-200">✓ Vetted</span>
+                  <p className="mt-2 text-5xl font-black text-emerald-700">2</p>
+                  <span className="text-xs font-bold text-emerald-600 bg-white/80 px-2 py-0.5 rounded-md border border-emerald-200">✓ Vetted</span>
                 </div>
               </div>
-              <div className="absolute -right-4 -top-4 text-6xl opacity-[0.05] group-hover:opacity-[0.1] transition-opacity select-none">✅</div>
+              <CheckCircle2 className="absolute -right-4 -top-4 h-24 w-24 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity select-none -rotate-12" />
             </div>
 
             <div className="card-vibe group relative overflow-hidden rounded-2xl p-6 transition-all hover:scale-[1.02] bg-gradient-to-br from-emerald-50/50 to-emerald-100/30 border-emerald-100">
               <div className="relative z-10">
-                <p className="text-[10px] font-black uppercase tracking-widest text-emerald-700/60">In Progress</p>
-                <p className="mt-2 text-4xl font-black text-emerald-700">1</p>
+                <p className="text-xs font-black uppercase tracking-widest text-emerald-700/60">In Progress</p>
+                <p className="mt-2 text-5xl font-black text-emerald-700">1</p>
               </div>
-              <div className="absolute -right-4 -top-4 text-6xl opacity-[0.05] group-hover:opacity-[0.1] transition-opacity select-none">⚡️</div>
+              <Zap className="absolute -right-4 -top-4 h-24 w-24 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity select-none -rotate-12" />
             </div>
           </div>
 
@@ -104,14 +106,14 @@ export default function CustomerDashboardPage() {
             {/* Recent Activity */}
             <section className="card-vibe overflow-hidden rounded-3xl p-5 sm:p-8 shadow-xl shadow-stone-200/40">
               <div className="mb-8 border-b border-stone-100 pb-6">
-                <h2 className="text-xl font-extrabold text-stone-900 leading-none">Your Requests</h2>
-                <p className="text-[11px] font-bold text-stone-400 uppercase tracking-widest mt-2 px-0.5">Track your bookings in real-time</p>
+                <h2 className="text-2xl font-extrabold text-stone-900 leading-none">Your Requests</h2>
+                <p className="text-xs font-bold text-stone-400 uppercase tracking-widest mt-2 px-0.5">Track your bookings in real-time</p>
               </div>
               <Link
                 href="/request"
-                className="text-xs font-black uppercase tracking-widest text-emerald-600 border-b-2 border-emerald-100 hover:border-emerald-500 transition-all pb-0.5"
+                className="flex items-center gap-1 text-xs font-black uppercase tracking-widest text-emerald-600 border-b-2 border-emerald-100 hover:border-emerald-500 transition-all pb-0.5 w-fit"
               >
-                View All →
+                View All <ChevronRight size={14} />
               </Link>
               {/* Live Tracker View */}
               <section className="card-vibe rounded-3xl p-6 sm:p-8 shadow-xl shadow-stone-200/40">
@@ -125,8 +127,8 @@ export default function CustomerDashboardPage() {
                     <div key={request.id} className="relative rounded-2xl border-2 border-stone-100 bg-white p-5 transition-all hover:border-emerald-100 sm:p-6">
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
                         <div className="flex items-center gap-4">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-stone-50 text-2xl group-hover:bg-emerald-50 transition-colors">
-                            {request.icon}
+                          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-stone-50 text-emerald-600 group-hover:bg-emerald-50 transition-colors">
+                            <request.icon size={24} />
                           </div>
                           <div>
                             <p className="text-sm font-black text-stone-900">{request.type}</p>
@@ -148,7 +150,7 @@ export default function CustomerDashboardPage() {
                         {["Request", "Matching", "En Route", "Working"].map((label, i) => (
                           <div key={label} className="relative z-10 flex flex-col items-center gap-2">
                             <div className={`h-8 w-8 rounded-full border-4 flex items-center justify-center text-[10px] font-black transition-colors ${i <= request.step ? "bg-emerald-500 border-white text-white shadow-md shadow-emerald-200" : "bg-white border-stone-100 text-stone-300"}`}>
-                              {i <= request.step ? "✓" : i + 1}
+                              {i <= request.step ? <CheckCircle2 size={14} strokeWidth={3} /> : i + 1}
                             </div>
                             <span className={`text-[9px] font-black uppercase tracking-tight ${i <= request.step ? "text-emerald-700" : "text-stone-400"}`}>
                               {label}
@@ -218,13 +220,16 @@ export default function CustomerDashboardPage() {
                 <p className="mt-1 text-[11px] font-medium text-stone-500 italic">24/7 Priority Support for premium members</p>
                 <div className="mt-4 grid gap-3">
                   <a
-                    href="https://wa.me/2348123456789"
+                    href="https://wa.me/2349119059859"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group relative flex items-center justify-between rounded-2xl border-2 border-stone-100 bg-white p-4 transition-all hover:border-emerald-100 hover:shadow-md active:scale-[0.99]"
+                    className="group relative flex items-center justify-between rounded-2xl border-2 border-stone-100 bg-white p-4 transition-all hover:border-emerald-100 hover:shadow-md active:scale-[0.99] text-xs font-bold"
                   >
-                    <span className="text-base text-emerald-500">💬</span>
-                    WhatsApp Chat
+                    <div className="flex items-center gap-3">
+                      <MessageCircle className="h-5 w-5 text-emerald-500" />
+                      WhatsApp Chat
+                    </div>
+                    <ChevronRight size={14} className="text-stone-300 group-hover:text-emerald-500 transition-colors" />
                   </a>
                 </div>
               </div>

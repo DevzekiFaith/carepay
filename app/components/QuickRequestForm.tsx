@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { PAYMENT_ACCOUNT } from "@/lib/payment-details";
+import { MessageCircle } from "lucide-react";
 
 interface QuickRequestFormProps {
     selectedService: string | null;
@@ -68,68 +69,68 @@ export default function QuickRequestForm({ selectedService, onServiceChange, ser
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6 text-sm">
-                <div className="grid gap-5 sm:grid-cols-2">
+                <div className="grid gap-6 sm:grid-cols-2">
                     {/* Full Name */}
-                    <div className="space-y-1.5 flex flex-col">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-stone-700 ml-1">
+                    <div className="space-y-2 flex flex-col">
+                        <label className="text-[11px] font-black uppercase tracking-widest text-stone-700 ml-1">
                             Full Name
                         </label>
                         <input
                             name="fullName"
                             placeholder="E.g. Chioma Adebayo"
-                            className={`input-vibe w-full rounded-2xl border-2 px-4 py-4 text-base outline-none transition-all sm:py-3 sm:text-sm ${errors.fullName
+                            className={`input-vibe w-full rounded-2xl border-2 px-5 py-5 text-lg outline-none transition-all sm:py-4 sm:text-base ${errors.fullName
                                 ? "border-rose-200 bg-rose-50/30 focus:border-rose-400 focus:ring-rose-100"
                                 : "border-stone-100 bg-stone-50/50 focus:border-emerald-300 focus:bg-white focus:ring-4 focus:ring-emerald-500/5"
                                 }`}
                         />
-                        {errors.fullName && <p className="text-[10px] font-bold text-rose-500 ml-1 mt-1">{errors.fullName}</p>}
+                        {errors.fullName && <p className="text-xs font-bold text-rose-500 ml-1 mt-1">{errors.fullName}</p>}
                     </div>
 
                     {/* Phone Number */}
-                    <div className="space-y-1.5 flex flex-col">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-stone-700 ml-1">
+                    <div className="space-y-2 flex flex-col">
+                        <label className="text-[11px] font-black uppercase tracking-widest text-stone-700 ml-1">
                             WhatsApp / Phone
                         </label>
                         <input
                             type="tel"
                             name="phone"
                             placeholder="+234 812 345 6789"
-                            className={`input-vibe w-full rounded-2xl border-2 px-4 py-4 text-base outline-none transition-all sm:py-3 sm:text-sm ${errors.phone
+                            className={`input-vibe w-full rounded-2xl border-2 px-5 py-5 text-lg outline-none transition-all sm:py-4 sm:text-base ${errors.phone
                                 ? "border-rose-200 bg-rose-50/30 focus:border-rose-400 focus:ring-rose-100"
                                 : "border-stone-100 bg-stone-50/50 focus:border-emerald-300 focus:bg-white focus:ring-4 focus:ring-emerald-500/5"
                                 }`}
                         />
-                        {errors.phone && <p className="text-[10px] font-bold text-rose-500 ml-1 mt-1">{errors.phone}</p>}
+                        {errors.phone && <p className="text-xs font-bold text-rose-500 ml-1 mt-1">{errors.phone}</p>}
                     </div>
                 </div>
 
-                <div className="grid gap-5 sm:grid-cols-2">
+                <div className="grid gap-6 sm:grid-cols-2">
                     {/* Address */}
-                    <div className="space-y-1.5 flex flex-col">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-stone-700 ml-1">
+                    <div className="space-y-2 flex flex-col">
+                        <label className="text-[11px] font-black uppercase tracking-widest text-stone-700 ml-1">
                             Service Address
                         </label>
                         <input
                             name="address"
                             placeholder="Number, street, your area"
-                            className={`input-vibe w-full rounded-2xl border-2 px-4 py-3 text-sm outline-none transition-all ${errors.address
+                            className={`input-vibe w-full rounded-2xl border-2 px-5 py-5 text-lg outline-none transition-all sm:py-4 sm:text-base ${errors.address
                                 ? "border-rose-200 bg-rose-50/30 focus:border-rose-400 focus:ring-rose-100"
                                 : "border-stone-100 bg-stone-50/50 focus:border-emerald-300 focus:bg-white focus:ring-4 focus:ring-emerald-500/5"
                                 }`}
                         />
-                        {errors.address && <p className="text-[10px] font-bold text-rose-500 ml-1 mt-1">{errors.address}</p>}
+                        {errors.address && <p className="text-xs font-bold text-rose-500 ml-1 mt-1">{errors.address}</p>}
                     </div>
 
                     {/* Service Type */}
-                    <div className="space-y-1.5 flex flex-col">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-stone-700 ml-1">
+                    <div className="space-y-2 flex flex-col">
+                        <label className="text-[11px] font-black uppercase tracking-widest text-stone-700 ml-1">
                             Select Service
                         </label>
                         <select
                             name="service"
                             value={selectedService ?? ""}
                             onChange={(e) => onServiceChange(e.target.value || null)}
-                            className={`input-vibe w-full rounded-2xl border-2 px-4 py-4 text-base outline-none transition-all appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[right_1rem_center] bg-no-repeat sm:py-3 sm:text-sm ${errors.service
+                            className={`input-vibe w-full rounded-2xl border-2 px-5 py-5 text-lg outline-none transition-all appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[right_1rem_center] bg-no-repeat sm:py-4 sm:text-base ${errors.service
                                 ? "border-rose-200 bg-rose-50/30 focus:border-rose-400 focus:ring-rose-100"
                                 : "border-stone-100 bg-stone-50/50 focus:border-emerald-300 focus:bg-white focus:ring-4 focus:ring-emerald-500/5"
                                 }`}
@@ -141,31 +142,31 @@ export default function QuickRequestForm({ selectedService, onServiceChange, ser
                                 </option>
                             ))}
                         </select>
-                        {errors.service && <p className="text-[10px] font-bold text-rose-500 ml-1 mt-1">{errors.service}</p>}
+                        {errors.service && <p className="text-xs font-bold text-rose-500 ml-1 mt-1">{errors.service}</p>}
                     </div>
                 </div>
 
                 {/* Task Details */}
-                <div className="space-y-1.5 flex flex-col">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-stone-700 ml-1">
+                <div className="space-y-2 flex flex-col">
+                    <label className="text-[11px] font-black uppercase tracking-widest text-stone-700 ml-1">
                         Work Details
                     </label>
                     <textarea
                         name="details"
                         rows={3}
                         placeholder="What exactly needs fixing? (e.g. Toilet is leaking, need new fan installed...)"
-                        className={`input-vibe w-full resize-none rounded-2xl border-2 px-4 py-4 text-base outline-none transition-all sm:py-3 sm:text-sm ${errors.details
+                        className={`input-vibe w-full resize-none rounded-2xl border-2 px-5 py-5 text-lg outline-none transition-all sm:py-4 sm:text-base ${errors.details
                             ? "border-rose-200 bg-rose-50/30 focus:border-rose-400 focus:ring-rose-100"
                             : "border-stone-100 bg-stone-50/50 focus:border-emerald-300 focus:bg-white focus:ring-4 focus:ring-emerald-500/5"
                             }`}
                     />
-                    {errors.details && <p className="text-[10px] font-bold text-rose-500 ml-1 mt-1">{errors.details}</p>}
+                    {errors.details && <p className="text-xs font-bold text-rose-500 ml-1 mt-1">{errors.details}</p>}
                 </div>
 
                 <div className="flex flex-col gap-6 pt-2 lg:flex-row lg:items-center lg:justify-between">
-                    <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-start gap-3 flex-1 lg:max-w-md">
-                        <span className="text-xl">💬</span>
-                        <p className="text-[11px] font-medium text-emerald-700 leading-relaxed">
+                    <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-start gap-4 flex-1 lg:max-w-md">
+                        <MessageCircle className="h-6 w-6 text-emerald-500 shrink-0 mt-0.5" strokeWidth={2.5} />
+                        <p className="text-xs sm:text-sm font-medium text-emerald-700 leading-relaxed">
                             <span className="font-bold">Pro Tip:</span> We usually respond on WhatsApp within <span className="underline decoration-emerald-300 underline-offset-2">5-10 minutes</span> to confirm the arrival and final quote.
                         </p>
                     </div>

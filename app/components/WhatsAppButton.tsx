@@ -1,8 +1,8 @@
 "use client";
 
 export default function WhatsAppButton() {
-  // Replace with your actual WhatsApp number (format: 2348123456789 without +)
-  const WHATSAPP_NUMBER = "2348123456789"; // Example - replace with CarePay support number
+  // Replace with actual WhatsApp number (format: 2349119059859 without +)
+  const WHATSAPP_NUMBER = "2349119059859"; // CarePay support number
   const WHATSAPP_MESSAGE = encodeURIComponent(
     "Hi! I need help with a handyman service."
   );

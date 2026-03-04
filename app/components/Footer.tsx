@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ShieldCheck, Twitter, Instagram, MessageCircle, ArrowRight } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -19,14 +20,16 @@ export default function Footer() {
             className="group flex items-center gap-3 rounded-full bg-white px-8 py-4 text-sm font-black text-emerald-700 shadow-xl transition-all hover:scale-105 active:scale-95 shrink-0"
           >
             Get Started Now
-            <span className="transition-transform group-hover:translate-x-1">→</span>
+            <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
 
         <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4 items-start">
           <div className="space-y-6">
             <Link href="/" className="inline-flex items-center gap-2 group">
-              <div className="h-10 w-10 bg-gradient-to-br from-emerald-500 to-green-400 rounded-xl flex items-center justify-center text-white font-black text-lg shadow-lg group-hover:rotate-6 transition-transform">C</div>
+              <div className="h-10 w-10 bg-gradient-to-br from-emerald-500 to-green-400 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:rotate-6 transition-transform">
+                <ShieldCheck size={24} strokeWidth={2.5} />
+              </div>
               <span className="text-lg font-black uppercase tracking-tighter text-white">CarePay</span>
             </Link>
             <p className="text-sm font-medium leading-relaxed opacity-70">
@@ -34,9 +37,13 @@ export default function Footer() {
               <span className="block mt-2 italic font-bold text-emerald-500">Book it. Fix it. Done.</span>
             </p>
             <div className="flex gap-4">
-              {['𝕏', '📸', '💬'].map((icon, i) => (
-                <button key={i} className="h-10 w-10 rounded-full border border-stone-800 flex items-center justify-center hover:bg-stone-800 hover:border-emerald-500 transition-all text-lg grayscale hover:grayscale-0">
-                  {icon}
+              {[
+                { icon: Twitter, href: "#" },
+                { icon: Instagram, href: "#" },
+                { icon: MessageCircle, href: "#" }
+              ].map((item, i) => (
+                <button key={i} className="h-10 w-10 rounded-full border border-stone-800 flex items-center justify-center hover:bg-stone-800 hover:border-emerald-500 transition-all text-stone-400 hover:text-emerald-500">
+                  <item.icon size={18} />
                 </button>
               ))}
             </div>
@@ -71,11 +78,11 @@ export default function Footer() {
               Accepting bookings in your area. Average response time: <span className="font-black text-white">8 mins</span>.
             </p>
             <a
-              href="https://wa.me/2348123456789"
+              href="https://wa.me/2349119059859"
               className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-stone-900 py-3 text-xs font-bold hover:bg-emerald-600 transition-colors group"
             >
               Contact Support
-              <span className="group-hover:translate-x-1 transition-transform">→</span>
+              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
             </a>
           </div>
         </div>

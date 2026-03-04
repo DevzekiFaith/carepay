@@ -18,8 +18,8 @@ export default function TrustSection({ testimonials, jobsCompleted, proImages }:
         <aside className="card-vibe space-y-8 rounded-2xl border-2 border-dashed border-emerald-200/60 bg-white/80 p-5 text-sm text-stone-700 opacity-0 animate-slide-up delay-2 sm:p-6 lg:sticky lg:top-8">
             {/* Pros at work gallery */}
             <div>
-                <h2 className="text-sm font-bold uppercase tracking-wider text-stone-500 flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                <h2 className="text-base font-black uppercase tracking-widest text-stone-500 flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
                     Pros at work
                 </h2>
                 <div className="mt-4 grid grid-cols-3 gap-3">
@@ -43,7 +43,7 @@ export default function TrustSection({ testimonials, jobsCompleted, proImages }:
                             {jobsCompleted.toLocaleString()}+
                         </span>
                         <br />
-                        <span className="text-[10px] uppercase tracking-widest text-stone-400 font-black">
+                        <span className="text-xs uppercase tracking-widest text-stone-400 font-black">
                             Jobs completed this month
                         </span>
                     </p>
@@ -52,15 +52,15 @@ export default function TrustSection({ testimonials, jobsCompleted, proImages }:
 
             {/* Testimonials */}
             <div>
-                <h3 className="text-sm font-bold uppercase tracking-wider text-stone-500 flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                <h3 className="text-base font-black uppercase tracking-widest text-stone-500 flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
                     What customers say
                 </h3>
                 <div className="mt-4 space-y-4">
                     {testimonials.map((testimonial) => (
                         <div
                             key={testimonial.name}
-                            className="group relative rounded-2xl border-2 border-stone-100 bg-white p-4 text-xs transition-all hover:border-emerald-100 hover:shadow-md"
+                            className="group relative rounded-2xl border-2 border-stone-100 bg-white p-4 text-sm transition-all hover:border-emerald-100 hover:shadow-md"
                         >
                             <div className="mb-2 flex items-center gap-1">
                                 {[...Array(5)].map((_, j) => (
@@ -74,7 +74,7 @@ export default function TrustSection({ testimonials, jobsCompleted, proImages }:
                                 <div className="h-6 w-6 rounded-full bg-emerald-100 flex items-center justify-center text-[10px] font-bold text-emerald-600 uppercase">
                                     {testimonial.name.charAt(0)}
                                 </div>
-                                <p className="text-[10px] font-bold text-stone-900">
+                                <p className="text-xs font-bold text-stone-900">
                                     {testimonial.name} <span className="mx-1 text-stone-300 font-normal">|</span> <span className="text-stone-500 font-medium">{testimonial.area}</span>
                                 </p>
                             </div>
@@ -86,10 +86,10 @@ export default function TrustSection({ testimonials, jobsCompleted, proImages }:
             {/* Trust Badges */}
             <div className="pt-2">
                 <div className="flex flex-wrap gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700 border border-emerald-100 uppercase">
+                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700 border border-emerald-100 uppercase">
                         ✓ NIN Verified Pros
                     </span>
-                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-2 py-1 text-[10px] font-bold text-blue-700 border border-blue-100 uppercase">
+                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-2 py-1 text-xs font-bold text-blue-700 border border-blue-100 uppercase">
                         ⚡ Quick Response
                     </span>
                 </div>
