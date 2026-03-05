@@ -4,10 +4,10 @@ import Link from "next/link";
 export default function Nav() {
   return (
     <nav
-      className="sticky top-0 z-10 border-b border-stone-200/80 bg-white/95 backdrop-blur-md"
+      className="sticky top-0 z-[100] border-b border-stone-200/80 bg-white/95 backdrop-blur-md"
       aria-label="Main"
     >
-      <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-1 px-4 sm:h-14 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-1 px-3 sm:h-14 sm:px-6 lg:px-8">
         <Link
           href="/"
           className="flex min-h-[44px] min-w-[44px] items-center gap-2 rounded-xl px-2 py-1.5 transition hover:opacity-90"

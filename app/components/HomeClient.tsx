@@ -15,13 +15,13 @@ const PRO_IMAGES = [
 ];
 
 const SERVICES = [
-  { label: "Plumber", icon: Wrench, price: "₦5k - ₦20k", time: "2-4 hrs" },
-  { label: "Electrician", icon: Lightbulb, price: "₦8k - ₦25k", time: "2-5 hrs" },
-  { label: "Carpenter", icon: Hammer, price: "₦10k - ₦40k", time: "3-6 hrs" },
-  { label: "Furniture Maker", icon: Sofa, price: "₦15k - ₦60k", time: "4-8 hrs" },
-  { label: "AC & Fridge Repair", icon: Snowflake, price: "₦7k - ₦30k", time: "2-4 hrs" },
-  { label: "Painter", icon: Palette, price: "₦12k - ₦50k", time: "4-8 hrs" },
-  { label: "General Handyman", icon: Settings, price: "₦5k - ₦25k", time: "2-5 hrs" },
+  { label: "Plumber", icon: Wrench, price: "₦20k - ₦45k", time: "2-4 hrs" },
+  { label: "Electrician", icon: Lightbulb, price: "₦20k - ₦50k", time: "2-5 hrs" },
+  { label: "Carpenter", icon: Hammer, price: "₦25k - ₦60k", time: "3-6 hrs" },
+  { label: "Furniture Maker", icon: Sofa, price: "₦30k - ₦120k", time: "4-8 hrs" },
+  { label: "AC & Fridge Repair", icon: Snowflake, price: "₦20k - ₦55k", time: "2-4 hrs" },
+  { label: "Painter", icon: Palette, price: "₦25k - ₦75k", time: "4-8 hrs" },
+  { label: "General Handyman", icon: Settings, price: "₦15k - ₦30k", time: "2-5 hrs" },
 ];
 
 const TESTIMONIALS = [

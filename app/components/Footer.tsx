@@ -1,12 +1,13 @@
+import Image from "next/image";
 import Link from "next/link";
-import { ShieldCheck, Twitter, Instagram, MessageCircle, ArrowRight } from "lucide-react";
+import { Twitter, Instagram, MessageCircle, ArrowRight } from "lucide-react";
 
 export default function Footer() {
   return (
     <footer className="relative mt-20 overflow-hidden bg-stone-900 pt-20 pb-10 text-stone-300">
       {/* Decorative background element */}
-      <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl" />
-      <div className="absolute -left-20 bottom-0 h-96 w-96 rounded-full bg-emerald-900/20 blur-3xl opacity-50" />
+      <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl animate-float" />
+      <div className="absolute -left-20 bottom-0 h-96 w-96 rounded-full bg-emerald-900/20 blur-3xl opacity-50 animate-float-delayed" />
 
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Micro-CTA Section */}
@@ -27,8 +28,14 @@ export default function Footer() {
         <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4 items-start">
           <div className="space-y-6">
             <Link href="/" className="inline-flex items-center gap-2 group">
-              <div className="h-10 w-10 bg-gradient-to-br from-emerald-500 to-green-400 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:rotate-6 transition-transform">
-                <ShieldCheck size={24} strokeWidth={2.5} />
+              <div className="relative h-10 w-10 overflow-hidden rounded-xl border-2 border-white/10 shadow-lg group-hover:rotate-6 transition-transform">
+                <Image
+                  src="/su5.jpg"
+                  alt="CarePay Logo"
+                  fill
+                  className="object-contain"
+                  sizes="40px"
+                />
               </div>
               <span className="text-lg font-black uppercase tracking-tighter text-white">CarePay</span>
             </Link>

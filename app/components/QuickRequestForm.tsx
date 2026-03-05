@@ -203,7 +203,7 @@ export default function QuickRequestForm({ selectedService, onServiceChange, ser
 
                         <div className="rounded-2xl bg-white p-5 shadow-sm border border-emerald-100 space-y-3">
                             <p className="text-xs font-bold text-stone-500 uppercase tracking-widest">Pre-payment Details</p>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div>
                                     <p className="text-[10px] font-black uppercase text-stone-400">Bank Name</p>
                                     <p className="text-sm font-bold text-stone-900">{PAYMENT_ACCOUNT.bankName}</p>
@@ -212,7 +212,7 @@ export default function QuickRequestForm({ selectedService, onServiceChange, ser
                                     <p className="text-[10px] font-black uppercase text-stone-400">Account No.</p>
                                     <p className="text-sm font-bold text-stone-900">{PAYMENT_ACCOUNT.accountNumber}</p>
                                 </div>
-                                <div className="col-span-2 pt-2 border-t border-stone-50">
+                                <div className="sm:col-span-2 pt-2 border-t border-stone-50">
                                     <p className="text-[10px] font-black uppercase text-stone-400">Account Name</p>
                                     <p className="text-sm font-bold text-emerald-700">{PAYMENT_ACCOUNT.accountName}</p>
                                 </div>

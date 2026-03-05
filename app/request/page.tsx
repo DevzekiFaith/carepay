@@ -18,13 +18,13 @@ import { Wrench, Lightbulb, Hammer, Sofa, Snowflake, Palette, Settings, MapPin, 
 const REQUEST_HERO_IMAGE = "/su3.jpg";
 
 const SERVICES = [
-  { label: "Plumber", icon: Wrench, basePrice: "₦5,000" },
-  { label: "Electrician", icon: Lightbulb, basePrice: "₦4,500" },
-  { label: "Carpenter", icon: Hammer, basePrice: "₦6,000" },
-  { label: "Furniture Maker", icon: Sofa, basePrice: "₦8,000" },
-  { label: "AC & Fridge Repair", icon: Snowflake, basePrice: "₦10,000" },
-  { label: "Painter", icon: Palette, basePrice: "₦5,500" },
-  { label: "General Handyman", icon: Settings, basePrice: "₦3,000" },
+  { label: "Plumber", icon: Wrench, basePrice: "₦20,000" },
+  { label: "Electrician", icon: Lightbulb, basePrice: "₦20,000" },
+  { label: "Carpenter", icon: Hammer, basePrice: "₦25,000" },
+  { label: "Furniture Maker", icon: Sofa, basePrice: "₦30,000" },
+  { label: "AC & Fridge Repair", icon: Snowflake, basePrice: "₦20,000" },
+  { label: "Painter", icon: Palette, basePrice: "₦25,000" },
+  { label: "General Handyman", icon: Settings, basePrice: "₦15,000" },
 ];
 export default function RequestPage() {
   const [selectedService, setSelectedService] = useState<string | null>(null);
@@ -32,6 +32,7 @@ export default function RequestPage() {
   const [submitted, setSubmitted] = useState(false);
   const [address, setAddress] = useState("");
   const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const [scheduledDate, setScheduledDate] = useState<Date | null>(null);
   const [showPayment, setShowPayment] = useState(false);
 
@@ -145,14 +146,21 @@ export default function RequestPage() {
                 <div className="space-y-4">
                   <div className="space-y-2 relative">
                     <label className="text-[11px] font-black uppercase tracking-widest text-stone-700 ml-1">Service Address</label>
-                    <input
-                      required
-                      name="address"
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                      placeholder="E.g. Number, street, area in your city"
-                      className="input-vibe w-full rounded-2xl border-2 border-stone-100 bg-white px-5 py-5 text-lg outline-none transition-all focus:border-emerald-300 focus:ring-4 focus:ring-emerald-500/5 sm:py-4 sm:text-base"
-                    />
+                    <div className="relative">
+                      <input
+                        required
+                        name="address"
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        placeholder="Enter building name, landmark, or any address..."
+                        className="input-vibe w-full rounded-2xl border-2 border-stone-100 bg-white px-5 py-5 text-lg outline-none transition-all focus:border-emerald-300 focus:ring-4 focus:ring-emerald-500/5 sm:py-4 sm:text-base pr-14"
+                      />
+                      {isSearching && (
+                        <div className="absolute right-5 top-1/2 -translate-y-1/2">
+                          <div className="h-5 w-5 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
+                        </div>
+                      )}
+                    </div>
                     {suggestions.length > 0 && (
                       <div className="absolute left-0 right-0 z-[3000] mt-2 max-h-48 overflow-y-auto rounded-2xl border-2 border-emerald-100 bg-white shadow-2xl animate-fade-in ring-1 ring-emerald-500/10 backdrop-blur-sm">
                         {suggestions.map((s, i) => (
@@ -185,6 +193,7 @@ export default function RequestPage() {
                       address={address}
                       onAddressResolved={setAddress}
                       onSuggestionsFound={setSuggestions}
+                      onSearchStateChange={setIsSearching}
                     />
                   </div>
                 </div>

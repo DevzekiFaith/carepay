@@ -19,7 +19,7 @@ const DEMO_JOBS = [
     area: "Region A",
     time: "Today · 4:00 PM",
     status: "New",
-    price: "₦12,000",
+    price: "₦25,000",
     icon: Wrench,
   },
   {
@@ -29,7 +29,7 @@ const DEMO_JOBS = [
     area: "Region B",
     time: "Tomorrow · 11:30 AM",
     status: "Scheduled",
-    price: "₦18,000",
+    price: "₦32,000",
     icon: Lightbulb,
   },
 ];
@@ -82,7 +82,7 @@ export default function WorkerDashboardPage() {
               <div className="relative z-10">
                 <p className="text-xs font-black uppercase tracking-widest text-stone-400">This Week</p>
                 <div className="flex items-baseline gap-1">
-                  <p className="mt-2 text-4xl font-black text-stone-900 sm:text-5xl">₦45k</p>
+                  <p className="mt-2 text-4xl font-black text-stone-900 sm:text-5xl">₦145k</p>
                   <span className="text-[11px] font-bold text-emerald-600">+12%</span>
                 </div>
               </div>
@@ -201,11 +201,11 @@ export default function WorkerDashboardPage() {
                   </div>
                   <div className="flex justify-between items-end border-b border-emerald-100 pb-2">
                     <span className="text-[11px] font-bold text-stone-500 uppercase">Total earned</span>
-                    <span className="text-lg font-black text-emerald-600">₦65,000</span>
+                    <span className="text-lg font-black text-emerald-600">₦165,000</span>
                   </div>
                   <div className="flex justify-between items-end">
                     <span className="text-[11px] font-bold text-stone-500 uppercase">Avg / Job</span>
-                    <span className="text-lg font-black text-stone-900">₦5,416</span>
+                    <span className="text-lg font-black text-stone-900">₦13,750</span>
                   </div>
                 </div>
                 <div className="mt-6 p-3 rounded-2xl bg-emerald-50 border border-emerald-100 text-[10px] font-medium text-emerald-800 leading-relaxed italic">

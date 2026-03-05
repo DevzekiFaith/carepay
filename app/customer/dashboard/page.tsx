@@ -3,8 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { BarChart3, CheckCircle2, Zap, Hammer, Lightbulb, MessageCircle, ChevronRight, UserCheck } from "lucide-react";
+import { useState, useEffect } from "react";
 
-const DEMO_REQUESTS = [
+const DEMO_REQUESTS_INITIAL = [
   {
     id: "REQ-3001",
     type: "Carpenter",
@@ -34,6 +35,20 @@ const TOP_PROS = [
 const USER_IMAGE = "/su1.jpg";
 
 export default function CustomerDashboardPage() {
+  const [requests, setRequests] = useState(DEMO_REQUESTS_INITIAL);
+
+  // Simulate Live Tracking Updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRequests(prev => prev.map(req => {
+        if (req.status === "In Progress" && req.step < 3) {
+          return { ...req, step: req.step + 0.1 }; // Smooth progress simulation
+        }
+        return req;
+      }));
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
   return (
     <div className="min-h-screen vibe-bg text-stone-900 antialiased selection:bg-emerald-100 pb-20">
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
@@ -123,7 +138,7 @@ export default function CustomerDashboardPage() {
                 </div>
 
                 <div className="grid gap-6">
-                  {DEMO_REQUESTS.map((request) => (
+                  {requests.map((request) => (
                     <div key={request.id} className="relative rounded-2xl border-2 border-stone-100 bg-white p-5 transition-all hover:border-emerald-100 sm:p-6">
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
                         <div className="flex items-center gap-4">
@@ -135,28 +150,36 @@ export default function CustomerDashboardPage() {
                             <p className="text-[10px] font-bold text-stone-400 uppercase tracking-tighter">ID: {request.id}</p>
                           </div>
                         </div>
-                        <span className="rounded-full bg-emerald-500 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-emerald-200">
-                          {request.status}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          {request.status === "In Progress" && (
+                            <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                          )}
+                          <span className="rounded-full bg-emerald-500 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-emerald-200">
+                            {request.status}
+                          </span>
+                        </div>
                       </div>
 
                       {/* Stepper */}
                       <div className="relative flex justify-between">
                         <div className="absolute top-4 left-0 right-0 h-0.5 bg-stone-100" />
                         <div
-                          className="absolute top-4 left-0 h-0.5 bg-emerald-500 transition-all duration-500"
-                          style={{ width: `${(request.step / 3) * 100}%` }}
+                          className="absolute top-4 left-0 h-0.5 bg-emerald-500 transition-all duration-700 ease-out"
+                          style={{ width: `${(Math.min(request.step, 3) / 3) * 100}%` }}
                         />
-                        {["Request", "Matching", "En Route", "Working"].map((label, i) => (
-                          <div key={label} className="relative z-10 flex flex-col items-center gap-2">
-                            <div className={`h-8 w-8 rounded-full border-4 flex items-center justify-center text-[10px] font-black transition-colors ${i <= request.step ? "bg-emerald-500 border-white text-white shadow-md shadow-emerald-200" : "bg-white border-stone-100 text-stone-300"}`}>
-                              {i <= request.step ? <CheckCircle2 size={14} strokeWidth={3} /> : i + 1}
+                        {["Request", "Matching", "En Route", "Working"].map((label, i) => {
+                          const isCompleted = i <= Math.floor(request.step);
+                          return (
+                            <div key={label} className="relative z-10 flex flex-col items-center gap-2">
+                              <div className={`h-8 w-8 rounded-full border-4 flex items-center justify-center text-[10px] font-black transition-colors ${isCompleted ? "bg-emerald-500 border-white text-white shadow-md shadow-emerald-200" : "bg-white border-stone-100 text-stone-300"}`}>
+                                {isCompleted ? <CheckCircle2 size={14} strokeWidth={3} /> : i + 1}
+                              </div>
+                              <span className={`text-[9px] font-black uppercase tracking-tight ${isCompleted ? "text-emerald-700" : "text-stone-400"} hidden sm:block`}>
+                                {label}
+                              </span>
                             </div>
-                            <span className={`text-[9px] font-black uppercase tracking-tight ${i <= request.step ? "text-emerald-700" : "text-stone-400"}`}>
-                              {label}
-                            </span>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   ))}

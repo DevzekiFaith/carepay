@@ -51,7 +51,7 @@ export default function ModernCalendar({ onSelect, selectedDate }: ModernCalenda
     const prevMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
 
     return (
-        <div className="w-full max-w-md rounded-3xl border-2 border-stone-100 bg-white p-6 shadow-xl shadow-stone-200/20">
+        <div className="w-full max-w-md rounded-3xl border-2 border-stone-100 bg-white p-4 shadow-xl shadow-stone-200/20 sm:p-6">
             <div className="mb-6 flex items-center justify-between">
                 <h3 className="text-base font-black uppercase tracking-widest text-stone-900">
                     {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
@@ -76,7 +76,7 @@ export default function ModernCalendar({ onSelect, selectedDate }: ModernCalenda
                         <button
                             key={day}
                             onClick={() => handleDateClick(day)}
-                            className={`flex h-11 w-11 items-center justify-center rounded-2xl text-sm font-bold transition-all ${isSelected
+                            className={`flex h-10 w-10 items-center justify-center rounded-2xl text-sm font-bold transition-all sm:h-11 sm:w-11 ${isSelected
                                 ? "bg-emerald-600 text-white shadow-lg shadow-emerald-200 ring-2 ring-emerald-50"
                                 : "text-stone-700 hover:bg-emerald-50 hover:text-emerald-700"
                                 }`}

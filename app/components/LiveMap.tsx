@@ -33,6 +33,7 @@ interface LiveMapProps {
     height?: string;
     className?: string;
     initialCenter?: [number, number];
+    onSearchStateChange?: (searching: boolean) => void;
 }
 
 function LocationMarker({ onSelect, onPositionChange, onAddressResolved }: {
@@ -73,10 +74,11 @@ function LocationMarker({ onSelect, onPositionChange, onAddressResolved }: {
 }
 
 // Map Controller for Forward Geocoding
-function MapController({ address, onPositionChange, onSuggestionsFound }: {
+function MapController({ address, onPositionChange, onSuggestionsFound, onSearchStateChange }: {
     address?: string,
     onPositionChange: (pos: L.LatLng) => void,
-    onSuggestionsFound?: (suggestions: any[]) => void
+    onSuggestionsFound?: (suggestions: any[]) => void,
+    onSearchStateChange?: (searching: boolean) => void
 }) {
     const map = useMap();
 
@@ -87,6 +89,7 @@ function MapController({ address, onPositionChange, onSuggestionsFound }: {
         }
 
         const timer = setTimeout(async () => {
+            if (onSearchStateChange) onSearchStateChange(true);
             try {
                 // Fetch more results to provide suggestions
                 const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=5&countrycodes=ng`);
@@ -97,15 +100,22 @@ function MapController({ address, onPositionChange, onSuggestionsFound }: {
                 }
 
                 if (data && data.length > 0) {
-                    const { lat, lon } = data[0];
+                    const { lat, lon, importance } = data[0];
                     const pos = new L.LatLng(parseFloat(lat), parseFloat(lon));
-                    map.flyTo(pos, 16);
-                    onPositionChange(pos);
+
+                    // Only flyTo if the result is reasonably specific (importance > 0.4)
+                    // or if it's the exact first match for a long string
+                    if (importance > 0.4 || address.split(' ').length > 2) {
+                        map.flyTo(pos, 16);
+                        onPositionChange(pos);
+                    }
                 }
             } catch (err) {
                 console.error("Forward geocoding error:", err);
+            } finally {
+                if (onSearchStateChange) onSearchStateChange(false);
             }
-        }, 1200);
+        }, 600);
 
         return () => clearTimeout(timer);
     }, [address, map]);
@@ -122,7 +132,8 @@ export default function LiveMap({
     address,
     height = "400px",
     className = "",
-    initialCenter = [6.5244, 3.3792] // Lagos, Nigeria default
+    initialCenter = [6.5244, 3.3792], // Lagos, Nigeria default
+    onSearchStateChange
 }: LiveMapProps) {
     const [mounted, setMounted] = useState(false);
     const [targetPos, setTargetPos] = useState<L.LatLng | null>(null);
@@ -166,6 +177,7 @@ export default function LiveMap({
                     address={address}
                     onPositionChange={setTargetPos}
                     onSuggestionsFound={onSuggestionsFound}
+                    onSearchStateChange={onSearchStateChange}
                 />
 
                 {interactive && <LocationMarker
