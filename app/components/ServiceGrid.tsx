@@ -51,13 +51,13 @@ export default function ServiceGrid({ services, selectedService, onSelectService
             </div>
 
             {filteredServices.length > 0 ? (
-                <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-6 sm:gap-10 sm:grid-cols-2 lg:grid-cols-3">
                     {filteredServices.map((service, idx) => (
                         <button
                             key={service.label}
                             onClick={() => onSelectService(service.label)}
                             style={{ animationDelay: `${idx * 50}ms` }}
-                            className={`group relative flex flex-col items-start rounded-[56px] border transition-all duration-700 animate-slide-up hover:-translate-y-6 active:scale-95 overflow-hidden text-left min-h-[460px] w-full perspective-1000 ${selectedService === service.label
+                            className={`group relative flex flex-col items-start rounded-[32px] sm:rounded-[48px] border transition-all duration-700 animate-slide-up hover:-translate-y-4 active:scale-95 overflow-hidden text-left min-h-[380px] sm:min-h-[420px] w-full perspective-1000 ${selectedService === service.label
                                 ? "bg-[#050505] border-emerald-500 shadow-[0_0_80px_-12px_rgba(16,185,129,0.5)] ring-2 ring-emerald-500/50"
                                 : "bg-[#080808] border-stone-800 shadow-2xl hover:border-emerald-400 hover:shadow-[0_0_60px_-12px_rgba(16,185,129,0.3)]"
                                 }`}
@@ -68,25 +68,25 @@ export default function ServiceGrid({ services, selectedService, onSelectService
                             </div>
 
                             {/* Obsidian Precision Ring */}
-                            <div className="absolute inset-0 rounded-[56px] ring-1 ring-white/10 pointer-events-none" />
+                            <div className="absolute inset-0 rounded-[32px] sm:rounded-[48px] ring-1 ring-white/10 pointer-events-none" />
 
-                            <div className="relative z-10 w-full grow flex flex-col p-10">
-                                <div className="flex w-full items-start justify-between mb-12">
+                            <div className="relative z-10 w-full grow flex flex-col p-6 sm:p-8">
+                                <div className="flex w-full items-start justify-between mb-8 sm:mb-10">
                                     {/* Cyber-Recessed Icon Housing */}
-                                    <div className={`flex h-24 w-24 items-center justify-center rounded-[32px] border transition-all duration-700 ${selectedService === service.label
-                                        ? "bg-emerald-500 border-emerald-400 text-white shadow-[0_0_30px_rgba(16,185,129,0.6)]"
+                                    <div className={`flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-[18px] sm:rounded-[20px] border transition-all duration-700 ${selectedService === service.label
+                                        ? "bg-emerald-500 border-emerald-400 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]"
                                         : "bg-black/60 border-stone-800 text-stone-500 group-hover:border-emerald-500/50 group-hover:text-emerald-400 shadow-inner"}`}>
-                                        <service.icon size={44} strokeWidth={1} className="group-hover:scale-125 transition-transform duration-700 ease-out group-hover:rotate-12" />
+                                        <service.icon size={24} sm:size={28} strokeWidth={1} className="group-hover:scale-125 transition-transform duration-700 ease-out group-hover:rotate-12" />
                                     </div>
 
                                     {/* Holographic Price Anchor */}
-                                    <div className={`flex flex-col items-end px-5 py-3 rounded-2xl border transition-all duration-700 ${selectedService === service.label
+                                    <div className={`flex flex-col items-end px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl border transition-all duration-700 ${selectedService === service.label
                                         ? "bg-emerald-500/10 border-emerald-500/40"
                                         : "bg-white/5 border-white/10 group-hover:border-emerald-500/30 group-hover:bg-emerald-500/5"}`}>
-                                        <span className="text-3xl font-black tracking-tighter text-white group-hover:text-emerald-400 transition-colors">
+                                        <span className="text-xl sm:text-2xl font-black tracking-tighter text-white group-hover:text-emerald-400 transition-colors">
                                             {service.price.split(' ')[0]}
                                         </span>
-                                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-500">
+                                        <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.3em] text-stone-500">
                                             {service.price.split(' ').slice(1).join(' ')}
                                         </span>
                                     </div>
@@ -94,29 +94,29 @@ export default function ServiceGrid({ services, selectedService, onSelectService
 
                                 {/* Main Content Block */}
                                 <div className="mt-auto">
-                                    <div className="mb-4 inline-flex items-center gap-2 border border-emerald-500/20 bg-emerald-500/5 px-4 py-2 rounded-full backdrop-blur-md">
-                                        <Star size={14} className="fill-emerald-500 text-emerald-500 animate-pulse" />
-                                        <span className="text-[12px] font-black text-emerald-400 uppercase tracking-[0.2em]">PLATINUM VETTED</span>
+                                    <div className="mb-3 sm:mb-4 inline-flex items-center gap-1.5 sm:gap-2 border border-emerald-500/20 bg-emerald-500/5 px-3 py-1 sm:px-4 sm:py-2 rounded-full backdrop-blur-md">
+                                        <Star size={12} sm:size={14} className="fill-emerald-500 text-emerald-500 animate-pulse" />
+                                        <span className="text-[10px] sm:text-[12px] font-black text-emerald-400 uppercase tracking-[0.1em] sm:tracking-[0.2em]">PLATINUM VETTED</span>
                                     </div>
 
-                                    <h3 className={`text-4xl font-black tracking-tighter mb-10 leading-[1] ${selectedService === service.label ? "text-white" : "text-stone-100 group-hover:text-white"}`}>
+                                    <h3 className={`text-xl sm:text-2xl font-black tracking-tighter mb-6 sm:mb-8 leading-[1] ${selectedService === service.label ? "text-white" : "text-stone-100 group-hover:text-white"}`}>
                                         {service.label}
                                     </h3>
 
                                     {/* Technical Metadata Tray */}
-                                    <div className="grid grid-cols-2 gap-4 pt-6 border-t border-white/10">
-                                        <div className="flex flex-col gap-1">
-                                            <span className="text-[10px] font-bold text-stone-600 uppercase tracking-widest">Response</span>
-                                            <div className="flex items-center gap-2 text-stone-300 group-hover:text-white">
-                                                <Clock size={16} className="text-emerald-500" />
-                                                <span className="text-sm font-black">{service.time}</span>
+                                    <div className="grid grid-cols-2 gap-3 sm:gap-4 pt-4 sm:pt-6 border-t border-white/10">
+                                        <div className="flex flex-col gap-0.5 sm:gap-1">
+                                            <span className="text-[8px] sm:text-[10px] font-bold text-stone-600 uppercase tracking-widest">Response</span>
+                                            <div className="flex items-center gap-1.2 sm:gap-2 text-stone-300 group-hover:text-white">
+                                                <Clock size={14} sm:size={16} className="text-emerald-500" />
+                                                <span className="text-xs sm:text-sm font-black">{service.time}</span>
                                             </div>
                                         </div>
-                                        <div className="flex flex-col gap-1">
-                                            <span className="text-[10px] font-bold text-stone-600 uppercase tracking-widest">Platform Status</span>
-                                            <div className="flex items-center gap-2 text-stone-300 group-hover:text-white">
-                                                <ShieldCheck size={16} className="text-emerald-500" />
-                                                <span className="text-sm font-black uppercase">Elite</span>
+                                        <div className="flex flex-col gap-0.5 sm:gap-1">
+                                            <span className="text-[8px] sm:text-[10px] font-bold text-stone-600 uppercase tracking-widest">Status</span>
+                                            <div className="flex items-center gap-1.2 sm:gap-2 text-stone-300 group-hover:text-white">
+                                                <ShieldCheck size={14} sm:size={16} className="text-emerald-500" />
+                                                <span className="text-xs sm:text-sm font-black uppercase">Elite</span>
                                             </div>
                                         </div>
                                     </div>

@@ -57,10 +57,10 @@ export default function HomeClient() {
         <Hero />
 
         {/* Main layout grid */}
-        <main className="grid flex-1 gap-8 lg:grid-cols-[1fr_360px] xl:grid-cols-[1fr_400px] mt-8">
+        <main className="grid flex-1 gap-6 sm:gap-8 lg:grid-cols-[1fr_360px] xl:grid-cols-[1fr_400px] mt-6 sm:mt-8">
 
           {/* Left Column: Interactive Booking */}
-          <div className="space-y-12">
+          <div className="space-y-10 sm:space-y-12">
 
             {/* Service Selection Section */}
             <section className="animate-slide-up delay-1">
@@ -73,7 +73,7 @@ export default function HomeClient() {
 
             {/* Form Section */}
             <section className="card-vibe animate-slide-up delay-2 overflow-hidden border border-stone-100 shadow-xl shadow-stone-200/50">
-              <div className="bg-gradient-to-r from-emerald-600/5 to-emerald-500/5 px-6 py-8 sm:px-10">
+              <div className="bg-gradient-to-r from-emerald-600/5 to-emerald-500/5 px-4 py-6 sm:px-10 sm:py-8">
                 <QuickRequestForm
                   services={SERVICES}
                   selectedService={selectedService}
