@@ -51,59 +51,76 @@ export default function ServiceGrid({ services, selectedService, onSelectService
             </div>
 
             {filteredServices.length > 0 ? (
-                <div className="grid grid-cols-1 gap-4 min-[450px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
                     {filteredServices.map((service, idx) => (
                         <button
                             key={service.label}
                             onClick={() => onSelectService(service.label)}
                             style={{ animationDelay: `${idx * 50}ms` }}
-                            className={`group relative flex flex-col items-start gap-4 rounded-[32px] border-2 p-6 transition-all duration-500 animate-slide-up hover:-translate-y-2 active:scale-95 ${selectedService === service.label
-                                ? "border-emerald-500 bg-emerald-50/50 shadow-2xl shadow-emerald-500/10 ring-1 ring-emerald-500"
-                                : "border-stone-50 bg-white/80 backdrop-blur-sm hover:border-emerald-200 hover:shadow-2xl hover:shadow-emerald-500/10"
+                            className={`group relative flex flex-col items-start rounded-[48px] border border-stone-800 p-10 transition-all duration-700 animate-slide-up hover:-translate-y-4 active:scale-95 overflow-hidden text-left min-h-[420px] w-full ${selectedService === service.label
+                                ? "bg-stone-950 ring-2 ring-emerald-500 shadow-[0_0_60px_-12px_rgba(16,185,129,0.35)]"
+                                : "bg-gradient-to-br from-stone-900 via-stone-950 to-black shadow-2xl hover:border-emerald-500/50 hover:shadow-[0_0_50px_-12px_rgba(16,185,129,0.2)]"
                                 }`}
                         >
-                            <div className="flex w-full items-center justify-between">
-                                <div className={`flex h-14 w-14 items-center justify-center rounded-[20px] transition-all duration-500 ${selectedService === service.label ? "bg-emerald-500 text-white shadow-lg shadow-emerald-200" : "bg-stone-50 text-stone-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 group-hover:rotate-6"}`}>
-                                    <service.icon size={28} strokeWidth={2.5} />
-                                </div>
-                                {selectedService === service.label ? (
-                                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-white">
-                                        <CheckCircle2 size={14} strokeWidth={3} />
-                                    </div>
-                                ) : (
-                                    <div className="flex items-center gap-1 glass-morphism px-2 py-1 rounded-full">
-                                        <Star size={10} className="fill-stone-300 text-stone-300 group-hover:fill-amber-400 group-hover:text-amber-400 transition-colors" />
-                                        <span className="text-[9px] font-black text-stone-400 group-hover:text-stone-900 leading-none">NEW</span>
-                                    </div>
-                                )}
-                            </div>
+                            {/* Inner Precision Ring */}
+                            <div className="absolute inset-0 rounded-[48px] ring-1 ring-white/5 pointer-events-none" />
 
-                            <div className="w-full text-left">
-                                <h3 className={`text-lg font-black tracking-tight ${selectedService === service.label ? "text-emerald-900" : "text-stone-800"}`}>
-                                    {service.label}
-                                </h3>
-                                <div className="mt-1 flex items-center gap-2">
-                                    <span className="text-xs font-black uppercase tracking-widest text-emerald-600">
-                                        {service.price}
-                                    </span>
-                                    <div className="h-1 w-1 rounded-full bg-stone-200" />
-                                    <div className="flex items-center gap-1">
-                                        <Clock size={12} className="text-stone-300" />
-                                        <span className="text-[10px] font-bold text-stone-400 uppercase tracking-tighter">
-                                            {service.time}
+                            <div className="relative z-10 w-full grow flex flex-col">
+                                <div className="flex w-full items-start justify-between mb-10">
+                                    {/* Recessed Icon Housing */}
+                                    <div className={`flex h-20 w-20 items-center justify-center rounded-[24px] border transition-all duration-700 ${selectedService === service.label
+                                        ? "bg-emerald-500 border-emerald-400 text-white shadow-lg shadow-emerald-500/40"
+                                        : "bg-black/40 border-stone-800 text-stone-500 group-hover:border-emerald-500/30 group-hover:text-emerald-400 group-hover:bg-black/60 shadow-inner"}`}>
+                                        <service.icon size={36} strokeWidth={1.5} className="group-hover:scale-110 transition-transform duration-500" />
+                                    </div>
+
+                                    {selectedService === service.label ? (
+                                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg ring-4 ring-emerald-500/10">
+                                            <CheckCircle2 size={18} strokeWidth={3} />
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-2 border border-stone-800 bg-stone-900/80 px-4 py-2 rounded-full shadow-lg">
+                                            <Star size={12} className="fill-emerald-500 text-emerald-500 animate-pulse" />
+                                            <span className="text-[11px] font-black text-stone-200 uppercase tracking-[0.2em]">PLATINUM</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Main Content Block */}
+                                <div className="mt-auto">
+                                    {/* Price Anchor */}
+                                    <div className="mb-4 flex items-baseline gap-3">
+                                        <span className="text-4xl font-black tracking-tighter text-white group-hover:text-emerald-400 transition-colors">
+                                            {service.price.split(' ')[0]}
+                                        </span>
+                                        <span className="text-[12px] font-black uppercase tracking-widest text-stone-500">
+                                            {service.price.split(' ').slice(1).join(' ')}
                                         </span>
                                     </div>
+
+                                    <h3 className={`text-2xl font-black tracking-tight mb-8 leading-[1.1] ${selectedService === service.label ? "text-white" : "text-stone-50 group-hover:text-white"}`}>
+                                        {service.label}
+                                    </h3>
+
+                                    <div className="flex flex-col gap-4 py-5 border-t border-white/5">
+                                        <div className="flex items-center gap-3 text-stone-400 group-hover:text-stone-100 transition-colors">
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-stone-900 ring-1 ring-stone-800">
+                                                <Clock size={16} className="text-stone-500" />
+                                            </div>
+                                            <span className="text-[13px] font-bold uppercase tracking-widest">{service.time} response time</span>
+                                        </div>
+                                        <div className="flex items-center gap-3 text-emerald-500/90 group-hover:text-emerald-400 transition-colors">
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/20">
+                                                <ShieldCheck size={16} />
+                                            </div>
+                                            <span className="text-[13px] font-black uppercase tracking-widest">Verified Artisan</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Hover Badge */}
-                            <div className="mt-2 flex items-center gap-1 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                                <ShieldCheck size={12} className="text-emerald-500" />
-                                <span className="text-[9px] font-black uppercase tracking-widest text-emerald-600">Vetted Pro</span>
-                            </div>
-
-                            {/* Background Glow */}
-                            <div className={`absolute -inset-px rounded-[32px] opacity-0 transition-opacity duration-500 group-hover:opacity-100 pointer-events-none ${selectedService === service.label ? "hidden" : "bg-gradient-to-br from-emerald-500/5 via-transparent to-transparent"}`} />
+                            {/* Background Bloom Effect */}
+                            <div className={`absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-emerald-500/5 blur-[100px] transition-opacity duration-1000 ${selectedService === service.label ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`} />
                         </button>
                     ))}
                 </div>
