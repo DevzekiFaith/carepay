@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 interface MockMapProps {
     interactive?: boolean;
@@ -18,7 +18,6 @@ export default function MockMap({
     className = ""
 }: MockMapProps) {
     const [pinPos, setPinPos] = useState({ x: 40, y: 50 });
-    const [isPulsing, setIsPulsing] = useState(true);
 
     const handleMapClick = (e: React.MouseEvent<SVGSVGElement>) => {
         if (!interactive) return;

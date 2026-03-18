@@ -26,7 +26,9 @@ export default function ModernCalendar({ onSelect, selectedDate }: ModernCalenda
         const newDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
         if (selectedTime) {
             const [time, period] = selectedTime.split(" ");
-            let [hours, minutes] = time.split(":").map(Number);
+            const [hoursStr, minutesStr] = time.split(":");
+            let hours = Number(hoursStr);
+            const minutes = Number(minutesStr);
             if (period === "PM" && hours !== 12) hours += 12;
             if (period === "AM" && hours === 12) hours = 0;
             newDate.setHours(hours, minutes);
@@ -39,7 +41,9 @@ export default function ModernCalendar({ onSelect, selectedDate }: ModernCalenda
         if (selectedDate) {
             const newDate = new Date(selectedDate);
             const [t, p] = time.split(" ");
-            let [h, m] = t.split(":").map(Number);
+            const [hStr, mStr] = t.split(":");
+            let h = Number(hStr);
+            const m = Number(mStr);
             if (p === "PM" && h !== 12) h += 12;
             if (p === "AM" && h === 12) h = 0;
             newDate.setHours(h, m);

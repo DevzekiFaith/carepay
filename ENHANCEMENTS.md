@@ -117,7 +117,7 @@
 14. **Community Features**
     - Worker forum/discussion board
     - Customer community (tips, reviews)
-    - Local area groups (Lagos neighborhoods)
+    - Local area groups (city neighborhoods)
 
 ---
 

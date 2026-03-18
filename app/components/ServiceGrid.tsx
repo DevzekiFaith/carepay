@@ -1,9 +1,12 @@
+"use client";
+
 import { useState, useMemo } from "react";
-import { Search, CheckCircle2, Wind, Clock, Star, ShieldCheck } from "lucide-react";
+import { Search, MapPin, Clock } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface Service {
     label: string;
-    icon: any;
+    icon: React.ComponentType<{ size?: number; strokeWidth?: number; className?: string }>;
     price: string;
     time: string;
 }
@@ -24,128 +27,91 @@ export default function ServiceGrid({ services, selectedService, onSelectService
     }, [services, searchQuery]);
 
     return (
-        <div className="space-y-10 animate-slide-up delay-2">
-            <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                    <div className="flex items-center gap-2 mb-2">
-                        <div className="h-1 w-8 bg-emerald-500 rounded-full" />
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600">Marketplace</span>
+        <section className="py-24 bg-background">
+            <div className="container mx-auto px-6 lg:px-12">
+                <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between mb-16">
+                    <div>
+                        <h2 className="text-3xl font-heading font-bold tracking-tight text-foreground sm:text-4xl">
+                            Our Services
+                        </h2>
+                        <p className="text-sm font-medium text-zinc-500 mt-2">
+                            Select a category to see available verified pros.
+                        </p>
                     </div>
-                    <h2 className="text-3xl font-black tracking-tight text-stone-900 sm:text-4xl">
-                        Choose a Service
-                    </h2>
-                    <p className="text-sm font-medium text-stone-400 mt-1">
-                        Select a category to see available <span className="text-emerald-600 font-bold">Verified Pros</span>.
-                    </p>
+                    <div className="relative w-full sm:w-80 group">
+                        <input
+                            type="text"
+                            placeholder="Find a professional..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full rounded-xl border border-zinc-200 dark:border-zinc-800 bg-transparent py-4 pl-11 pr-4 text-sm font-medium text-foreground outline-none transition-all placeholder:text-zinc-400 focus:border-foreground dark:focus:border-zinc-400"
+                        />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 h-4 w-4 transition-colors group-focus-within:text-foreground dark:group-focus-within:text-zinc-400" />
+                    </div>
                 </div>
-                <div className="relative w-full sm:w-80 group">
-                    <input
-                        type="text"
-                        placeholder="Search for a pro (e.g. Plumber)..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full rounded-2xl border-2 border-stone-100 bg-white py-4 pl-12 pr-4 text-sm outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-8 focus:ring-emerald-500/5 sm:py-3"
-                    />
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 h-5 w-5 transition-colors group-focus-within:text-emerald-500" />
-                </div>
-            </div>
 
-            {filteredServices.length > 0 ? (
-                <div className="grid grid-cols-1 gap-6 sm:gap-10 sm:grid-cols-2 lg:grid-cols-3">
-                    {filteredServices.map((service, idx) => (
-                        <button
-                            key={service.label}
-                            onClick={() => onSelectService(service.label)}
-                            style={{ animationDelay: `${idx * 50}ms` }}
-                            className={`group relative flex flex-col items-start rounded-[32px] sm:rounded-[48px] border transition-all duration-700 animate-slide-up hover:-translate-y-4 active:scale-95 overflow-hidden text-left min-h-[380px] sm:min-h-[420px] w-full perspective-1000 ${selectedService === service.label
-                                ? "bg-[#050505] border-emerald-500 shadow-[0_0_80px_-12px_rgba(16,185,129,0.5)] ring-2 ring-emerald-500/50"
-                                : "bg-[#080808] border-stone-800 shadow-2xl hover:border-emerald-400 hover:shadow-[0_0_60px_-12px_rgba(16,185,129,0.3)]"
-                                }`}
-                        >
-                            {/* Scanning Light Sweep Effect */}
-                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none">
-                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-500/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
-                            </div>
-
-                            {/* Obsidian Precision Ring */}
-                            <div className="absolute inset-0 rounded-[32px] sm:rounded-[48px] ring-1 ring-white/10 pointer-events-none" />
-
-                            <div className="relative z-10 w-full grow flex flex-col p-6 sm:p-8">
-                                <div className="flex w-full items-start justify-between mb-8 sm:mb-10">
-                                    {/* Cyber-Recessed Icon Housing */}
-                                    <div className={`flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-[18px] sm:rounded-[20px] border transition-all duration-700 ${selectedService === service.label
-                                        ? "bg-emerald-500 border-emerald-400 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]"
-                                        : "bg-black/60 border-stone-800 text-stone-500 group-hover:border-emerald-500/50 group-hover:text-emerald-400 shadow-inner"}`}>
-                                        <service.icon size={24} sm:size={28} strokeWidth={1} className="group-hover:scale-125 transition-transform duration-700 ease-out group-hover:rotate-12" />
+                {filteredServices.length > 0 ? (
+                    <div className="grid grid-cols-1 gap-6 sm:gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                        {filteredServices.map((service, idx) => (
+                            <motion.button
+                                key={service.label}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true, margin: "-50px" }}
+                                transition={{ duration: 0.5, delay: idx * 0.05 }}
+                                onClick={() => onSelectService(service.label)}
+                                className={`group flex flex-col items-start rounded-2xl border transition-all duration-300 overflow-hidden text-left min-h-[280px] sm:min-h-[320px] w-full p-6 sm:p-8 ${selectedService === service.label
+                                    ? "bg-foreground text-background border-transparent shadow-premium-hover scale-[1.02]"
+                                    : "bg-background text-foreground border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-premium"
+                                    }`}
+                            >
+                                <div className="flex w-full items-start justify-between mb-auto">
+                                    <div className={`flex h-12 w-12 items-center justify-center rounded-xl transition-colors ${selectedService === service.label
+                                        ? "bg-background/10 text-background"
+                                        : "bg-zinc-100 dark:bg-zinc-900 text-foreground group-hover:bg-zinc-200 dark:group-hover:bg-zinc-800"
+                                        }`}>
+                                        <service.icon size={20} strokeWidth={1.5} className="transition-transform group-hover:scale-110" />
                                     </div>
-
-                                    {/* Holographic Price Anchor */}
-                                    <div className={`flex flex-col items-end px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl border transition-all duration-700 ${selectedService === service.label
-                                        ? "bg-emerald-500/10 border-emerald-500/40"
-                                        : "bg-white/5 border-white/10 group-hover:border-emerald-500/30 group-hover:bg-emerald-500/5"}`}>
-                                        <span className="text-xl sm:text-2xl font-black tracking-tighter text-white group-hover:text-emerald-400 transition-colors">
+                                    <div className="flex flex-col items-end">
+                                        <span className={`text-xl font-bold tracking-tight ${selectedService === service.label ? "text-background" : "text-foreground"}`}>
                                             {service.price.split(' ')[0]}
                                         </span>
-                                        <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.3em] text-stone-500">
+                                        <span className={`text-[10px] font-semibold uppercase tracking-widest ${selectedService === service.label ? "text-background/60" : "text-zinc-500"}`}>
                                             {service.price.split(' ').slice(1).join(' ')}
                                         </span>
                                     </div>
                                 </div>
 
-                                {/* Main Content Block */}
-                                <div className="mt-auto">
-                                    <div className="mb-3 sm:mb-4 inline-flex items-center gap-1.5 sm:gap-2 border border-emerald-500/20 bg-emerald-500/5 px-3 py-1 sm:px-4 sm:py-2 rounded-full backdrop-blur-md">
-                                        <Star size={12} sm:size={14} className="fill-emerald-500 text-emerald-500 animate-pulse" />
-                                        <span className="text-[10px] sm:text-[12px] font-black text-emerald-400 uppercase tracking-[0.1em] sm:tracking-[0.2em]">PLATINUM VETTED</span>
+                                <h3 className="text-2xl font-heading font-bold tracking-tight mt-12 mb-6">
+                                    {service.label}
+                                </h3>
+
+                                <div className={`flex items-center gap-6 w-full pt-6 border-t transition-colors ${selectedService === service.label ? "border-background/10" : "border-zinc-100 dark:border-zinc-800"}`}>
+                                    <div className="flex items-center gap-2">
+                                        <Clock size={14} className={selectedService === service.label ? "text-background/60" : "text-zinc-400"} />
+                                        <span className={`text-xs font-semibold ${selectedService === service.label ? "text-background/80" : "text-zinc-600 dark:text-zinc-400"}`}>{service.time}</span>
                                     </div>
-
-                                    <h3 className={`text-xl sm:text-2xl font-black tracking-tighter mb-6 sm:mb-8 leading-[1] ${selectedService === service.label ? "text-white" : "text-stone-100 group-hover:text-white"}`}>
-                                        {service.label}
-                                    </h3>
-
-                                    {/* Technical Metadata Tray */}
-                                    <div className="grid grid-cols-2 gap-3 sm:gap-4 pt-4 sm:pt-6 border-t border-white/10">
-                                        <div className="flex flex-col gap-0.5 sm:gap-1">
-                                            <span className="text-[8px] sm:text-[10px] font-bold text-stone-600 uppercase tracking-widest">Response</span>
-                                            <div className="flex items-center gap-1.2 sm:gap-2 text-stone-300 group-hover:text-white">
-                                                <Clock size={14} sm:size={16} className="text-emerald-500" />
-                                                <span className="text-xs sm:text-sm font-black">{service.time}</span>
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-col gap-0.5 sm:gap-1">
-                                            <span className="text-[8px] sm:text-[10px] font-bold text-stone-600 uppercase tracking-widest">Status</span>
-                                            <div className="flex items-center gap-1.2 sm:gap-2 text-stone-300 group-hover:text-white">
-                                                <ShieldCheck size={14} sm:size={16} className="text-emerald-500" />
-                                                <span className="text-xs sm:text-sm font-black uppercase">Elite</span>
-                                            </div>
-                                        </div>
+                                    <div className="flex items-center gap-2">
+                                        <MapPin size={14} className={selectedService === service.label ? "text-background/60" : "text-zinc-400"} />
+                                        <span className={`text-xs font-semibold ${selectedService === service.label ? "text-background/80" : "text-zinc-600 dark:text-zinc-400"}`}>Local Pros</span>
                                     </div>
                                 </div>
-                            </div>
-
-                            {/* Perspective Bloom Glow */}
-                            <div className={`absolute -bottom-40 -right-40 h-[400px] w-[400px] rounded-full bg-emerald-500/10 blur-[120px] transition-all duration-1000 ${selectedService === service.label ? "opacity-100 scale-110" : "opacity-0 group-hover:opacity-100 scale-100"}`} />
-                        </button>
-                    ))}
-                </div>
-            ) : (
-                <div className="py-20 text-center rounded-[40px] border-4 border-dashed border-stone-100 glass-card">
-                    <div className="relative inline-block mb-6">
-                        <Wind className="h-16 w-16 text-stone-100 animate-float" />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <Search className="h-6 w-6 text-stone-300" />
-                        </div>
+                            </motion.button>
+                        ))}
                     </div>
-                    <h3 className="text-xl font-black text-stone-900">No pros found</h3>
-                    <p className="mt-2 text-sm font-medium text-stone-400 max-w-xs mx-auto">We couldn't find any results for "{searchQuery}". Try a broader term like "repair".</p>
-                    <button
-                        onClick={() => setSearchQuery("")}
-                        className="mt-8 relative btn-gradient h-12 px-8 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-emerald-200/50"
-                    >
-                        Clear Search
-                    </button>
-                </div>
-            )}
-        </div>
+                ) : (
+                    <div className="py-24 text-center rounded-2xl border border-dashed border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+                        <h3 className="text-lg font-bold text-foreground">No pros found</h3>
+                        <p className="mt-2 text-sm font-medium text-zinc-500 max-w-sm mx-auto">We couldn&apos;t find any results for &quot;{searchQuery}&quot;. Try a broader category.</p>
+                        <button
+                            onClick={() => setSearchQuery("")}
+                            className="mt-6 btn-minimal h-10 px-6 rounded-full text-xs font-semibold uppercase tracking-widest"
+                        >
+                            Clear Search
+                        </button>
+                    </div>
+                )}
+            </div>
+        </section>
     );
 }

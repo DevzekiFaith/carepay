@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { PAYMENT_ACCOUNT } from "@/lib/payment-details";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, CheckCircle2 } from "lucide-react";
 
 interface QuickRequestFormProps {
     selectedService: string | null;
@@ -40,7 +40,6 @@ export default function QuickRequestForm({ selectedService, onServiceChange, ser
         setSubmitted(false);
         setSubmitting(true);
 
-        // Mock sumission
         setTimeout(() => {
             setSubmitting(false);
             setSubmitted(true);
@@ -50,89 +49,85 @@ export default function QuickRequestForm({ selectedService, onServiceChange, ser
     };
 
     return (
-        <div className="border-t border-stone-100 pt-8 mt-4">
-            <div className="flex items-center justify-between gap-2 mb-6">
+        <div className="border-t border-zinc-200 dark:border-zinc-800 pt-10 mt-6">
+            <div className="flex items-center justify-between gap-4 mb-8">
                 <div>
-                    <h2 className="text-sm font-black uppercase tracking-widest text-stone-400">
-                        Send Request
+                    <h2 className="text-xl font-heading font-bold text-foreground">
+                        Instant Booking
                     </h2>
-                    <p className="mt-1 text-xs font-semibold text-stone-500 uppercase tracking-tight">
-                        Instant matching with nearby pros
+                    <p className="mt-1 text-sm font-medium text-zinc-500">
+                        Fill in your details, we match you instantly.
                     </p>
                 </div>
                 <Link
                     href="/request"
-                    className="text-[10px] font-black uppercase tracking-widest text-emerald-600 border-b-2 border-emerald-200 hover:border-emerald-500 transition-all py-0.5"
+                    className="text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-foreground transition-colors border-b border-zinc-300 dark:border-zinc-700 hover:border-foreground pb-0.5"
                 >
-                    Adv. Form →
+                    Advanced Form
                 </Link>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6 text-sm">
+            <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid gap-6 sm:grid-cols-2">
-                    {/* Full Name */}
                     <div className="space-y-2 flex flex-col">
-                        <label className="text-[11px] font-black uppercase tracking-widest text-stone-700 ml-1">
+                        <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">
                             Full Name
                         </label>
                         <input
                             name="fullName"
                             placeholder="E.g. Chioma Adebayo"
-                            className={`input-vibe w-full rounded-2xl border-2 px-5 py-5 text-lg outline-none transition-all sm:py-4 sm:text-base ${errors.fullName
-                                ? "border-rose-200 bg-rose-50/30 focus:border-rose-400 focus:ring-rose-100"
-                                : "border-stone-100 bg-stone-50/50 focus:border-emerald-300 focus:bg-white focus:ring-4 focus:ring-emerald-500/5"
+                            className={`w-full rounded-xl border px-4 py-3.5 text-sm bg-transparent outline-none transition-all ${errors.fullName
+                                ? "border-red-400 focus:border-red-600 focus:ring-1 focus:ring-red-600"
+                                : "border-zinc-200 dark:border-zinc-800 focus:border-foreground focus:ring-1 focus:ring-foreground"
                                 }`}
                         />
-                        {errors.fullName && <p className="text-xs font-bold text-rose-500 ml-1 mt-1">{errors.fullName}</p>}
+                        {errors.fullName && <p className="text-xs font-semibold text-red-500">{errors.fullName}</p>}
                     </div>
 
-                    {/* Phone Number */}
                     <div className="space-y-2 flex flex-col">
-                        <label className="text-[11px] font-black uppercase tracking-widest text-stone-700 ml-1">
-                            WhatsApp / Phone
+                        <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+                            Phone
                         </label>
                         <input
                             type="tel"
                             name="phone"
                             placeholder="+234 812 345 6789"
-                            className={`input-vibe w-full rounded-2xl border-2 px-5 py-5 text-lg outline-none transition-all sm:py-4 sm:text-base ${errors.phone
-                                ? "border-rose-200 bg-rose-50/30 focus:border-rose-400 focus:ring-rose-100"
-                                : "border-stone-100 bg-stone-50/50 focus:border-emerald-300 focus:bg-white focus:ring-4 focus:ring-emerald-500/5"
+                            className={`w-full rounded-xl border px-4 py-3.5 text-sm bg-transparent outline-none transition-all ${errors.phone
+                                ? "border-red-400 focus:border-red-600 focus:ring-1 focus:ring-red-600"
+                                : "border-zinc-200 dark:border-zinc-800 focus:border-foreground focus:ring-1 focus:ring-foreground"
                                 }`}
                         />
-                        {errors.phone && <p className="text-xs font-bold text-rose-500 ml-1 mt-1">{errors.phone}</p>}
+                        {errors.phone && <p className="text-xs font-semibold text-red-500">{errors.phone}</p>}
                     </div>
                 </div>
 
                 <div className="grid gap-6 sm:grid-cols-2">
-                    {/* Address */}
                     <div className="space-y-2 flex flex-col">
-                        <label className="text-[11px] font-black uppercase tracking-widest text-stone-700 ml-1">
-                            Service Address
+                        <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+                            Address
                         </label>
                         <input
                             name="address"
-                            placeholder="Number, street, your area"
-                            className={`input-vibe w-full rounded-2xl border-2 px-5 py-5 text-lg outline-none transition-all sm:py-4 sm:text-base ${errors.address
-                                ? "border-rose-200 bg-rose-50/30 focus:border-rose-400 focus:ring-rose-100"
-                                : "border-stone-100 bg-stone-50/50 focus:border-emerald-300 focus:bg-white focus:ring-4 focus:ring-emerald-500/5"
+                            placeholder="Number, street, area"
+                            className={`w-full rounded-xl border px-4 py-3.5 text-sm bg-transparent outline-none transition-all ${errors.address
+                                ? "border-red-400 focus:border-red-600 focus:ring-1 focus:ring-red-600"
+                                : "border-zinc-200 dark:border-zinc-800 focus:border-foreground focus:ring-1 focus:ring-foreground"
                                 }`}
                         />
-                        {errors.address && <p className="text-xs font-bold text-rose-500 ml-1 mt-1">{errors.address}</p>}
+                        {errors.address && <p className="text-xs font-semibold text-red-500">{errors.address}</p>}
                     </div>
 
-                    {/* Service Type */}
                     <div className="space-y-2 flex flex-col">
-                        <label className="text-[11px] font-black uppercase tracking-widest text-stone-700 ml-1">
+                        <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">
                             Select Service
                         </label>
                         <select
                             name="service"
                             value={selectedService ?? ""}
                             onChange={(e) => onServiceChange(e.target.value || null)}
-                            className={`input-vibe w-full rounded-2xl border-2 px-5 py-5 text-lg outline-none transition-all appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[right_1rem_center] bg-no-repeat sm:py-4 sm:text-base ${errors.service
-                                ? "border-rose-200 bg-rose-50/30 focus:border-rose-400 focus:ring-rose-100"
-                                : "border-stone-100 bg-stone-50/50 focus:border-emerald-300 focus:bg-white focus:ring-4 focus:ring-emerald-500/5"
+                            className={`w-full rounded-xl border px-4 py-3.5 text-sm bg-background outline-none transition-all appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[right_1rem_center] bg-no-repeat ${errors.service
+                                ? "border-red-400 focus:border-red-600 focus:ring-1 focus:ring-red-600"
+                                : "border-zinc-200 dark:border-zinc-800 focus:border-foreground focus:ring-1 focus:ring-foreground"
                                 }`}
                         >
                             <option value="">Choose service...</option>
@@ -142,94 +137,88 @@ export default function QuickRequestForm({ selectedService, onServiceChange, ser
                                 </option>
                             ))}
                         </select>
-                        {errors.service && <p className="text-xs font-bold text-rose-500 ml-1 mt-1">{errors.service}</p>}
+                        {errors.service && <p className="text-xs font-semibold text-red-500">{errors.service}</p>}
                     </div>
                 </div>
 
-                {/* Task Details */}
                 <div className="space-y-2 flex flex-col">
-                    <label className="text-[11px] font-black uppercase tracking-widest text-stone-700 ml-1">
+                    <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">
                         Work Details
                     </label>
                     <textarea
                         name="details"
                         rows={3}
-                        placeholder="What exactly needs fixing? (e.g. Toilet is leaking, need new fan installed...)"
-                        className={`input-vibe w-full resize-none rounded-2xl border-2 px-5 py-5 text-lg outline-none transition-all sm:py-4 sm:text-base ${errors.details
-                            ? "border-rose-200 bg-rose-50/30 focus:border-rose-400 focus:ring-rose-100"
-                            : "border-stone-100 bg-stone-50/50 focus:border-emerald-300 focus:bg-white focus:ring-4 focus:ring-emerald-500/5"
+                        placeholder="What needs fixing?"
+                        className={`w-full resize-none rounded-xl border px-4 py-3.5 text-sm bg-transparent outline-none transition-all ${errors.details
+                            ? "border-red-400 focus:border-red-600 focus:ring-1 focus:ring-red-600"
+                            : "border-zinc-200 dark:border-zinc-800 focus:border-foreground focus:ring-1 focus:ring-foreground"
                             }`}
                     />
-                    {errors.details && <p className="text-xs font-bold text-rose-500 ml-1 mt-1">{errors.details}</p>}
+                    {errors.details && <p className="text-xs font-semibold text-red-500">{errors.details}</p>}
                 </div>
 
-                <div className="flex flex-col gap-6 pt-2 lg:flex-row lg:items-center lg:justify-between">
-                    <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-start gap-4 flex-1 lg:max-w-md">
-                        <MessageCircle className="h-6 w-6 text-emerald-500 shrink-0 mt-0.5" strokeWidth={2.5} />
-                        <p className="text-xs sm:text-sm font-medium text-emerald-700 leading-relaxed">
-                            <span className="font-bold">Pro Tip:</span> We usually respond on WhatsApp within <span className="underline decoration-emerald-300 underline-offset-2">5-10 minutes</span> to confirm the arrival and final quote.
+                <div className="flex flex-col gap-6 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 flex items-start gap-4 flex-1">
+                        <MessageCircle className="h-5 w-5 text-zinc-400 shrink-0 mt-0.5" strokeWidth={2} />
+                        <p className="text-xs font-medium text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                            <span className="font-bold text-foreground">Next step:</span> We typically respond on WhatsApp within 5-10 minutes to verify pricing and pro arrival time.
                         </p>
                     </div>
                     <button
                         type="submit"
                         disabled={submitting}
-                        className="btn-gradient interactive-tap group h-14 rounded-full px-10 text-base shadow-lg shadow-emerald-200/50 flex items-center justify-center gap-2 min-w-[200px] disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="btn-minimal h-12 w-full sm:w-auto rounded-full px-8 text-xs font-bold uppercase tracking-widest shadow-premium flex items-center justify-center gap-2 sm:min-w-[180px] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {submitting ? (
                             <>
-                                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                                <span>Matching...</span>
+                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-background/30 border-t-background" />
+                                <span>Processing</span>
                             </>
                         ) : (
-                            <>
-                                <span>Request Pro</span>
-                                <span className="transition-transform group-hover:translate-x-1">→</span>
-                            </>
+                            <span>Request Pro</span>
                         )}
                     </button>
                 </div>
 
                 {submitted && (
-                    <div className="animate-success-pop rounded-3xl border-2 border-emerald-200 bg-emerald-50/50 p-6 shadow-xl">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="h-10 w-10 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xl">
-                                ✓
-                            </div>
+                    <div className="mt-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 p-8 shadow-sm">
+                        <div className="flex items-center gap-4 mb-6">
+                            <CheckCircle2 className="h-8 w-8 text-foreground" strokeWidth={2} />
                             <div>
-                                <h3 className="text-lg font-black text-emerald-900 leading-tight">Request Received!</h3>
-                                <p className="text-xs font-bold text-emerald-700 uppercase tracking-tighter">Someone is looking at it rn</p>
+                                <h3 className="text-xl font-heading font-bold text-foreground leading-tight">Request Received</h3>
+                                <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-1">Matching in progress</p>
                             </div>
                         </div>
 
-                        <div className="rounded-2xl bg-white p-5 shadow-sm border border-emerald-100 space-y-3">
-                            <p className="text-xs font-bold text-stone-500 uppercase tracking-widest">Pre-payment Details</p>
+                        <div className="rounded-xl bg-background p-6 border border-zinc-200 dark:border-zinc-800">
+                            <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">Payment Details</p>
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div>
-                                    <p className="text-[10px] font-black uppercase text-stone-400">Bank Name</p>
-                                    <p className="text-sm font-bold text-stone-900">{PAYMENT_ACCOUNT.bankName}</p>
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-1">Bank Name</p>
+                                    <p className="text-sm font-semibold text-foreground">{PAYMENT_ACCOUNT.bankName}</p>
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-black uppercase text-stone-400">Account No.</p>
-                                    <p className="text-sm font-bold text-stone-900">{PAYMENT_ACCOUNT.accountNumber}</p>
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-1">Account No.</p>
+                                    <p className="text-sm font-semibold text-foreground">{PAYMENT_ACCOUNT.accountNumber}</p>
                                 </div>
-                                <div className="sm:col-span-2 pt-2 border-t border-stone-50">
-                                    <p className="text-[10px] font-black uppercase text-stone-400">Account Name</p>
-                                    <p className="text-sm font-bold text-emerald-700">{PAYMENT_ACCOUNT.accountName}</p>
+                                <div className="sm:col-span-2 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-1">Account Name</p>
+                                    <p className="text-sm font-semibold text-foreground">{PAYMENT_ACCOUNT.accountName}</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="mt-6 flex flex-wrap gap-3">
+                        <div className="mt-8 flex flex-wrap gap-4">
                             <Link
                                 href="/customer/dashboard"
-                                className="btn-gradient h-12 rounded-full px-6 flex items-center justify-center text-xs shadow-md"
+                                className="btn-minimal h-10 rounded-full px-6 flex items-center justify-center text-xs font-bold tracking-widest uppercase"
                             >
                                 Track Status
                             </Link>
                             <button
                                 type="button"
                                 onClick={() => setSubmitted(false)}
-                                className="h-12 rounded-full border-2 border-stone-200 bg-white px-6 text-xs font-bold text-stone-700 hover:bg-stone-50 transition-colors"
+                                className="h-10 rounded-full border border-zinc-200 dark:border-zinc-700 bg-background px-6 text-xs font-bold uppercase tracking-widest text-foreground hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
                             >
                                 Book Another
                             </button>

@@ -3,7 +3,7 @@ import Skeleton from "../../../components/Skeleton";
 export default function AuthLoading() {
     return (
         <div className="min-h-screen vibe-bg flex items-center justify-center p-4">
-            <div className="w-full max-w-md card-vibe p-8 sm:p-10 bg-white/50">
+            <div className="w-full max-w-md card-vibe mac-card-pad-lg bg-white/50">
                 <header className="mb-8 text-center">
                     <Skeleton className="h-8 w-48 mx-auto mb-3" />
                     <Skeleton className="h-4 w-64 mx-auto" />

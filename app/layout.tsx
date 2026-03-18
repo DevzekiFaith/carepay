@@ -1,24 +1,50 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Inter } from "next/font/google";
+import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import Nav from "./components/Nav";
 import Footer from "./components/Footer";
 import WhatsAppButton from "./components/WhatsAppButton";
 import "./globals.css";
+import {
+  DEFAULT_CITY,
+  DEFAULT_COUNTRY,
+  DEFAULT_STATE,
+  SITE_NAME,
+  getSiteUrl,
+} from "@/lib/site";
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-plus-jakarta-sans",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "CarePay — Book it. Fix it. Done. | Ogun",
-  description:
-    "Plumbers, electricians, carpenters & more. Book in 2 mins. Vetted pros across Lagos.",
+  metadataBase: getSiteUrl(),
+  title: {
+    default: `${SITE_NAME} — Book it. Fix it. Done.`,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: `Plumbers, electricians, carpenters & more in ${DEFAULT_CITY}. Book in 2 mins. Vetted pros across ${DEFAULT_STATE}, ${DEFAULT_COUNTRY}.`,
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} — Book it. Fix it. Done.`,
+    description: `Book trusted handymen in ${DEFAULT_CITY}.`,
+    locale: "en_NG",
+    url: "/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_NAME} — Book it. Fix it. Done.`,
+    description: `Book trusted handymen in ${DEFAULT_CITY}.`,
+  },
 };
 
 export const viewport = {
@@ -35,10 +61,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.variable} ${geistMono.variable} min-w-0 overflow-x-hidden font-sans antialiased`}
+        className={`${inter.variable} ${plusJakartaSans.variable} min-w-0 overflow-x-hidden font-sans antialiased`}
       >
+        <a
+          href="#content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-stone-900 focus:shadow-lg focus:ring-2 focus:ring-violet-200"
+        >
+          Skip to content
+        </a>
         <Nav />
-        {children}
+        <div id="content">{children}</div>
         <Footer />
         <WhatsAppButton />
       </body>

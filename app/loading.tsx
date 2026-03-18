@@ -18,8 +18,8 @@ export default function RootLoading() {
                 </header>
 
                 <main className="grid gap-8 lg:grid-cols-[1fr_360px]">
-                    <div className="space-y-8">
-                        <section className="card-vibe rounded-2xl p-6 bg-white/50">
+                    <div className="mac-stack">
+                        <section className="card-vibe mac-card-pad-lg bg-white/50">
                             <Skeleton className="h-4 w-40 mb-6" />
                             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                                 {[...Array(6)].map((_, i) => (
@@ -29,7 +29,7 @@ export default function RootLoading() {
                         </section>
                         <Skeleton className="h-96 w-full rounded-2xl" />
                     </div>
-                    <aside className="space-y-6">
+                    <aside className="mac-stack">
                         <Skeleton className="h-48 w-full rounded-2xl" />
                         <Skeleton className="h-64 w-full rounded-2xl" />
                         <Skeleton className="h-32 w-full rounded-2xl" />

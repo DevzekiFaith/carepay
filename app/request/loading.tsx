@@ -10,8 +10,8 @@ export default function RequestLoading() {
                     <Skeleton className="h-4 w-80 mx-auto" />
                 </header>
 
-                <main className="card-vibe rounded-2xl p-6 sm:p-10 bg-white/50">
-                    <div className="space-y-8">
+                <main className="card-vibe mac-card-pad-lg bg-white/50">
+                    <div className="mac-stack">
                         <div className="grid gap-6 sm:grid-cols-2">
                             {[...Array(4)].map((_, i) => (
                                 <div key={i} className="space-y-2">

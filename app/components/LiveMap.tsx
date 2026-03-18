@@ -28,7 +28,7 @@ interface LiveMapProps {
     showRoute?: boolean;
     onLocationSelect?: (location: string) => void;
     onAddressResolved?: (address: string) => void;
-    onSuggestionsFound?: (suggestions: any[]) => void;
+    onSuggestionsFound?: (suggestions: Array<{ lat: string, lon: string, display_name: string, importance: number }>) => void;
     address?: string;
     height?: string;
     className?: string;
@@ -77,7 +77,7 @@ function LocationMarker({ onSelect, onPositionChange, onAddressResolved }: {
 function MapController({ address, onPositionChange, onSuggestionsFound, onSearchStateChange }: {
     address?: string,
     onPositionChange: (pos: L.LatLng) => void,
-    onSuggestionsFound?: (suggestions: any[]) => void,
+    onSuggestionsFound?: (suggestions: Array<{ lat: string, lon: string, display_name: string, importance: number }>) => void,
     onSearchStateChange?: (searching: boolean) => void
 }) {
     const map = useMap();
@@ -118,7 +118,7 @@ function MapController({ address, onPositionChange, onSuggestionsFound, onSearch
         }, 600);
 
         return () => clearTimeout(timer);
-    }, [address, map]);
+    }, [address, map, onPositionChange, onSuggestionsFound, onSearchStateChange]);
 
     return null;
 }
@@ -132,16 +132,12 @@ export default function LiveMap({
     address,
     height = "400px",
     className = "",
-    initialCenter = [6.5244, 3.3792], // Lagos, Nigeria default
+    initialCenter = [6.4584, 7.5464], // Enugu, Nigeria default
     onSearchStateChange
 }: LiveMapProps) {
-    const [mounted, setMounted] = useState(false);
+    const [mounted] = useState(true);
     const [targetPos, setTargetPos] = useState<L.LatLng | null>(null);
     const [proPos, setProPos] = useState<[number, number] | null>(null);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
 
     // Simulate nearby pro when a target is selected
     useEffect(() => {
@@ -154,7 +150,7 @@ export default function LiveMap({
             }, 800);
             return () => clearTimeout(timeout);
         } else {
-            setProPos(null);
+            setTimeout(() => setProPos(null), 0);
         }
     }, [targetPos]);
 

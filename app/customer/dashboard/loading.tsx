@@ -16,14 +16,14 @@ export default function CustomerDashboardLoading() {
                     </div>
                 </header>
 
-                <main className="space-y-6">
+                <main className="mac-stack">
                     <div className="grid gap-4 sm:grid-cols-3">
                         {[...Array(3)].map((_, i) => (
                             <Skeleton key={i} className="h-24 w-full rounded-xl" />
                         ))}
                     </div>
 
-                    <section className="card-vibe rounded-xl p-5 bg-white/50">
+                    <section className="card-vibe mac-card-pad bg-white/50">
                         <Skeleton className="h-4 w-32 mb-4" />
                         <div className="flex gap-2">
                             <Skeleton className="h-8 w-28 rounded-full" />
@@ -31,7 +31,7 @@ export default function CustomerDashboardLoading() {
                         </div>
                     </section>
 
-                    <section className="card-vibe rounded-xl p-5 bg-white/50">
+                    <section className="card-vibe mac-card-pad bg-white/50">
                         <div className="mb-6 flex items-center justify-between">
                             <Skeleton className="h-4 w-32" />
                             <Skeleton className="h-3 w-20" />
