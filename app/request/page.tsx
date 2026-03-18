@@ -8,14 +8,16 @@ import { motion } from "framer-motion";
 
 const REQUEST_HERO_IMAGE = "/su4.jpg";
 
+import { Wrench, Zap, Hammer, Armchair, Snowflake, Paintbrush, PenTool } from "lucide-react";
+
 const SERVICES = [
-  { label: "Plumber", emoji: "🔧" },
-  { label: "Electrician", emoji: "💡" },
-  { label: "Carpenter", emoji: "🪚" },
-  { label: "Furniture Maker", emoji: "🪑" },
-  { label: "AC & Fridge Repair", emoji: "❄️" },
-  { label: "Painter", emoji: "🎨" },
-  { label: "General Handyman", emoji: "🔨" },
+  { label: "Plumber", icon: Wrench, price: "₦5,000 Start" },
+  { label: "Electrician", icon: Zap, price: "₦8,000 Start" },
+  { label: "Carpenter", icon: Hammer, price: "₦10,000 Start" },
+  { label: "Furniture Maker", icon: Armchair, price: "₦15,000 Start" },
+  { label: "AC & Fridge Repair", icon: Snowflake, price: "₦7,000 Start" },
+  { label: "Painter", icon: Paintbrush, price: "₦12,000 Start" },
+  { label: "General Handyman", icon: PenTool, price: "₦5,000 Start" },
 ];
 
 export default function RequestPage() {
@@ -72,22 +74,39 @@ export default function RequestPage() {
                 1. Select Service
               </h2>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                {SERVICES.map(({ label, emoji }) => {
-                  const isActive = selectedService === label;
+                {SERVICES.map((service) => {
+                  const isActive = selectedService === service.label;
                   return (
                     <button
-                      key={label}
+                      key={service.label}
                       type="button"
-                      onClick={() =>
-                        setSelectedService(isActive ? null : label)
-                      }
-                      className={`group flex flex-col items-center justify-center gap-3 rounded-2xl border p-6 text-center transition-all ${isActive
-                        ? "border-foreground bg-foreground text-background shadow-lg scale-[1.02]"
-                        : "border-zinc-200 dark:border-zinc-800 bg-background text-foreground hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-premium"
+                      onClick={() => setSelectedService(isActive ? null : service.label)}
+                      className={`group flex flex-col items-start rounded-2xl border transition-all duration-300 overflow-hidden text-left w-full p-4 sm:p-5 ${isActive
+                        ? "bg-foreground text-background border-transparent shadow-premium-hover scale-[1.02]"
+                        : "bg-background text-foreground border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-premium"
                         }`}
                     >
-                      <span className="text-2xl" aria-hidden>{emoji}</span>
-                      <span className="text-xs font-semibold">{label}</span>
+                      <div className="flex w-full items-start justify-between mb-2">
+                        <div className={`flex h-10 w-10 items-center justify-center rounded-xl transition-colors ${isActive
+                          ? "bg-background/10 text-background"
+                          : "bg-zinc-100 dark:bg-zinc-900 text-foreground group-hover:bg-zinc-200 dark:group-hover:bg-zinc-800"
+                          }`}>
+                          <service.icon size={18} strokeWidth={1.5} className="transition-transform group-hover:scale-110" />
+                        </div>
+                      </div>
+
+                      <h3 className="text-sm font-bold tracking-tight mt-4 mb-2">
+                        {service.label}
+                      </h3>
+
+                      <div className={`flex flex-col items-start w-full pt-3 border-t transition-colors ${isActive ? "border-background/10" : "border-zinc-100 dark:border-zinc-800"}`}>
+                        <span className={`text-sm font-bold tracking-tight ${isActive ? "text-background" : "text-foreground"}`}>
+                          {service.price.split(' ')[0]}
+                        </span>
+                        <span className={`text-[9px] font-semibold uppercase tracking-widest ${isActive ? "text-background/60" : "text-zinc-500"}`}>
+                          {service.price.split(' ').slice(1).join(' ')}
+                        </span>
+                      </div>
                     </button>
                   );
                 })}
