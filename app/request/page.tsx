@@ -82,8 +82,8 @@ export default function RequestPage() {
                         setSelectedService(isActive ? null : label)
                       }
                       className={`group flex flex-col items-center justify-center gap-3 rounded-2xl border p-6 text-center transition-all ${isActive
-                          ? "border-foreground bg-foreground text-background shadow-lg scale-[1.02]"
-                          : "border-zinc-200 dark:border-zinc-800 bg-background text-foreground hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-premium"
+                        ? "border-foreground bg-foreground text-background shadow-lg scale-[1.02]"
+                        : "border-zinc-200 dark:border-zinc-800 bg-background text-foreground hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-premium"
                         }`}
                     >
                       <span className="text-2xl" aria-hidden>{emoji}</span>
@@ -271,7 +271,7 @@ export default function RequestPage() {
                 src={REQUEST_HERO_IMAGE}
                 alt="Expert Professional"
                 fill
-                className="object-cover grayscale"
+                className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 400px"
               />
             </div>

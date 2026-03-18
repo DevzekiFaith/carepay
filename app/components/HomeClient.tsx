@@ -106,7 +106,7 @@ export default function HomeClient() {
               <div className="grid grid-cols-3 gap-3">
                 {PRO_IMAGES.map(({ src, alt }) => (
                   <div key={src} className="relative aspect-square overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800">
-                    <Image src={src} alt={alt} fill className="object-cover grayscale" sizes="120px" />
+                    <Image src={src} alt={alt} fill className="object-cover transition-transform duration-500 hover:scale-105" sizes="120px" />
                   </div>
                 ))}
               </div>
