@@ -3,9 +3,15 @@
 :root {
   --background: #ffffff;
   --foreground: #09090b;
-  /* zinc-950 */
   --accent: #18181b;
-  /* zinc-900 */
+  
+  /* Vibrant Orange Palette */
+  --brand-primary: #f97316; /* orange-500 */
+  --brand-primary-hover: #ea580c; /* orange-600 */
+  --brand-glow: rgba(249, 115, 22, 0.4);
+  --brand-glow-strong: rgba(249, 115, 22, 0.6);
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(0, 0, 0, 0.08);
 }
 
 @theme inline {
@@ -18,11 +24,15 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #09090b;
-    /* zinc-950 */
     --foreground: #fafafa;
-    /* zinc-50 */
     --accent: #e4e4e7;
-    /* zinc-200 */
+    
+    --brand-primary: #f97316; /* orange-500 */
+    --brand-primary-hover: #fb923c; /* orange-400 */
+    --brand-glow: rgba(249, 115, 22, 0.3);
+    --brand-glow-strong: rgba(249, 115, 22, 0.5);
+    --glass-bg: rgba(24, 24, 27, 0.4); /* zinc-900 / 40% */
+    --glass-border: rgba(250, 250, 250, 0.1);
   }
 }
 
@@ -44,58 +54,79 @@ h6,
   font-family: var(--font-plus-jakarta-sans), ui-sans-serif, system-ui;
 }
 
-/* Accessibility: clear keyboard focus */
+/* Accessibility */
 :where(a, button, input, select, textarea):focus-visible {
-  outline: 2px solid rgba(24, 24, 27, 0.8);
+  outline: 2px solid var(--brand-primary);
   outline-offset: 2px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :where(a, button, input, select, textarea):focus-visible {
-    outline: 2px solid rgba(250, 250, 250, 0.8);
-  }
+/* Glassmorphism Utilities */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
 }
 
-/* Base minimal interactive classes */
-.interactive-tap {
-  transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+.glass-panel-hover {
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.interactive-tap:active {
-  transform: scale(0.98);
+.glass-panel-hover:hover {
+  transform: translateY(-4px) scale(1.02);
+  border-color: var(--brand-primary);
+  box-shadow: 0 12px 40px -8px var(--brand-glow);
 }
 
-/* Sleek primary minimal button */
+.text-gradient-primary {
+  background-image: linear-gradient(135deg, #f97316, #f43f5e);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Sleek primary minimal button / Glow button */
 .btn-minimal {
   background: var(--foreground);
   color: var(--background);
-  font-weight: 500;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.btn-minimal::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.3s ease;
 }
 
 .btn-minimal:hover {
-  transform: translateY(-1px);
-  background: var(--accent);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 8px 24px -4px var(--brand-glow-strong);
+}
+
+.btn-minimal:hover::before {
+  opacity: 1;
 }
 
 .btn-minimal:active {
   transform: translateY(0);
 }
 
-/* Premium card shadow and border */
-.card-minimal {
-  background: var(--background);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-@media (prefers-color-scheme: dark) {
-  .card-minimal {
-    border-color: rgba(255, 255, 255, 0.12);
-  }
-}
-
+/* Premium card shadow */
 .shadow-premium {
   box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.04),
     0 8px 24px -4px rgba(0, 0, 0, 0.02);
@@ -103,15 +134,15 @@ h6,
 
 .shadow-premium-hover {
   box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05),
-    0 16px 32px -4px rgba(0, 0, 0, 0.04);
+    0 16px 32px -4px var(--brand-glow);
 }
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-
-  .interactive-tap:active,
   .btn-minimal:hover,
-  .btn-minimal:active {
+  .btn-minimal:active,
+  .glass-panel-hover {
     transform: none;
+    transition: none;
   }
 }

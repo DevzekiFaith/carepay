@@ -4,6 +4,10 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { motion } from "framer-motion";
 import { ShieldCheck, UserCircle, UploadCloud } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import Image from "next/image";
+import { getDefaultAreas } from "@/lib/cities";
+import IdVerificationStatus, { type VerificationStatus } from "@/app/components/IdVerificationStatus";
 
 const NIN_LENGTH = 11;
 
@@ -18,14 +22,7 @@ const SKILLS = [
   "General Handyman",
 ];
 
-const AREAS = [
-  "Independence Layout",
-  "GRA",
-  "New Haven",
-  "Abakpa",
-  "Thinkers Corner",
-  "Emene",
-];
+const AREAS = getDefaultAreas();
 
 export default function WorkerRegisterPage() {
   const [submitting, setSubmitting] = useState(false);
@@ -33,49 +30,114 @@ export default function WorkerRegisterPage() {
   const [ninError, setNinError] = useState<string | null>(null);
   const [certFile, setCertFile] = useState<File | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [verifyStatus, setVerifyStatus] = useState<VerificationStatus>("idle");
+  const [verifyReason, setVerifyReason] = useState<string | undefined>(undefined);
+  const [verifyConfidence, setVerifyConfidence] = useState<"high" | "medium" | "low" | null>(null);
+  const [aiVerified, setAiVerified] = useState(false);
+  const [aiVerifyReason, setAiVerifyReason] = useState<string>("");
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setMessage(null);
     setNinError(null);
+    setSubmitting(true);
 
     const form = e.target as HTMLFormElement;
-    const nin = (form.elements.namedItem("nin") as HTMLInputElement)?.value?.trim() ?? "";
+    const formData = new FormData(form);
+
+    // Extract fields
+    const nin = (formData.get("nin") as string)?.trim() ?? "";
+    const phone = (formData.get("phone") as string)?.trim() ?? "";
+    const pin = (formData.get("pin") as string)?.trim() ?? "";
+    const fullName = (formData.get("fullName") as string)?.trim() ?? "";
+    const primarySkill = (formData.get("primarySkill") as string)?.trim() ?? "";
+    const experience = parseInt((formData.get("experience") as string) || "0", 10);
+    const bio = (formData.get("bio") as string)?.trim() ?? "";
+    const areas = formData.getAll("areas") as string[];
 
     if (nin.length !== NIN_LENGTH || !/^\d+$/.test(nin)) {
       setNinError(`NIN must be exactly ${NIN_LENGTH} digits.`);
+      setSubmitting(false);
       return;
     }
 
-    setSubmitting(true);
+    const supabase = createClient();
 
-    setTimeout(() => {
+    // We use a synthetic email from the phone number since SMS auth typically
+    // requires configuring an SMS provider inside the Supabase dashboard
+    const email = `${phone.replace(/\D/g, '')}@unovaconsultingfirstafrica@gmail.com`;
+
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password: pin,
+    });
+
+    if (authError || !authData?.user) {
+      setMessage(`Registration failed: ${authError?.message || "Unknown error"}`);
       setSubmitting(false);
-      setMessage(
-        "Profile successfully submitted! We will securely verify your NIN, address, and guarantor before activating your account to ensure total safety."
-      );
-      form.reset();
-      setCertFile(null);
-      setPhotoFile(null);
-    }, 900);
+      return;
+    }
+
+    // Insert into professionals table
+    const { error: dbError } = await supabase.from('professionals').insert({
+      id: authData.user.id,
+      full_name: fullName,
+      phone: phone,
+      nin: nin,
+      primary_skill: primarySkill,
+      experience_years: experience,
+      areas: areas,
+      bio: bio,
+      is_verified: false,
+      ai_verified: aiVerified,
+      ai_verification_reason: aiVerifyReason,
+    });
+
+    if (dbError) {
+      setMessage(`Profile creation failed: ${dbError.message}`);
+      setSubmitting(false);
+      return;
+    }
+
+    setSubmitting(false);
+    setMessage(
+      "Profile successfully submitted! We will securely verify your identity before activating your account to ensure total safety."
+    );
+    form.reset();
+    setCertFile(null);
+    setPhotoFile(null);
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground antialiased py-12 sm:py-24">
-      <div className="mx-auto flex max-w-5xl flex-col gap-12 lg:flex-row px-6 lg:px-8">
+    <div className="relative min-h-screen bg-background text-foreground antialiased py-12 sm:py-24">
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute inset-0 bg-background/85 dark:bg-background/95 mix-blend-multiply z-10" />
+        <div className="absolute inset-0 bg-foreground/5 dark:bg-foreground/5 z-10" />
+        <div className="relative w-full h-full">
+          <Image
+            src="/su1.jpg"
+            alt="Background"
+            fill
+            className="object-cover object-center"
+          />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background z-20" />
+      </div>
+
+      <div className="relative z-30 mx-auto flex max-w-5xl flex-col gap-12 lg:flex-row px-6 lg:px-8">
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-background p-8 lg:p-12 shadow-sm lg:w-2/3"
+          className="glass-panel w-full p-8 lg:p-12 lg:w-2/3"
         >
           <div className="mb-10">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-brand-primary mb-2">
               For Professionals
             </p>
-            <h1 className="text-3xl font-heading font-bold tracking-tight text-foreground">
+            <h1 className="text-3xl font-heading font-extrabold tracking-tight text-gradient-primary">
               Pro Verification
             </h1>
-            <p className="mt-2 text-sm text-zinc-500 font-medium max-w-xl leading-relaxed">
+            <p className="mt-2 text-sm text-zinc-400 font-medium max-w-xl leading-relaxed">
               Customer safety is our absolute priority. Please provide your true identity and professional details to be vetted and approved. Let's make home repairs secure.
             </p>
           </div>
@@ -97,19 +159,45 @@ export default function WorkerRegisterPage() {
                     required
                     name="fullName"
                     placeholder="Matches your NIN"
-                    className="w-full rounded-xl border border-zinc-200 dark:border-zinc-800 bg-transparent px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground"
+                    className="w-full rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3 text-sm text-foreground outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary"
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                    Primary Phone (WhatsApp)
+                    Email Address
+                  </label>
+                  <input
+                    required
+                    type="email"
+                    name="email"
+                    placeholder="you@example.com"
+                    className="w-full rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3 text-sm text-foreground outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                    Phone (WhatsApp)
                   </label>
                   <input
                     required
                     type="tel"
                     name="phone"
                     placeholder="+234 812 345 6789"
-                    className="w-full rounded-xl border border-zinc-200 dark:border-zinc-800 bg-transparent px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground"
+                    className="w-full rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3 text-sm text-foreground outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                    6-Digit PIN
+                  </label>
+                  <input
+                    required
+                    type="password"
+                    name="pin"
+                    minLength={6}
+                    maxLength={6}
+                    placeholder="e.g. 123456"
+                    className="w-full rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3 text-sm text-foreground outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary"
                   />
                 </div>
               </div>
@@ -122,7 +210,7 @@ export default function WorkerRegisterPage() {
                   required
                   name="homeAddress"
                   placeholder="Your full home verifiable address in Enugu"
-                  className="w-full rounded-xl border border-zinc-200 dark:border-zinc-800 bg-transparent px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground"
+                  className="w-full rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3 text-sm text-foreground outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary"
                 />
               </div>
             </div>
@@ -148,7 +236,7 @@ export default function WorkerRegisterPage() {
                     maxLength={11}
                     name="nin"
                     placeholder="12345678901"
-                    className="w-full max-w-sm rounded-xl border border-zinc-300 dark:border-zinc-700 bg-background px-4 py-3 text-sm text-foreground tabular-nums outline-none transition focus:border-foreground shadow-sm"
+                    className="w-full max-w-sm rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3 text-sm text-foreground tabular-nums outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary shadow-sm"
                   />
                   {ninError && (
                     <p className="text-xs font-semibold text-red-500 mt-2">
@@ -161,21 +249,51 @@ export default function WorkerRegisterPage() {
                   <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">
                     Upload Clear Photo (Selfie)
                   </label>
-                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-background px-5 py-3 text-xs font-bold uppercase tracking-widest text-zinc-600 dark:text-zinc-400 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800 shadow-sm">
-                    <input
-                      required
-                      type="file"
-                      name="photo"
-                      accept="image/*"
-                      className="sr-only"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        setPhotoFile(file ?? null);
-                      }}
-                    />
-                    <UploadCloud size={16} />
-                    <span>{photoFile ? photoFile.name : "Capture Selfie"}</span>
-                  </label>
+                   <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-background px-5 py-3 text-xs font-bold uppercase tracking-widest text-zinc-600 dark:text-zinc-400 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800 shadow-sm">
+                     <input
+                       required
+                       type="file"
+                       name="photo"
+                       accept="image/*"
+                       className="sr-only"
+                       onChange={async (e) => {
+                         const file = e.target.files?.[0];
+                         setPhotoFile(file ?? null);
+                         if (!file) return;
+                         // Trigger AI verification
+                         setVerifyStatus("checking");
+                         setVerifyReason(undefined);
+                         try {
+                           const reader = new FileReader();
+                           reader.onload = async (ev) => {
+                             const imageBase64 = ev.target?.result as string;
+                             const res = await fetch("/api/verify-id", {
+                               method: "POST",
+                               headers: { "Content-Type": "application/json" },
+                               body: JSON.stringify({ imageBase64, workerName: "" }),
+                             });
+                             const data = await res.json() as {
+                               status: VerificationStatus;
+                               confidence?: "high" | "medium" | "low" | null;
+                               reason?: string;
+                             };
+                             setVerifyStatus(data.status);
+                             setVerifyReason(data.reason);
+                             setVerifyConfidence(data.confidence ?? null);
+                             setAiVerified(data.status === "verified");
+                             setAiVerifyReason(data.reason ?? "");
+                           };
+                           reader.readAsDataURL(file);
+                         } catch {
+                           setVerifyStatus("pending_manual");
+                           setVerifyReason("Verification will be completed manually by our team.");
+                         }
+                       }}
+                     />
+                     <UploadCloud size={16} />
+                     <span>{photoFile ? photoFile.name : "Capture Selfie"}</span>
+                   </label>
+                   <IdVerificationStatus status={verifyStatus} reason={verifyReason} confidence={verifyConfidence} />
                 </div>
               </div>
 
@@ -188,7 +306,7 @@ export default function WorkerRegisterPage() {
                     required
                     name="guarantorName"
                     placeholder="A trusted relative or associate"
-                    className="w-full rounded-xl border border-zinc-200 dark:border-zinc-800 bg-transparent px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground"
+                    className="w-full rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3 text-sm text-foreground outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary"
                   />
                 </div>
                 <div className="space-y-2">
@@ -200,7 +318,7 @@ export default function WorkerRegisterPage() {
                     name="guarantorPhone"
                     type="tel"
                     placeholder="Must be reachable"
-                    className="w-full rounded-xl border border-zinc-200 dark:border-zinc-800 bg-transparent px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground"
+                    className="w-full rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3 text-sm text-foreground outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary"
                   />
                 </div>
               </div>
@@ -220,7 +338,7 @@ export default function WorkerRegisterPage() {
                   <select
                     required
                     name="primarySkill"
-                    className="w-full rounded-xl border border-zinc-200 dark:border-zinc-800 bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground appearance-none"
+                    className="w-full rounded-xl border border-white/10 dark:border-white/5 bg-[#121212] px-4 py-3 text-sm text-foreground outline-none transition focus:border-brand-primary focus:bg-background focus:ring-1 focus:ring-brand-primary appearance-none"
                   >
                     <option value="">Select your main skill</option>
                     {SKILLS.map((skill) => (
@@ -241,7 +359,7 @@ export default function WorkerRegisterPage() {
                     max={40}
                     name="experience"
                     placeholder="e.g. 4"
-                    className="w-full rounded-xl border border-zinc-200 dark:border-zinc-800 bg-transparent px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground"
+                    className="w-full rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3 text-sm text-foreground outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary"
                   />
                 </div>
               </div>
@@ -276,7 +394,7 @@ export default function WorkerRegisterPage() {
                   name="bio"
                   rows={3}
                   placeholder="Detail your past projects, specializations, and why customers should trust you."
-                  className="w-full resize-none rounded-xl border border-zinc-200 dark:border-zinc-800 bg-transparent px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground"
+                  className="w-full resize-none rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3 text-sm text-foreground outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary"
                 />
               </div>
 
@@ -331,9 +449,9 @@ export default function WorkerRegisterPage() {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1 }}
-          className="w-full rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 p-8 lg:w-1/3 h-fit"
+          className="glass-panel w-full p-8 lg:w-1/3 h-fit"
         >
-          <div className="bg-background rounded-xl p-6 border border-zinc-200 dark:border-zinc-800 mb-8 space-y-4 shadow-sm">
+          <div className="bg-background/50 rounded-xl p-6 border border-white/10 dark:border-white/5 mb-8 space-y-4 shadow-sm">
             <h2 className="text-[10px] font-bold uppercase tracking-widest text-foreground flex items-center gap-2">
               <ShieldCheck size={14} /> Trust & Safety First
             </h2>

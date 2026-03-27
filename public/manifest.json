@@ -1,0 +1,40 @@
+{
+  "name": "CarePay — Book it. Fix it. Done.",
+  "short_name": "CarePay",
+  "description": "Book vetted home-repair professionals in Enugu. Plumbers, electricians, carpenters & more.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "categories": ["lifestyle", "utilities"],
+  "icons": [
+    {
+      "src": "/icons/192",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/512",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Book a Service",
+      "short_name": "Book",
+      "url": "/request",
+      "description": "Quickly book a home repair professional"
+    },
+    {
+      "name": "My Dashboard",
+      "short_name": "Dashboard",
+      "url": "/customer/dashboard",
+      "description": "Track your service requests"
+    }
+  ]
+}

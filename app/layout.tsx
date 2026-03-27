@@ -45,6 +45,12 @@ export const metadata: Metadata = {
     title: `${SITE_NAME} — Book it. Fix it. Done.`,
     description: `Book trusted handymen in ${DEFAULT_CITY}.`,
   },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: SITE_NAME,
+  },
 };
 
 export const viewport = {
@@ -73,6 +79,12 @@ export default function RootLayout({
         <div id="content">{children}</div>
         <Footer />
         <WhatsAppButton />
+        {/* PWA service worker registration */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(err){console.warn('SW registration failed:',err)})})}`,
+          }}
+        />
       </body>
     </html>
   );

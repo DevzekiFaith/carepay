@@ -1,5 +1,7 @@
 "use client";
 
+import { motion } from "framer-motion";
+
 const DEMO_JOBS = [
   {
     id: "JOB-1024",
@@ -21,118 +23,139 @@ const DEMO_JOBS = [
   },
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 300 } },
+};
+
 export default function WorkerDashboardPage() {
   return (
-    <div className="min-h-screen vibe-bg px-4 py-8 text-stone-900 antialiased">
-      <div className="mx-auto max-w-5xl">
-        <header className="mb-6 flex items-center justify-between gap-4">
+    <div className="relative min-h-screen bg-background px-4 py-8 text-foreground antialiased overflow-hidden">
+      {/* Background Ambience */}
+      <div className="absolute inset-x-0 top-0 -z-10 h-[50%] w-full rounded-full bg-brand-primary/5 opacity-50 blur-[120px] mix-blend-screen pointer-events-none" />
+
+      <div className="mx-auto max-w-5xl relative z-10">
+        <header className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/10 pb-6">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-600">
-              Worker dashboard
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-primary">
+              Pro Dashboard
             </p>
-            <h1 className="mt-2 text-2xl font-bold tracking-tight text-stone-900">
-              Your jobs & earnings
+            <h1 className="mt-2 text-3xl font-heading font-extrabold tracking-tight text-gradient-primary">
+              Your Jobs & Earnings
             </h1>
-            <p className="mt-1 text-xs text-stone-500">
+            <p className="mt-1 text-sm text-zinc-400 font-medium">
               Manage your jobs, track earnings, and grow your business.
             </p>
           </div>
-          <div className="text-right text-xs text-stone-500">
-            <p className="font-semibold text-stone-700">Ibrahim Adewale</p>
-            <p>Enugu • Plumber</p>
-            <span className="mt-1 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
-              ✓ Verified
+          <div className="text-left sm:text-right text-xs text-zinc-500">
+            <p className="font-bold text-foreground">Ibrahim Adewale</p>
+            <p className="uppercase tracking-widest mt-1 text-[10px]">Enugu • Plumber</p>
+            <span className="mt-2 inline-flex h-6 items-center rounded-full border border-brand-primary/30 bg-brand-primary/10 px-3 text-[9px] font-bold uppercase tracking-widest text-brand-primary shadow-[0_0_10px_-2px_rgba(249,115,22,0.3)]">
+              Authorized Pro
             </span>
           </div>
         </header>
 
-        <main className="mac-stack">
+        <motion.main
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+          className="space-y-6"
+        >
           {/* Earnings stats */}
           <div className="grid gap-4 sm:grid-cols-3">
-            <div className="card-vibe mac-card-pad">
-              <p className="text-xs text-stone-500">This week</p>
-              <p className="mt-1 text-2xl font-bold text-stone-900">₦45,000</p>
-            </div>
-            <div className="card-vibe mac-card-pad">
-              <p className="text-xs text-stone-500">Jobs completed</p>
-              <p className="mt-1 text-2xl font-bold text-emerald-600">8</p>
-            </div>
-            <div className="card-vibe mac-card-pad">
-              <p className="text-xs text-stone-500">Rating</p>
-              <p className="mt-1 text-2xl font-bold text-amber-600">4.8★</p>
-            </div>
+            <motion.div variants={itemVariants} className="glass-panel p-6 shadow-premium border-brand-primary/20">
+              <p className="text-[10px] uppercase tracking-widest font-bold text-brand-primary">This week</p>
+              <p className="mt-2 text-3xl font-heading font-extrabold text-foreground">₦45,000</p>
+            </motion.div>
+            <motion.div variants={itemVariants} className="glass-panel p-6 shadow-premium">
+              <p className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">Jobs completed</p>
+              <p className="mt-2 text-3xl font-heading font-extrabold text-foreground">8</p>
+            </motion.div>
+            <motion.div variants={itemVariants} className="glass-panel p-6 shadow-premium">
+              <p className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">Rating</p>
+              <p className="mt-2 text-3xl font-heading font-extrabold text-foreground tracking-tighter">4.8<span className="text-brand-primary ml-1 text-2xl">★</span></p>
+            </motion.div>
           </div>
 
           {/* Upcoming jobs */}
-          <section className="card-vibe mac-card-pad">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-stone-800">Upcoming jobs</h2>
-              <span className="rounded-full bg-violet-100 px-2.5 py-1 text-[11px] font-medium text-violet-700">
+          <motion.section variants={itemVariants} className="glass-panel p-6 shadow-premium">
+            <div className="mb-6 flex items-center justify-between border-b border-white/10 pb-4">
+              <h2 className="text-[10px] uppercase tracking-widest font-bold text-zinc-400">Upcoming jobs</h2>
+              <span className="rounded-full bg-brand-primary/10 border border-brand-primary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-primary">
                 2 active
               </span>
             </div>
-            <div className="divide-y divide-stone-100">
+            <div className="divide-y divide-white/5">
               {DEMO_JOBS.map((job) => (
-                <div key={job.id} className="flex items-center justify-between py-3">
-                  <div className="space-y-0.5">
-                    <p className="text-sm font-semibold text-stone-800">
-                      {job.type} · {job.area}
+                <div key={job.id} className="flex flex-col sm:flex-row sm:items-center justify-between py-4 glass-panel-hover px-4 rounded-xl transition-colors -mx-4 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-sm font-bold text-foreground">
+                      {job.type} <span className="text-zinc-500 font-normal">in {job.area}</span>
                     </p>
-                    <p className="text-xs text-stone-500">
+                    <p className="text-xs font-medium text-zinc-400">
                       {job.customer} • {job.time}
                     </p>
-                    <p className="text-xs font-semibold text-emerald-600">{job.price}</p>
+                    <p className="text-[11px] font-extrabold tracking-widest text-brand-primary">{job.price}</p>
                   </div>
-                  <span className="rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-700">
+                  <span className="inline-flex self-start sm:self-center h-6 items-center rounded-full border border-white/10 bg-background/50 px-3 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
                     {job.status}
                   </span>
                 </div>
               ))}
             </div>
-          </section>
+          </motion.section>
 
           {/* Quick actions */}
-          <section className="card-vibe mac-card-pad">
-            <h3 className="mb-3 text-sm font-semibold text-stone-800">Quick actions</h3>
-            <div className="flex flex-wrap gap-2">
-              <button className="interactive-tap rounded-full border-2 border-stone-300 bg-white px-4 py-2 text-xs font-semibold text-stone-700 transition hover:bg-stone-50">
+          <motion.section variants={itemVariants} className="glass-panel p-6 shadow-premium">
+            <h3 className="mb-4 text-[10px] uppercase tracking-widest font-bold text-zinc-400">Quick actions</h3>
+            <div className="flex flex-wrap gap-3">
+              <button className="btn-minimal inline-flex shrink-0 h-10 items-center justify-center rounded-full px-6 text-xs font-bold uppercase tracking-widest">
                 Set availability
               </button>
               <a
                 href="https://wa.me/2348123456789"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="interactive-tap rounded-full border-2 border-stone-300 bg-white px-4 py-2 text-xs font-semibold text-stone-700 transition hover:bg-stone-50"
+                className="inline-flex h-10 items-center justify-center rounded-full border border-white/10 dark:border-white/5 bg-background/50 backdrop-blur-sm px-6 text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-foreground hover:bg-white/5 transition-colors"
               >
-                Support
+                Support Hub
               </a>
             </div>
-          </section>
+          </motion.section>
 
           {/* Earnings breakdown */}
-          <section className="card-vibe mac-card-pad border-2 border-dashed border-violet-200/60 bg-white/80">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-stone-500">
+          <motion.section variants={itemVariants} className="glass-panel p-6 shadow-premium border border-brand-primary/20 bg-gradient-to-br from-background/50 to-brand-primary/5">
+            <h3 className="text-[10px] uppercase tracking-widest font-bold text-brand-primary mb-4">
               Earnings this month
             </h3>
-            <div className="mt-3 space-y-2 text-xs text-stone-600">
-              <div className="flex justify-between">
-                <span>Completed jobs:</span>
-                <span className="font-semibold text-stone-800">32</span>
+            <div className="space-y-3 text-xs font-semibold text-zinc-400">
+              <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                <span>Completed jobs</span>
+                <span className="font-bold text-foreground">32</span>
               </div>
-              <div className="flex justify-between">
-                <span>Total earned:</span>
-                <span className="font-semibold text-emerald-600">₦180,000</span>
+              <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                <span>Total earned</span>
+                <span className="font-extrabold text-foreground text-sm">₦180,000</span>
               </div>
-              <div className="flex justify-between">
-                <span>Avg per job:</span>
-                <span className="font-semibold text-stone-800">₦5,625</span>
+              <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                <span>Avg per job</span>
+                <span className="font-bold text-foreground">₦5,625</span>
               </div>
             </div>
-            <p className="mt-4 text-[11px] text-stone-500">
-              Payouts are processed weekly. Check your bank account every Friday.
+            <p className="mt-6 text-[10px] uppercase tracking-widest text-zinc-500 font-bold border-l-2 border-brand-primary/30 pl-3">
+              Payouts are processed weekly. Ensure your settlement accounts are ready by every Thursday midnight.
             </p>
-          </section>
-        </main>
+          </motion.section>
+        </motion.main>
       </div>
     </div>
   );

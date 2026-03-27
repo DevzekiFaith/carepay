@@ -1,0 +1,86 @@
+/**
+ * CarePay Surge Pricing Engine
+ * Computes a price multiplier based on time of day, day of week, and service type.
+ * Admin can override via Supabase `surge_overrides` table.
+ */
+
+export interface SurgeResult {
+  multiplier: number;
+  /** 'standard' | 'busy' | 'high' */
+  level: 'standard' | 'busy' | 'high';
+  label: string;
+  reason: string;
+}
+
+/** Base starting prices per service (in Naira) */
+export const BASE_PRICES: Record<string, number> = {
+  Plumber: 5000,
+  Electrician: 8000,
+  Carpenter: 10000,
+  'Furniture Maker': 15000,
+  'AC & Fridge Repair': 7000,
+  Painter: 12000,
+  'General Handyman': 5000,
+};
+
+/**
+ * Returns a surge result for the given service, city, and current hour (0–23).
+ * If no specific hour is passed it uses the current local hour.
+ */
+export function getSurgeResult(
+  service: string,
+  _city: string,
+  hour: number = new Date().getHours()
+): SurgeResult {
+  const day = new Date().getDay(); // 0=Sun, 6=Sat
+  const isWeekend = day === 0 || day === 6;
+  const isMorningPeak = hour >= 7 && hour <= 9;
+  const isEveningPeak = hour >= 17 && hour <= 20;
+  const isOffHours = hour >= 21 || hour <= 5;
+
+  let multiplier = 1.0;
+  let reason = 'Regular availability';
+
+  if (isOffHours) {
+    multiplier = 1.4;
+    reason = 'After-hours emergency rate';
+  } else if (isMorningPeak && isWeekend) {
+    multiplier = 1.35;
+    reason = 'Weekend morning demand';
+  } else if (isEveningPeak) {
+    multiplier = 1.25;
+    reason = 'Evening peak hours';
+  } else if (isMorningPeak) {
+    multiplier = 1.15;
+    reason = 'Morning rush hours';
+  } else if (isWeekend) {
+    multiplier = 1.1;
+    reason = 'Weekend availability';
+  }
+
+  // High-demand services get a slight additional factor
+  const highDemandServices = ['Electrician', 'AC & Fridge Repair', 'Plumber'];
+  if (highDemandServices.includes(service) && multiplier > 1.0) {
+    multiplier = Math.min(multiplier + 0.05, 1.5);
+  }
+
+  let level: SurgeResult['level'] = 'standard';
+  let label = 'Standard';
+
+  if (multiplier >= 1.25) {
+    level = 'high';
+    label = 'High Demand';
+  } else if (multiplier >= 1.1) {
+    level = 'busy';
+    label = 'Busy';
+  }
+
+  return { multiplier: Math.round(multiplier * 100) / 100, level, label, reason };
+}
+
+/** Format a Naira price with the surge multiplier applied */
+export function getSurgePrice(service: string, multiplier: number): string {
+  const base = BASE_PRICES[service] ?? 5000;
+  const surged = Math.ceil((base * multiplier) / 500) * 500; // round to nearest ₦500
+  return `₦${surged.toLocaleString()}`;
+}
