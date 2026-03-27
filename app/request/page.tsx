@@ -9,18 +9,18 @@ import { createClient } from "@/lib/supabase/client";
 import SurgeBadge from "@/app/components/SurgeBadge";
 import type { SurgeResult } from "@/lib/surge";
 
-import { Wrench, Zap, Hammer, Armchair, Snowflake, Paintbrush, PenTool } from "lucide-react";
+import { Wrench, Zap, Hammer, Armchair, Snowflake, Paintbrush, PenTool, Camera, X } from "lucide-react";
 
 const REQUEST_HERO_IMAGE = "/su4.jpg";
 
 const SERVICES = [
-  { label: "Plumber", icon: Wrench, price: "₦5,000 Start" },
-  { label: "Electrician", icon: Zap, price: "₦8,000 Start" },
-  { label: "Carpenter", icon: Hammer, price: "₦10,000 Start" },
-  { label: "Furniture Maker", icon: Armchair, price: "₦15,000 Start" },
-  { label: "AC & Fridge Repair", icon: Snowflake, price: "₦7,000 Start" },
-  { label: "Painter", icon: Paintbrush, price: "₦12,000 Start" },
-  { label: "General Handyman", icon: PenTool, price: "₦5,000 Start" },
+  { label: "Plumber", icon: Wrench, price: "₦15,000 Start" },
+  { label: "Electrician", icon: Zap, price: "₦18,000 Start" },
+  { label: "Carpenter", icon: Hammer, price: "₦20,000 Start" },
+  { label: "Furniture Maker", icon: Armchair, price: "₦25,000 Start" },
+  { label: "AC & Fridge Repair", icon: Snowflake, price: "₦20,000 Start" },
+  { label: "Painter", icon: Paintbrush, price: "₦22,000 Start" },
+  { label: "General Handyman", icon: PenTool, price: "₦15,000 Start" },
 ];
 
 
@@ -31,6 +31,8 @@ export default function RequestPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [surgeData, setSurgeData] = useState<(SurgeResult & { displayPrice: string }) | null>(null);
   const [surgeLoading, setSurgeLoading] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const handleServiceSelect = async (label: string) => {
     const isActive = selectedService === label;
@@ -124,13 +126,39 @@ export default function RequestPage() {
 
     const preferredTime = preferredTimeRaw ? new Date(preferredTimeRaw).toISOString() : null;
 
+    // Handle Image Upload First
+    let imageUrl = null;
+    if (imageFile) {
+      const fileExt = imageFile.name.split('.').pop() || 'jpg';
+      const fileName = `${userId}-${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('job-photos')
+        .upload(fileName, imageFile, {
+          upsert: true,
+        });
+
+      if (uploadError) {
+        setErrorMsg(`Failed to upload photo: ${uploadError.message}`);
+        setSubmitting(false);
+        return;
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from('job-photos')
+        .getPublicUrl(fileName);
+        
+      imageUrl = publicUrlData.publicUrl;
+    }
+
     // Insert Request
     const { error: requestError } = await supabase.from('service_requests').insert({
       customer_id: userId,
       service_type: serviceType,
       description: details,
       address: address,
-      preferred_time: preferredTime
+      preferred_time: preferredTime,
+      image_url: imageUrl
     });
 
     if (requestError) {
@@ -143,6 +171,8 @@ export default function RequestPage() {
     setSubmitted(true);
     form.reset();
     setSelectedService(null);
+    setImageFile(null);
+    setImagePreview(null);
   };
 
   return (
@@ -360,8 +390,54 @@ export default function RequestPage() {
                     name="details"
                     rows={4}
                     placeholder="Describe the issue. Detailed descriptions help us match the right pro."
-                    className="w-full resize-none rounded-xl border border-zinc-200 dark:border-zinc-800 bg-transparent px-4 py-3.5 text-sm text-foreground outline-none transition focus:border-foreground"
+                    className="w-full resize-none rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3.5 text-sm text-foreground outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary"
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                    Photo of Issue (Optional)
+                  </label>
+                  <div className="relative flex flex-col items-center justify-center w-full rounded-2xl border-2 border-dashed border-white/10 dark:border-white/5 bg-background/50 p-6 transition-all hover:bg-background/80 hover:border-brand-primary/40 group">
+                    {imagePreview ? (
+                      <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-black/50">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={imagePreview} alt="Issue preview" className="w-full h-full object-cover" />
+                        <button 
+                          type="button" 
+                          onClick={(e) => { 
+                            e.preventDefault(); 
+                            setImageFile(null); 
+                            setImagePreview(null); 
+                          }}
+                          className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-background/80 backdrop-blur-md text-foreground hover:bg-red-500 hover:text-white transition-all shadow-premium"
+                        >
+                          <X size={14} strokeWidth={3} />
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/5 text-zinc-400 group-hover:text-brand-primary group-hover:bg-brand-primary/10 transition-colors mb-3">
+                          <Camera size={20} />
+                        </div>
+                        <p className="text-sm font-bold text-foreground">Tap to take a photo</p>
+                        <p className="text-[10px] uppercase tracking-widest text-zinc-500 mt-1">or upload from gallery</p>
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          capture="environment"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setImageFile(file);
+                              setImagePreview(URL.createObjectURL(file));
+                            }
+                          }}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                      </>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-2">

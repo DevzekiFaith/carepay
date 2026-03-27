@@ -1,27 +1,21 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { X, ExternalLink, AlertCircle, CheckCircle2 } from "lucide-react";
 
-const DEMO_JOBS = [
-  {
-    id: "JOB-1024",
-    type: "Plumbing",
-    customer: "Mrs. Adebayo",
-    area: "Ikeja",
-    time: "Today · 4:00 PM",
-    status: "New",
-    price: "₦12,000",
-  },
-  {
-    id: "JOB-1025",
-    type: "Electrical",
-    customer: "Chinedu Okafor",
-    area: "Yaba",
-    time: "Tomorrow · 11:30 AM",
-    status: "Scheduled",
-    price: "₦18,000",
-  },
-];
+// Types
+interface ServiceRequest {
+  id: string;
+  created_at: string;
+  service_type: string;
+  description: string;
+  address: string;
+  preferred_time: string | null;
+  status: string;
+  image_url: string | null;
+}
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -37,6 +31,34 @@ const itemVariants = {
 };
 
 export default function WorkerDashboardPage() {
+  const [requests, setRequests] = useState<ServiceRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchRequests = async () => {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from("service_requests")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+        setRequests(data || []);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRequests();
+  }, []);
+
+  const activeJobsCount = requests.filter(r => r.status !== 'completed').length;
+
   return (
     <div className="relative min-h-screen bg-background px-4 py-8 text-foreground antialiased overflow-hidden">
       {/* Background Ambience */}
@@ -49,17 +71,17 @@ export default function WorkerDashboardPage() {
               Pro Dashboard
             </p>
             <h1 className="mt-2 text-3xl font-heading font-extrabold tracking-tight text-gradient-primary">
-              Your Jobs & Earnings
+              Live Radar & Earnings
             </h1>
             <p className="mt-1 text-sm text-zinc-400 font-medium">
-              Manage your jobs, track earnings, and grow your business.
+              Accept live requests and preview customer defect photos before deploying.
             </p>
           </div>
           <div className="text-left sm:text-right text-xs text-zinc-500">
             <p className="font-bold text-foreground">Ibrahim Adewale</p>
-            <p className="uppercase tracking-widest mt-1 text-[10px]">Enugu • Plumber</p>
-            <span className="mt-2 inline-flex h-6 items-center rounded-full border border-brand-primary/30 bg-brand-primary/10 px-3 text-[9px] font-bold uppercase tracking-widest text-brand-primary shadow-[0_0_10px_-2px_rgba(249,115,22,0.3)]">
-              Authorized Pro
+            <p className="uppercase tracking-widest mt-1 text-[10px]">Enugu • Plumber / Elect.</p>
+            <span className="mt-2 inline-flex h-6 items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 text-[9px] font-bold uppercase tracking-widest text-emerald-500 shadow-[0_0_10px_-2px_rgba(16,185,129,0.3)]">
+              Radar Active
             </span>
           </div>
         </header>
@@ -82,81 +104,154 @@ export default function WorkerDashboardPage() {
             </motion.div>
             <motion.div variants={itemVariants} className="glass-panel p-6 shadow-premium">
               <p className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">Rating</p>
-              <p className="mt-2 text-3xl font-heading font-extrabold text-foreground tracking-tighter">4.8<span className="text-brand-primary ml-1 text-2xl">★</span></p>
+              <p className="mt-2 text-3xl font-heading font-extrabold text-foreground tracking-tighter">4.9<span className="text-brand-primary ml-1 text-2xl">★</span></p>
             </motion.div>
           </div>
 
-          {/* Upcoming jobs */}
+          {/* Incoming Request Radar */}
           <motion.section variants={itemVariants} className="glass-panel p-6 shadow-premium">
             <div className="mb-6 flex items-center justify-between border-b border-white/10 pb-4">
-              <h2 className="text-[10px] uppercase tracking-widest font-bold text-zinc-400">Upcoming jobs</h2>
+              <div className="flex items-center gap-3">
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-primary opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-brand-primary"></span>
+                </span>
+                <h2 className="text-[10px] uppercase tracking-widest font-bold text-zinc-400">Live Area Radar</h2>
+              </div>
               <span className="rounded-full bg-brand-primary/10 border border-brand-primary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-primary">
-                2 active
+                {activeJobsCount} Available
               </span>
             </div>
+
             <div className="divide-y divide-white/5">
-              {DEMO_JOBS.map((job) => (
-                <div key={job.id} className="flex flex-col sm:flex-row sm:items-center justify-between py-4 glass-panel-hover px-4 rounded-xl transition-colors -mx-4 gap-4">
-                  <div className="space-y-1">
-                    <p className="text-sm font-bold text-foreground">
-                      {job.type} <span className="text-zinc-500 font-normal">in {job.area}</span>
-                    </p>
-                    <p className="text-xs font-medium text-zinc-400">
-                      {job.customer} • {job.time}
-                    </p>
-                    <p className="text-[11px] font-extrabold tracking-widest text-brand-primary">{job.price}</p>
-                  </div>
-                  <span className="inline-flex self-start sm:self-center h-6 items-center rounded-full border border-white/10 bg-background/50 px-3 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
-                    {job.status}
-                  </span>
+              {loading ? (
+                <div className="py-12 flex flex-col items-center justify-center text-zinc-500">
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-primary border-t-transparent mb-4" />
+                  <p className="text-xs font-medium">Scanning for local jobs...</p>
                 </div>
-              ))}
-            </div>
-          </motion.section>
+              ) : error ? (
+                <div className="py-6 flex flex-col items-center justify-center text-red-400">
+                  <AlertCircle size={24} className="mb-2 opacity-50" />
+                  <p className="text-xs font-bold uppercase tracking-widest">Connection Error</p>
+                  <p className="text-xs text-red-500/70 mt-1 text-center">{error}</p>
+                </div>
+              ) : requests.length === 0 ? (
+                <div className="py-12 flex flex-col items-center justify-center text-zinc-500">
+                  <CheckCircle2 size={32} className="mb-3 opacity-20" />
+                  <p className="text-sm font-bold text-foreground">No active jobs in your area</p>
+                  <p className="text-xs mt-1">Leave your radar on to get notified instantly.</p>
+                </div>
+              ) : (
+                <AnimatePresence>
+                  {requests.map((job) => (
+                    <motion.div
+                      key={job.id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="flex flex-col sm:flex-row gap-5 py-5 transition-colors group"
+                    >
+                      {/* Photo Thumbnail */}
+                      {job.image_url ? (
+                        <div 
+                          className="relative w-full sm:w-28 aspect-video sm:aspect-square rounded-xl overflow-hidden shrink-0 cursor-pointer border border-white/10 group/img shadow-md bg-black/20"
+                          onClick={() => setLightboxImage(job.image_url!)}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img 
+                            src={job.image_url} 
+                            alt="Issue thumbnail" 
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-110" 
+                          />
+                          <div className="absolute inset-0 bg-brand-primary/80 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                            <ExternalLink size={16} className="text-white drop-shadow-md" />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col w-full sm:w-28 aspect-video sm:aspect-square items-center justify-center rounded-xl border border-dashed border-white/10 bg-white/5 shrink-0">
+                          <p className="text-[10px] uppercase font-bold tracking-widest text-zinc-500">No Photo</p>
+                        </div>
+                      )}
 
-          {/* Quick actions */}
-          <motion.section variants={itemVariants} className="glass-panel p-6 shadow-premium">
-            <h3 className="mb-4 text-[10px] uppercase tracking-widest font-bold text-zinc-400">Quick actions</h3>
-            <div className="flex flex-wrap gap-3">
-              <button className="btn-minimal inline-flex shrink-0 h-10 items-center justify-center rounded-full px-6 text-xs font-bold uppercase tracking-widest">
-                Set availability
-              </button>
-              <a
-                href="https://wa.me/2348123456789"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex h-10 items-center justify-center rounded-full border border-white/10 dark:border-white/5 bg-background/50 backdrop-blur-sm px-6 text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-foreground hover:bg-white/5 transition-colors"
-              >
-                Support Hub
-              </a>
+                      {/* Job Info */}
+                      <div className="flex-1 space-y-1 w-full flex flex-col">
+                        <div className="flex justify-between items-start mb-1">
+                          <div>
+                            <p className="text-sm font-bold text-foreground group-hover:text-brand-primary transition-colors">
+                              {job.service_type}
+                            </p>
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mt-1">
+                              {job.address.slice(0, 30)}{job.address.length > 30 ? '...' : ''}
+                            </p>
+                          </div>
+                          <span className={`inline-flex h-6 items-center rounded-full border px-3 text-[9px] font-bold uppercase tracking-widest ${
+                            job.status === 'pending' || job.status === 'new'
+                              ? 'border-brand-primary/30 bg-brand-primary/10 text-brand-primary'
+                              : 'border-white/10 bg-white/5 text-zinc-400'
+                          }`}>
+                            {job.status || 'New'}
+                          </span>
+                        </div>
+                        
+                        <p className="text-xs text-zinc-400 font-medium pt-1">
+                          {new Date(job.created_at).toLocaleDateString()} at {new Date(job.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        </p>
+                        <p className="text-xs text-zinc-500 line-clamp-2 mt-2 leading-relaxed bg-white/5 p-3 rounded-lg border border-white/5">
+                          "{job.description}"
+                        </p>
+                        
+                        <div className="flex justify-between items-center mt-auto pt-4">
+                            <div>
+                                <p className="text-[11px] font-extrabold tracking-widest text-brand-primary">₦15,000</p>
+                                <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-500 mt-0.5">Base Call-Out</p>
+                            </div>
+                            <button className="btn-minimal h-9 px-6 rounded-full text-[10px] font-bold uppercase tracking-[0.15em] shadow-premium hover:shadow-[0_0_15px_rgba(249,115,22,0.3)]">
+                              Accept Job
+                            </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              )}
             </div>
-          </motion.section>
-
-          {/* Earnings breakdown */}
-          <motion.section variants={itemVariants} className="glass-panel p-6 shadow-premium border border-brand-primary/20 bg-gradient-to-br from-background/50 to-brand-primary/5">
-            <h3 className="text-[10px] uppercase tracking-widest font-bold text-brand-primary mb-4">
-              Earnings this month
-            </h3>
-            <div className="space-y-3 text-xs font-semibold text-zinc-400">
-              <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                <span>Completed jobs</span>
-                <span className="font-bold text-foreground">32</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                <span>Total earned</span>
-                <span className="font-extrabold text-foreground text-sm">₦180,000</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                <span>Avg per job</span>
-                <span className="font-bold text-foreground">₦5,625</span>
-              </div>
-            </div>
-            <p className="mt-6 text-[10px] uppercase tracking-widest text-zinc-500 font-bold border-l-2 border-brand-primary/30 pl-3">
-              Payouts are processed weekly. Ensure your settlement accounts are ready by every Thursday midnight.
-            </p>
           </motion.section>
         </motion.main>
       </div>
+
+      {/* Lightbox Overlay */}
+      <AnimatePresence>
+        {lightboxImage && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-xl p-4 sm:p-12" 
+            onClick={() => setLightboxImage(null)}
+          >
+            <button 
+              className="absolute top-6 right-6 sm:top-8 sm:right-8 h-12 w-12 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-brand-primary hover:text-white transition-colors shadow-premium backdrop-blur-md"
+              onClick={() => setLightboxImage(null)}
+            >
+              <X size={20} strokeWidth={2.5} />
+            </button>
+            <motion.div 
+               initial={{ scale: 0.95, opacity: 0, y: 20 }}
+               animate={{ scale: 1, opacity: 1, y: 0 }}
+               exit={{ scale: 0.95, opacity: 0 }}
+               transition={{ type: "spring", stiffness: 300, damping: 25 }}
+               className="relative max-w-5xl max-h-[90vh] rounded-3xl overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.5)] border border-white/10 bg-black"
+               onClick={(e) => e.stopPropagation()}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img 
+                src={lightboxImage} 
+                alt="Enlarged issue detail" 
+                className="w-full h-full object-contain max-h-[90vh]" 
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -30,6 +30,18 @@ export default function Nav() {
             <span className="sm:hidden">Pros</span>
           </Link>
           <Link
+            href="/customer/wallet"
+            className="hidden sm:flex items-center rounded-full px-4 py-2 text-sm font-bold text-zinc-500 hover:text-brand-primary hover:bg-brand-primary/10 transition-colors"
+          >
+            Wallet
+          </Link>
+          <Link
+            href="/customer/subscription"
+            className="hidden sm:flex items-center rounded-full px-4 py-2 text-sm font-bold text-gradient-primary hover:opacity-80 transition-opacity"
+          >
+            Go Pro
+          </Link>
+          <Link
             href="/request"
             className="btn-minimal flex items-center rounded-full px-6 py-2.5 text-xs font-bold uppercase tracking-widest shadow-premium"
           >

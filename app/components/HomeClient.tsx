@@ -17,16 +17,16 @@ const PRO_IMAGES = [
 ];
 
 const SERVICES = [
-  { label: "Plumber", icon: Wrench, price: "₦5,000 Start", time: "2-4 hrs" },
-  { label: "Electrician", icon: Zap, price: "₦8,000 Start", time: "2-5 hrs" },
-  { label: "Carpenter", icon: Hammer, price: "₦10,000 Start", time: "3-6 hrs" },
-  { label: "Furniture Maker", icon: Armchair, price: "₦15,000 Start", time: "4-8 hrs" },
-  { label: "AC & Fridge Repair", icon: Snowflake, price: "₦7,000 Start", time: "2-4 hrs" },
-  { label: "Painter", icon: Paintbrush, price: "₦12,000 Start", time: "4-8 hrs" },
-  { label: "General Handyman", icon: PenTool, price: "₦5,000 Start", time: "2-5 hrs" },
+  { label: "Plumber", icon: Wrench, price: "₦15,000 Start", time: "2-4 hrs" },
+  { label: "Electrician", icon: Zap, price: "₦18,000 Start", time: "2-5 hrs" },
+  { label: "Carpenter", icon: Hammer, price: "₦20,000 Start", time: "3-6 hrs" },
+  { label: "Furniture Maker", icon: Armchair, price: "₦25,000 Start", time: "4-8 hrs" },
+  { label: "AC & Fridge Repair", icon: Snowflake, price: "₦20,000 Start", time: "2-4 hrs" },
+  { label: "Painter", icon: Paintbrush, price: "₦22,000 Start", time: "4-8 hrs" },
+  { label: "General Handyman", icon: PenTool, price: "₦15,000 Start", time: "2-5 hrs" },
 ];
 
-const JOBS_COMPLETED = 1247;
+const JOBS_COMPLETED = 85;
 
 export default function HomeClient() {
   const [selectedService, setSelectedService] = useState<string | null>(null);

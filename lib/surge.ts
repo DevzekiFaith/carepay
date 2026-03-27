@@ -14,13 +14,13 @@ export interface SurgeResult {
 
 /** Base starting prices per service (in Naira) */
 export const BASE_PRICES: Record<string, number> = {
-  Plumber: 5000,
-  Electrician: 8000,
-  Carpenter: 10000,
-  'Furniture Maker': 15000,
-  'AC & Fridge Repair': 7000,
-  Painter: 12000,
-  'General Handyman': 5000,
+  Plumber: 15000,
+  Electrician: 18000,
+  Carpenter: 20000,
+  'Furniture Maker': 25000,
+  'AC & Fridge Repair': 20000,
+  Painter: 22000,
+  'General Handyman': 15000,
 };
 
 /**
@@ -80,7 +80,7 @@ export function getSurgeResult(
 
 /** Format a Naira price with the surge multiplier applied */
 export function getSurgePrice(service: string, multiplier: number): string {
-  const base = BASE_PRICES[service] ?? 5000;
+  const base = BASE_PRICES[service] ?? 15000;
   const surged = Math.ceil((base * multiplier) / 500) * 500; // round to nearest ₦500
   return `₦${surged.toLocaleString()}`;
 }

@@ -2,23 +2,18 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { Image as ImageIcon } from "lucide-react";
 
-const DEMO_REQUESTS = [
-  {
-    id: "REQ-3001",
-    type: "Carpenter",
-    summary: "Fix wardrobe hinges and replace drawer handle",
-    status: "Awaiting match",
-    date: "Today",
-  },
-  {
-    id: "REQ-3002",
-    type: "Electrician",
-    summary: "Install new ceiling fan in living room",
-    status: "Scheduled",
-    date: "Yesterday",
-  },
-];
+interface Request {
+  id: string;
+  service_type: string;
+  description: string;
+  status: string;
+  created_at: string;
+  image_url: string | null;
+}
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -34,6 +29,34 @@ const itemVariants = {
 };
 
 export default function CustomerDashboardPage() {
+  const [requests, setRequests] = useState<Request[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRequests = async () => {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        let query = supabase.from('service_requests').select('*').order('created_at', { ascending: false });
+        // If user is logged in, show their requests. Otherwise, show 3 global recents as a demo.
+        if (user) {
+          query = query.eq('customer_id', user.id);
+        } else {
+          query = query.limit(3);
+        }
+        
+        const { data } = await query;
+        setRequests(data || []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRequests();
+  }, []);
+
   return (
     <div className="relative min-h-screen bg-background px-4 py-8 text-foreground antialiased overflow-hidden">
       {/* Background Ambience */}
@@ -53,8 +76,8 @@ export default function CustomerDashboardPage() {
             </p>
           </div>
           <div className="text-left sm:text-right text-xs text-zinc-500">
-            <p className="font-bold text-foreground">John Doe</p>
-            <p className="uppercase tracking-widest mt-1 text-[10px]">Enugu customer</p>
+            <p className="font-bold text-foreground">Customer Connect</p>
+            <p className="uppercase tracking-widest mt-1 text-[10px]">Active Profile</p>
           </div>
         </header>
 
@@ -64,19 +87,35 @@ export default function CustomerDashboardPage() {
           animate="show"
           className="space-y-6"
         >
+          {/* Wallet Summary */}
+          <motion.section variants={itemVariants} className="glass-panel p-6 shadow-premium flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border-brand-primary/30 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/10 blur-[50px] -mr-32 -mt-32 pointer-events-none" />
+            <div className="relative z-10">
+              <p className="text-[10px] uppercase tracking-widest font-bold text-zinc-400">Available Balance</p>
+              <p className="mt-1 text-4xl font-heading font-extrabold text-brand-primary tracking-tight">₦10,000<span className="text-xl text-brand-primary/50">.00</span></p>
+            </div>
+            <div className="relative z-10 flex items-center gap-3 w-full sm:w-auto mt-2 sm:mt-0">
+              <Link href="/customer/wallet" className="btn-minimal rounded-full px-8 h-12 w-full sm:w-auto text-[11px] font-bold uppercase tracking-[0.2em] flex items-center justify-center">
+                Fund Wallet
+              </Link>
+            </div>
+          </motion.section>
+
           {/* Stats */}
           <div className="grid gap-4 sm:grid-cols-3">
             <motion.div variants={itemVariants} className="glass-panel p-6 shadow-premium">
               <p className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">Total requests</p>
-              <p className="mt-2 text-3xl font-heading font-extrabold text-foreground">12</p>
+              <p className="mt-2 text-3xl font-heading font-extrabold text-foreground">{requests.length || 0}</p>
             </motion.div>
             <motion.div variants={itemVariants} className="glass-panel p-6 shadow-premium border-brand-primary/20">
               <p className="text-[10px] uppercase tracking-widest font-bold text-brand-primary">Completed</p>
-              <p className="mt-2 text-3xl font-heading font-extrabold text-foreground">10</p>
+              <p className="mt-2 text-3xl font-heading font-extrabold text-foreground">0</p>
             </motion.div>
             <motion.div variants={itemVariants} className="glass-panel p-6 shadow-premium">
               <p className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">In progress</p>
-              <p className="mt-2 text-3xl font-heading font-extrabold text-foreground">2</p>
+              <p className="mt-2 text-3xl font-heading font-extrabold text-foreground">
+                {requests.filter(r => r.status && r.status.toLowerCase() !== 'completed').length || 0}
+              </p>
             </motion.div>
           </div>
 
@@ -89,6 +128,12 @@ export default function CustomerDashboardPage() {
                 className="btn-minimal inline-flex items-center rounded-full px-6 h-10 text-xs font-bold uppercase tracking-widest"
               >
                 New request
+              </Link>
+              <Link
+                href="/inspection"
+                className="inline-flex h-10 items-center justify-center rounded-full border border-brand-primary/30 bg-brand-primary/10 px-6 text-xs font-bold uppercase tracking-widest text-brand-primary hover:bg-brand-primary/20 transition-colors"
+              >
+                Property Inspection
               </Link>
               <a
                 href="https://wa.me/2348123456789"
@@ -103,7 +148,7 @@ export default function CustomerDashboardPage() {
 
           {/* Recent requests */}
           <motion.section variants={itemVariants} className="glass-panel p-6 shadow-premium">
-            <div className="mb-6 flex items-center justify-between border-b border-white/10 pb-4">
+            <div className="mb-6 border-b border-white/10 pb-4 flex items-center justify-between">
               <h2 className="text-[10px] uppercase tracking-widest font-bold text-zinc-400">
                 Recent requests
               </h2>
@@ -114,30 +159,62 @@ export default function CustomerDashboardPage() {
                 View all →
               </Link>
             </div>
-            <div className="divide-y divide-white/5">
-              {DEMO_REQUESTS.map((request) => (
-                <div
-                  key={request.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between py-4 gap-4 glass-panel-hover px-4 rounded-xl transition-colors -mx-4"
-                >
-                  <div className="space-y-1">
-                    <p className="text-sm font-bold text-foreground">
-                      {request.type}
-                    </p>
-                    <p className="text-xs font-medium text-zinc-400">{request.summary}</p>
-                    <p className="text-[10px] uppercase tracking-widest text-zinc-500">{request.date}</p>
+            
+            {loading ? (
+              <div className="py-8 flex justify-center">
+                <div className="animate-spin h-5 w-5 border-2 border-brand-primary border-t-transparent rounded-full" />
+              </div>
+            ) : requests.length === 0 ? (
+              <div className="py-8 flex flex-col items-center justify-center text-zinc-500">
+                 <p className="text-sm font-bold text-foreground">No recent requests</p>
+                 <p className="text-xs mt-1">When you book a professional, it will appear here.</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-white/5">
+                {requests.map((request) => (
+                  <div
+                    key={request.id}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between py-4 gap-4 glass-panel-hover px-4 rounded-xl transition-colors -mx-4 group"
+                  >
+                    <div className="flex items-center gap-4 w-full sm:w-auto">
+                      {/* Photo Thumbnail */}
+                      {request.image_url ? (
+                        <div className="w-12 h-12 rounded-lg bg-black/20 overflow-hidden shrink-0 border border-white/10 group-hover:border-brand-primary/30 transition-colors pointer-events-none">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={request.image_url} alt="Uploaded issue" className="w-full h-full object-cover" />
+                        </div>
+                      ) : (
+                        <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center shrink-0 border border-white/10 text-zinc-600 transition-colors">
+                          <ImageIcon size={16} />
+                        </div>
+                      )}
+                      
+                      <div className="space-y-1 overflow-hidden">
+                        <p className="text-sm font-bold text-foreground group-hover:text-brand-primary transition-colors">
+                          {request.service_type}
+                        </p>
+                        <p className="text-xs font-medium text-zinc-400 truncate max-w-[200px] sm:max-w-xs">{request.description}</p>
+                        <p className="text-[10px] uppercase tracking-widest text-zinc-500">
+                          {new Date(request.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+
+                    <span className={`inline-flex self-start sm:self-center shrink-0 h-6 items-center rounded-full border px-3 text-[10px] font-bold uppercase tracking-widest transition-colors ${
+                      !request.status || request.status.toLowerCase() === 'pending' || request.status.toLowerCase() === 'new'
+                        ? 'border-brand-primary/30 bg-brand-primary/10 text-brand-primary'
+                        : 'border-white/10 bg-white/5 text-zinc-400'
+                    }`}>
+                      {request.status || 'New'}
+                    </span>
                   </div>
-                  <span className="inline-flex self-start sm:self-center h-6 items-center rounded-full border border-brand-primary/30 bg-brand-primary/10 px-3 text-[10px] font-bold uppercase tracking-widest text-brand-primary">
-                    {request.status}
-                  </span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </motion.section>
 
           {/* Referral */}
           <motion.section variants={itemVariants} className="glass-panel p-6 shadow-premium relative overflow-hidden group">
-            {/* Subtle glow effect for Premium banner */}
             <div className="absolute inset-x-0 bottom-0 h-1/2 bg-brand-primary/5 group-hover:bg-brand-primary/10 transition-colors blur-xl pointer-events-none" />
             
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
@@ -170,4 +247,3 @@ export default function CustomerDashboardPage() {
     </div>
   );
 }
-
