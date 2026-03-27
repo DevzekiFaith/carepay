@@ -2,14 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
 import { PAYMENT_ACCOUNT } from "@/lib/payment-details";
 import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import SurgeBadge from "@/app/components/SurgeBadge";
 import type { SurgeResult } from "@/lib/surge";
 
-import { Wrench, Zap, Hammer, Armchair, Snowflake, Paintbrush, PenTool, Camera, X } from "lucide-react";
+import { Wrench, Zap, Hammer, Armchair, Snowflake, Paintbrush, PenTool, Camera, X, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 const REQUEST_HERO_IMAGE = "/su4.jpg";
 
@@ -82,6 +83,9 @@ export default function RequestPage() {
     const preferredTimeRaw = formData.get("preferredTime") as string;
 
     if (!serviceType) {
+      toast.error("Service required", {
+        description: "Please select a service above."
+      });
       setErrorMsg("Please select a service above.");
       setSubmitting(false);
       return;
@@ -174,10 +178,17 @@ export default function RequestPage() {
     });
 
     if (requestError) {
+      toast.error("Submission failed", {
+        description: requestError.message
+      });
       setErrorMsg(`Failed to submit request: ${requestError.message}`);
       setSubmitting(false);
       return;
     }
+
+    toast.success("Booking confirmed!", {
+      description: "A professional will be assigned to you shortly."
+    });
 
     setSubmitting(false);
     setSubmitted(true);

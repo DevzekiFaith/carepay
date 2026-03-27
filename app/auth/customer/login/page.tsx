@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function CustomerLoginPage() {
   const [submitting, setSubmitting] = useState(false);
@@ -31,10 +32,18 @@ export default function CustomerLoginPage() {
       if (signInError) throw signInError;
 
       if (data.user) {
-        router.push('/');
-        router.refresh();
+        toast.success("Login successful", {
+          description: "Welcome back! Redirecting..."
+        });
+        setTimeout(() => {
+          router.push('/');
+          router.refresh();
+        }, 1000);
       }
     } catch (err: any) {
+      toast.error("Login failed", {
+        description: err.message
+      });
       setError(err.message || "Invalid login credentials.");
       setSubmitting(false);
     }

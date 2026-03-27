@@ -6,6 +6,8 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Plus, History, ArrowUpRight, ArrowDownLeft, Loader2, AlertCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
+import { toast } from "sonner";
+
 interface Transaction {
   id: string;
   transaction_type: 'credit' | 'debit';
@@ -125,9 +127,9 @@ export default function CustomerWalletPage() {
       await fetchData();
       setFunding(false);
       setAmount("");
-      alert(`Successfully funded ₦${val.toLocaleString()}`);
+      toast.success(`Successfully funded ₦${val.toLocaleString()}`);
     } catch (err: any) {
-      alert(`Funding failed: ${err.message}`);
+      toast.error(`Funding failed: ${err.message}`);
     } finally {
       setLoading(false);
     }

@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function CustomerRegisterPage() {
   const [submitting, setSubmitting] = useState(false);
@@ -39,11 +40,18 @@ export default function CustomerRegisterPage() {
       if (signUpError) throw signUpError;
 
       if (data.user) {
-        // Success! Redirect to home
-        router.push('/');
-        router.refresh(); // Refresh to update server-side auth gate
+        toast.success("Account created successfully", {
+          description: "Welcome to CarePay! Redirecting..."
+        });
+        setTimeout(() => {
+          router.push('/');
+          router.refresh();
+        }, 1000);
       }
     } catch (err: any) {
+      toast.error("Registration failed", {
+        description: err.message
+      });
       setError(err.message || "Failed to create account. Please try again.");
       setSubmitting(false);
     }

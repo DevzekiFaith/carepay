@@ -6,6 +6,8 @@ import Link from "next/link";
 import { ArrowLeft, Check, Shield, Star, Zap, Loader2, AlertCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
+import { toast } from "sonner";
+
 export default function SubscriptionPage() {
   const [currentTier, setCurrentTier] = useState<'basic' | 'pro' | 'elite'>('basic');
   const [loading, setLoading] = useState(true);
@@ -74,9 +76,12 @@ export default function SubscriptionPage() {
       if (subError) throw subError;
 
       setCurrentTier(tier);
-      alert(`Welcome to CarePay ${tier.toUpperCase()}! Your benefits are now active.`);
+      toast.success(`Welcome to CarePay ${tier.toUpperCase()}! Your benefits are now active.`, {
+        description: "Zero convenience fees have been applied to your profile."
+      });
     } catch (err: any) {
       setError(`Upgrade failed: ${err.message}`);
+      toast.error(`Upgrade failed: ${err.message}`);
     } finally {
       setUpgrading(null);
     }

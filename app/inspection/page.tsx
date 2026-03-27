@@ -4,15 +4,22 @@ import { motion } from "framer-motion";
 import { Check, ClipboardCheck, ArrowLeft, Home, User, Calendar, MapPin } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function PropertyInspectionPage() {
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    toast.info("Processing request", {
+      description: "Securing your inspection appointment..."
+    });
     setTimeout(() => {
       setSubmitted(true);
-    }, 1000);
+      toast.success("Inspection Requested!", {
+        description: "We will contact you via WhatsApp shortly."
+      });
+    }, 1500);
   };
 
   return (
