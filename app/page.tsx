@@ -1,4 +1,6 @@
 import HomeClient from "./components/HomeClient";
+import Gateway from "./components/Gateway";
+import { createClient } from "@/lib/supabase/server";
 import {
   DEFAULT_CITY,
   DEFAULT_COUNTRY,
@@ -7,7 +9,10 @@ import {
   getSiteUrl,
 } from "@/lib/site";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   const base = getSiteUrl();
   const structuredData = {
     "@context": "https://schema.org",
@@ -47,7 +52,7 @@ export default function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <HomeClient />
+      {user ? <HomeClient /> : <Gateway />}
     </>
   );
 }

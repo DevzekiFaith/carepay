@@ -34,6 +34,17 @@ export default function RequestPage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const checkUser = async () => {
+       const supabase = createClient();
+       const { data: { user: u } } = await supabase.auth.getUser();
+       setUser(u);
+    };
+    checkUser();
+  }, []);
+
   const handleServiceSelect = async (label: string) => {
     const isActive = selectedService === label;
     const next = isActive ? null : label;
@@ -77,48 +88,51 @@ export default function RequestPage() {
     }
 
     const supabase = createClient();
+    let currentUserId = user?.id;
 
-    let userId = null;
-
-    // Seamless Auth Flow: Attempt Signup (New User), if exists -> Signin (Returning User)
-    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password: pin,
-    });
-
-    if (signUpError && signUpError.message.includes("User already registered")) {
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password: pin,
-      });
-      if (signInError) {
-        setErrorMsg("Incorrect PIN for this phone number.");
+    // If NOT logged in, perform "Seamless Auth" (Signup/Signin)
+    if (!currentUserId) {
+      if (!email || !pin) {
+        setErrorMsg("Email and PIN are required for new bookings.");
         setSubmitting(false);
         return;
       }
-      userId = signInData.user?.id;
-    } else if (signUpError) {
-      setErrorMsg(`Auth Error: ${signUpError.message}`);
-      setSubmitting(false);
-      return;
-    } else {
-      userId = signUpData.user?.id;
-      if (userId) {
-        const { error: profileError } = await supabase.from('profiles').insert({
-          id: userId,
-          full_name: fullName,
-          phone: phone,
-          address: address
+
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password: pin,
+      });
+
+      if (signUpError && signUpError.message.includes("already registered")) {
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password: pin,
         });
-        if (profileError) {
-          setErrorMsg(`Error creating profile: ${profileError.message}`);
+        if (signInError) {
+          setErrorMsg("Incorrect PIN for this email.");
           setSubmitting(false);
           return;
+        }
+        currentUserId = signInData.user?.id;
+      } else if (signUpError) {
+        setErrorMsg(`Auth Error: ${signUpError.message}`);
+        setSubmitting(false);
+        return;
+      } else {
+        currentUserId = signUpData.user?.id;
+        if (currentUserId) {
+          // New Profile
+          await supabase.from('profiles').insert({
+            id: currentUserId,
+            full_name: fullName,
+            phone: phone,
+            address: address
+          });
         }
       }
     }
 
-    if (!userId) {
+    if (!currentUserId) {
       setErrorMsg("Failed to authenticate user.");
       setSubmitting(false);
       return;
@@ -130,13 +144,11 @@ export default function RequestPage() {
     let imageUrl = null;
     if (imageFile) {
       const fileExt = imageFile.name.split('.').pop() || 'jpg';
-      const fileName = `${userId}-${Date.now()}.${fileExt}`;
+      const fileName = `${currentUserId}-${Date.now()}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('job-photos')
-        .upload(fileName, imageFile, {
-          upsert: true,
-        });
+        .upload(fileName, imageFile, { upsert: true });
 
       if (uploadError) {
         setErrorMsg(`Failed to upload photo: ${uploadError.message}`);
@@ -153,7 +165,7 @@ export default function RequestPage() {
 
     // Insert Request
     const { error: requestError } = await supabase.from('service_requests').insert({
-      customer_id: userId,
+      customer_id: currentUserId,
       service_type: serviceType,
       description: details,
       address: address,
@@ -176,11 +188,11 @@ export default function RequestPage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground antialiased py-12 sm:py-24 overflow-hidden">
+    <div className="relative min-h-screen bg-background text-foreground antialiased py-8 sm:py-24 overflow-hidden px-4 sm:px-0">
       {/* Background Ambience */}
       <div className="absolute inset-x-0 -top-[30%] -z-10 h-[80%] w-full rounded-full bg-brand-primary/5 opacity-50 blur-[120px] mix-blend-screen pointer-events-none" />
 
-      <div className="mx-auto flex min-w-0 max-w-5xl flex-col px-6 lg:px-8 relative z-10">
+      <div className="mx-auto flex min-w-0 max-w-5xl flex-col px-0 sm:px-6 lg:px-8 relative z-10">
         <motion.header
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -190,13 +202,13 @@ export default function RequestPage() {
             <h1 className="text-3xl font-heading font-extrabold tracking-tight text-gradient-primary sm:text-4xl">
               Book a Professional
             </h1>
-            <p className="mt-2 text-sm text-zinc-400 font-medium">
-              Select a service and provide your details. We match you instantly.
+            <p className="mt-2 text-sm text-zinc-400 font-medium max-w-md">
+              Fastest matching in Nigeria. {user ? "Your details are pre-filled." : "Signup instantly during checkout."}
             </p>
           </div>
           <Link
             href="/"
-            className="flex h-10 items-center justify-center rounded-full border border-white/10 dark:border-white/5 glass-panel px-6 text-[10px] font-bold uppercase tracking-widest text-zinc-400 glass-panel-hover transition-colors"
+            className="flex h-10 w-fit items-center justify-center rounded-full border border-white/10 dark:border-white/5 glass-panel px-6 text-[10px] font-bold uppercase tracking-widest text-zinc-400 glass-panel-hover transition-colors"
           >
             ← Home
           </Link>
@@ -210,10 +222,10 @@ export default function RequestPage() {
             className="space-y-12"
           >
             <div>
-              <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-6">
+              <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-6">
                 1. Select Service
               </h2>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
                 {SERVICES.map((service) => {
                   const isActive = selectedService === service.label;
                   return (
@@ -221,29 +233,29 @@ export default function RequestPage() {
                       key={service.label}
                       type="button"
                       onClick={() => handleServiceSelect(service.label)}
-                      className={`group flex flex-col items-start rounded-2xl border transition-all duration-300 overflow-hidden text-left w-full p-4 sm:p-5 ${isActive
+                      className={`group flex flex-col items-start rounded-2xl border transition-all duration-300 overflow-hidden text-left w-full p-3.5 sm:p-5 ${isActive
                         ? "bg-brand-primary/10 text-foreground border-brand-primary/50 shadow-[0_0_20px_rgba(249,115,22,0.15)] scale-[1.02]"
                         : "glass-panel glass-panel-hover"
                         }`}
                     >
                       <div className="flex w-full items-start justify-between mb-2">
-                        <div className={`flex h-10 w-10 items-center justify-center rounded-xl transition-colors ${isActive
+                        <div className={`flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl transition-colors ${isActive
                           ? "bg-brand-primary/20 text-brand-primary"
                           : "bg-white/5 border border-white/5 text-zinc-400 group-hover:bg-brand-primary/20 group-hover:border-brand-primary/30 group-hover:text-brand-primary"
                           }`}>
-                          <service.icon size={18} strokeWidth={1.5} className="transition-transform group-hover:scale-110" />
+                          <service.icon size={16} strokeWidth={1.5} className="transition-transform group-hover:scale-110" />
                         </div>
                       </div>
 
-                      <h3 className={`text-sm font-bold tracking-tight mt-4 mb-2 ${isActive ? "text-brand-primary" : "text-foreground group-hover:text-brand-primary transition-colors"}`}>
+                      <h3 className={`text-xs sm:text-sm font-bold tracking-tight mt-3 mb-1.5 ${isActive ? "text-brand-primary" : "text-foreground group-hover:text-brand-primary transition-colors"}`}>
                         {service.label}
                       </h3>
 
-                      <div className={`flex flex-col items-start w-full pt-3 border-t transition-colors ${isActive ? "border-brand-primary/20" : "border-white/5"}`}>
-                        <span className={`text-sm font-bold tracking-tight ${isActive ? "text-foreground" : "text-zinc-300"}`}>
+                      <div className={`flex flex-col items-start w-full pt-2.5 border-t transition-colors ${isActive ? "border-brand-primary/20" : "border-white/5"}`}>
+                        <span className={`text-xs sm:text-sm font-bold tracking-tight ${isActive ? "text-foreground" : "text-zinc-300"}`}>
                           {service.price.split(' ')[0]}
                         </span>
-                        <span className={`text-[9px] font-semibold uppercase tracking-widest ${isActive ? "text-brand-primary" : "text-zinc-500"}`}>
+                        <span className={`text-[8px] font-bold uppercase tracking-widest ${isActive ? "text-brand-primary" : "text-zinc-500"}`}>
                           {service.price.split(' ').slice(1).join(' ')}
                         </span>
                       </div>
@@ -263,15 +275,15 @@ export default function RequestPage() {
                 />
               )}
               {surgeLoading && (
-                <div className="flex items-center gap-2 mt-3">
-                  <span className="h-3 w-3 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-600" />
-                  <span className="text-[10px] text-zinc-500 font-medium">Checking pricing…</span>
+                <div className="flex items-center gap-2 mt-4">
+                  <Loader2 className="animate-spin text-zinc-500" size={14} />
+                  <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Calculating live rate...</span>
                 </div>
               )}
             </div>
 
-            <div className="border-t border-zinc-100 dark:border-zinc-800 pt-10">
-              <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-6">
+            <div className="border-t border-white/10 pt-10">
+              <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-6">
                 2. Your Details
               </h2>
 
@@ -279,45 +291,47 @@ export default function RequestPage() {
                 onSubmit={handleSubmit}
                 className="space-y-6"
               >
-                <div className="grid gap-6 sm:grid-cols-3">
-                  <div className="space-y-2">
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                      Full name
-                    </label>
-                    <input
-                      required
-                      name="fullName"
-                      placeholder="John Doe"
-                      className="w-full rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3.5 text-sm text-foreground outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                      Email
-                    </label>
-                    <input
-                      required
-                      type="email"
-                      name="email"
-                      placeholder="you@example.com"
-                      className="w-full rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3.5 text-sm text-foreground outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                      Phone number
-                    </label>
-                    <input
-                      required
-                      type="tel"
-                      name="phone"
-                      placeholder="+234 812 345 6789"
-                      className="w-full rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3.5 text-sm text-foreground outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary"
-                    />
-                  </div>
-                </div>
+                {!user && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="grid gap-4 sm:grid-cols-3 mb-6">
+                      <div className="space-y-2">
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                          Full Name
+                        </label>
+                        <input
+                          required
+                          name="fullName"
+                          placeholder="John Doe"
+                          className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-foreground outline-none focus:border-brand-primary transition-all"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                          Email
+                        </label>
+                        <input
+                          required
+                          type="email"
+                          name="email"
+                          placeholder="you@example.com"
+                          className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-foreground outline-none focus:border-brand-primary transition-all"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                          Phone No.
+                        </label>
+                        <input
+                          required
+                          type="tel"
+                          name="phone"
+                          placeholder="+234..."
+                          className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-foreground outline-none focus:border-brand-primary transition-all"
+                        />
+                      </div>
+                    </motion.div>
+                )}
 
-                <div className="grid gap-6 sm:grid-cols-2">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
                       Address
@@ -326,60 +340,51 @@ export default function RequestPage() {
                       required
                       name="address"
                       placeholder="House number, street, area"
-                      className="w-full rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3.5 text-sm text-foreground outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary"
+                      className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-foreground outline-none focus:border-brand-primary transition-all"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                      6-Digit PIN <span className="text-zinc-400 lowercase">(To track booking)</span>
-                    </label>
-                    <input
-                      required
-                      type="password"
-                      name="pin"
-                      maxLength={6}
-                      minLength={6}
-                      placeholder="e.g. 123456"
-                      className="w-full rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3.5 text-sm text-foreground outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary"
-                    />
-                  </div>
+                  {!user && (
+                     <div className="space-y-2">
+                       <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                         6-Digit PIN <span className="text-zinc-600 lowercase">(To login later)</span>
+                       </label>
+                       <input
+                         required
+                         type="password"
+                         name="pin"
+                         maxLength={6}
+                         minLength={6}
+                         placeholder="e.g. 123456"
+                         className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-foreground outline-none focus:border-brand-primary transition-all"
+                       />
+                     </div>
+                  )}
+                  {user && (
+                    <div className="space-y-2">
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                          Preferred Appointment Date
+                        </label>
+                        <input
+                          type="datetime-local"
+                          name="preferredTime"
+                          className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-foreground outline-none focus:border-brand-primary transition-all"
+                        />
+                      </div>
+                  )}
                 </div>
 
-                <div className="grid gap-6 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                      Service
-                    </label>
-                    <select
-                      required
-                      name="service"
-                      value={selectedService ?? ""}
-                      onChange={(e) =>
-                        setSelectedService(
-                          e.target.value || null,
-                        )
-                      }
-                      className="w-full rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3.5 text-sm text-foreground outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary appearance-none"
-                    >
-                      <option value="">Select a service</option>
-                      {SERVICES.map(({ label }) => (
-                        <option key={label} value={label}>
-                          {label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                      Preferred time
-                    </label>
-                    <input
-                      type="datetime-local"
-                      name="preferredTime"
-                      className="w-full rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3.5 text-sm text-foreground outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary"
-                    />
-                  </div>
-                </div>
+                {!user && (
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                        Preferred time
+                      </label>
+                      <input
+                        type="datetime-local"
+                        name="preferredTime"
+                        className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-foreground outline-none focus:border-brand-primary transition-all"
+                      />
+                    </div>
+                )}
 
                 <div className="space-y-2">
                   <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">

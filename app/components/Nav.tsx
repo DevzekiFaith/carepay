@@ -1,7 +1,12 @@
 import Link from "next/link";
-import { Zap } from "lucide-react";
+import { Zap, LayoutDashboard } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import LogoutButton from "./LogoutButton";
 
-export default function Nav() {
+export default async function Nav() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   return (
     <nav
       className="sticky top-0 z-50 border-b border-zinc-200/50 dark:border-zinc-800/50 bg-background/50 backdrop-blur-xl transition-all"
@@ -21,31 +26,33 @@ export default function Nav() {
             Care<span className="text-brand-primary">Pay</span>
           </span>
         </Link>
-        <div className="flex items-center gap-4 sm:gap-6">
-          <Link
-            href="/auth/worker/register"
-            className="flex items-center rounded-full px-4 py-2 text-sm font-bold text-zinc-500 hover:text-brand-primary hover:bg-brand-primary/10 transition-colors"
-          >
-            <span className="hidden sm:inline">For Professionals</span>
-            <span className="sm:hidden">Pros</span>
-          </Link>
-          <Link
-            href="/customer/wallet"
-            className="hidden sm:flex items-center rounded-full px-4 py-2 text-sm font-bold text-zinc-500 hover:text-brand-primary hover:bg-brand-primary/10 transition-colors"
-          >
-            Wallet
-          </Link>
-          <Link
-            href="/customer/subscription"
-            className="hidden sm:flex items-center rounded-full px-4 py-2 text-sm font-bold text-gradient-primary hover:opacity-80 transition-opacity"
-          >
-            Go Pro
-          </Link>
+        <div className="flex items-center gap-2 sm:gap-4">
+          {!user ? (
+            <Link
+              href="/auth/worker/register"
+              className="flex items-center rounded-full px-4 py-2 text-sm font-bold text-zinc-500 hover:text-brand-primary hover:bg-brand-primary/10 transition-colors"
+            >
+              <span className="hidden sm:inline">Professional Portal</span>
+              <span className="sm:hidden">Pros</span>
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/customer/dashboard"
+                className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-zinc-500 hover:text-brand-primary hover:bg-brand-primary/10 transition-colors"
+              >
+                <LayoutDashboard size={16} />
+                <span className="hidden md:inline">Dashboard</span>
+              </Link>
+              <LogoutButton />
+            </>
+          )}
+
           <Link
             href="/request"
-            className="btn-minimal flex items-center rounded-full px-6 py-2.5 text-xs font-bold uppercase tracking-widest shadow-premium"
+            className="btn-minimal flex items-center rounded-full px-4 sm:px-6 py-2.5 text-xs font-bold uppercase tracking-widest shadow-premium"
           >
-            Book Now
+            {user ? "New Request" : "Book Now"}
           </Link>
         </div>
       </div>

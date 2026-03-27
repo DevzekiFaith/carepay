@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Image as ImageIcon } from "lucide-react";
+import { Image as ImageIcon, Loader2, Shield, Star, Zap } from "lucide-react";
 
 interface Request {
   id: string;
@@ -15,47 +15,60 @@ interface Request {
   image_url: string | null;
 }
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 10 },
-  show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 300 } },
-};
+const containerVariants = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.1 } } };
+const itemVariants = { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 300 } } };
 
 export default function CustomerDashboardPage() {
   const [requests, setRequests] = useState<Request[]>([]);
+  const [balance, setBalance] = useState(0);
+  const [tier, setTier] = useState<'basic' | 'pro' | 'elite'>('basic');
   const [loading, setLoading] = useState(true);
 
+  const supabase = createClient();
+
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // 1. Fetch Requests
+      const { data: reqData } = await supabase
+        .from('service_requests')
+        .select('*')
+        .eq('customer_id', user.id)
+        .order('created_at', { ascending: false });
+      
+      setRequests(reqData || []);
+
+      // 2. Fetch Wallet Balance
+      const { data: wallet } = await supabase
+        .from('wallets')
+        .select('balance')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (wallet) setBalance(wallet.balance);
+
+      // 3. Fetch Profile Tier
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('subscription_tier')
+        .eq('id', user.id)
+        .single();
+      
+      if (profile) setTier(profile.subscription_tier || 'basic');
+
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [supabase]);
+
   useEffect(() => {
-    const fetchRequests = async () => {
-      try {
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        
-        let query = supabase.from('service_requests').select('*').order('created_at', { ascending: false });
-        // If user is logged in, show their requests. Otherwise, show 3 global recents as a demo.
-        if (user) {
-          query = query.eq('customer_id', user.id);
-        } else {
-          query = query.limit(3);
-        }
-        
-        const { data } = await query;
-        setRequests(data || []);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchRequests();
-  }, []);
+    fetchData();
+  }, [fetchData]);
 
   return (
     <div className="relative min-h-screen bg-background px-4 py-8 text-foreground antialiased overflow-hidden">
@@ -65,9 +78,20 @@ export default function CustomerDashboardPage() {
       <div className="mx-auto max-w-5xl relative z-10">
         <header className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/10 pb-6">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-primary">
-              Dashboard
-            </p>
+            <div className="flex items-center gap-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-primary">
+                Dashboard
+              </p>
+              <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider ${
+                tier === 'elite' ? 'bg-zinc-100 text-black' : 
+                tier === 'pro' ? 'bg-brand-primary text-background' : 
+                'bg-white/5 text-zinc-500 border border-white/10'
+              }`}>
+                {tier === 'elite' && <Shield size={8} />}
+                {tier === 'pro' && <Zap size={8} />}
+                {tier}
+              </span>
+            </div>
             <h1 className="mt-2 text-3xl font-heading font-extrabold tracking-tight text-gradient-primary">
               Welcome back
             </h1>
@@ -76,7 +100,7 @@ export default function CustomerDashboardPage() {
             </p>
           </div>
           <div className="text-left sm:text-right text-xs text-zinc-500">
-            <p className="font-bold text-foreground">Customer Connect</p>
+            <p className="font-bold text-foreground capitalize">Premium User</p>
             <p className="uppercase tracking-widest mt-1 text-[10px]">Active Profile</p>
           </div>
         </header>
@@ -92,7 +116,10 @@ export default function CustomerDashboardPage() {
             <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/10 blur-[50px] -mr-32 -mt-32 pointer-events-none" />
             <div className="relative z-10">
               <p className="text-[10px] uppercase tracking-widest font-bold text-zinc-400">Available Balance</p>
-              <p className="mt-1 text-4xl font-heading font-extrabold text-brand-primary tracking-tight">₦10,000<span className="text-xl text-brand-primary/50">.00</span></p>
+              <div className="flex items-baseline gap-1">
+                <p className="mt-1 text-4xl font-heading font-extrabold text-brand-primary tracking-tight">₦{balance.toLocaleString()}</p>
+                <span className="text-xl text-brand-primary/50 font-heading font-bold">.00</span>
+              </div>
             </div>
             <div className="relative z-10 flex items-center gap-3 w-full sm:w-auto mt-2 sm:mt-0">
               <Link href="/customer/wallet" className="btn-minimal rounded-full px-8 h-12 w-full sm:w-auto text-[11px] font-bold uppercase tracking-[0.2em] flex items-center justify-center">
@@ -105,16 +132,18 @@ export default function CustomerDashboardPage() {
           <div className="grid gap-4 sm:grid-cols-3">
             <motion.div variants={itemVariants} className="glass-panel p-6 shadow-premium">
               <p className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">Total requests</p>
-              <p className="mt-2 text-3xl font-heading font-extrabold text-foreground">{requests.length || 0}</p>
+              <p className="mt-2 text-3xl font-heading font-extrabold text-foreground">{requests.length}</p>
             </motion.div>
             <motion.div variants={itemVariants} className="glass-panel p-6 shadow-premium border-brand-primary/20">
               <p className="text-[10px] uppercase tracking-widest font-bold text-brand-primary">Completed</p>
-              <p className="mt-2 text-3xl font-heading font-extrabold text-foreground">0</p>
+              <p className="mt-2 text-3xl font-heading font-extrabold text-foreground">
+                {requests.filter(r => r.status?.toLowerCase() === 'completed').length}
+              </p>
             </motion.div>
             <motion.div variants={itemVariants} className="glass-panel p-6 shadow-premium">
               <p className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">In progress</p>
               <p className="mt-2 text-3xl font-heading font-extrabold text-foreground">
-                {requests.filter(r => r.status && r.status.toLowerCase() !== 'completed').length || 0}
+                {requests.filter(r => r.status?.toLowerCase() !== 'completed').length}
               </p>
             </motion.div>
           </div>
@@ -130,19 +159,17 @@ export default function CustomerDashboardPage() {
                 New request
               </Link>
               <Link
-                href="/inspection"
+                href="/customer/subscription"
                 className="inline-flex h-10 items-center justify-center rounded-full border border-brand-primary/30 bg-brand-primary/10 px-6 text-xs font-bold uppercase tracking-widest text-brand-primary hover:bg-brand-primary/20 transition-colors"
+              >
+                Subscription Tiers
+              </Link>
+              <Link
+                href="/inspection"
+                className="inline-flex h-10 items-center justify-center rounded-full border border-white/10 dark:border-white/5 bg-background/50 backdrop-blur-sm px-6 text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-foreground hover:bg-white/5 transition-colors"
               >
                 Property Inspection
               </Link>
-              <a
-                href="https://wa.me/2348123456789"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex h-10 items-center justify-center rounded-full border border-white/10 dark:border-white/5 bg-background/50 backdrop-blur-sm px-6 text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-foreground hover:bg-white/5 transition-colors"
-              >
-                WhatsApp support
-              </a>
             </div>
           </motion.section>
 
@@ -162,7 +189,7 @@ export default function CustomerDashboardPage() {
             
             {loading ? (
               <div className="py-8 flex justify-center">
-                <div className="animate-spin h-5 w-5 border-2 border-brand-primary border-t-transparent rounded-full" />
+                <Loader2 className="animate-spin text-brand-primary" size={24} />
               </div>
             ) : requests.length === 0 ? (
               <div className="py-8 flex flex-col items-center justify-center text-zinc-500">
@@ -171,7 +198,7 @@ export default function CustomerDashboardPage() {
               </div>
             ) : (
               <div className="divide-y divide-white/5">
-                {requests.map((request) => (
+                {requests.slice(0, 5).map((request) => (
                   <div
                     key={request.id}
                     className="flex flex-col sm:flex-row sm:items-center justify-between py-4 gap-4 glass-panel-hover px-4 rounded-xl transition-colors -mx-4 group"
@@ -203,6 +230,8 @@ export default function CustomerDashboardPage() {
                     <span className={`inline-flex self-start sm:self-center shrink-0 h-6 items-center rounded-full border px-3 text-[10px] font-bold uppercase tracking-widest transition-colors ${
                       !request.status || request.status.toLowerCase() === 'pending' || request.status.toLowerCase() === 'new'
                         ? 'border-brand-primary/30 bg-brand-primary/10 text-brand-primary'
+                        : request.status.toLowerCase() === 'completed'
+                        ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-500'
                         : 'border-white/10 bg-white/5 text-zinc-400'
                     }`}>
                       {request.status || 'New'}
