@@ -10,8 +10,15 @@ import {
 } from "@/lib/site";
 
 export default async function HomePage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch (error) {
+    console.error('Failed to initialize Supabase client:', error);
+    // User remains null, page falls back to Gateway
+  }
 
   const base = getSiteUrl();
   const structuredData = {
