@@ -31,12 +31,16 @@ export default function AdminJobsPage() {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase
-      .from("service_requests")
-      .select("id, service_type, description, address, status, preferred_time, created_at")
-      .order("created_at", { ascending: false })
-      .limit(100)
-      .then(({ data }) => { setJobs(data ?? []); setLoading(false); });
+    async function fetchJobs() {
+      const { data } = await supabase
+        .from("service_requests")
+        .select("id, service_type, description, address, status, preferred_time, created_at")
+        .order("created_at", { ascending: false })
+        .limit(100);
+      setJobs(data ?? []);
+      setLoading(false);
+    }
+    fetchJobs();
   }, []);
 
   const filtered = jobs.filter((j) => {
