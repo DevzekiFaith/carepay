@@ -101,23 +101,19 @@ export default function WorkerLoginPage() {
           </div>
 
           <div className="flex items-center justify-between py-1">
-            <button 
-              type="button"
-              onClick={() => setRememberMe(!rememberMe)}
-              className="flex items-center gap-2 cursor-pointer group w-fit"
-            >
+            <label className="flex items-center gap-2 cursor-pointer group w-fit">
               <div className="relative flex items-center justify-center h-4 w-4 rounded border border-white/20 bg-white/5 group-hover:border-brand-primary/50 transition-colors">
                  <input 
                    type="checkbox" 
                    name="remember" 
                    className="sr-only" 
                    checked={rememberMe} 
-                   onChange={() => {}} 
+                   onChange={(e) => setRememberMe(e.target.checked)} 
                  />
                  <div className={`h-2 w-2 rounded-sm bg-brand-primary transition-opacity ${rememberMe ? 'opacity-100' : 'opacity-0'}`} />
               </div>
-              <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest group-hover:text-zinc-300 transition-colors">Keep me signed in</span>
-            </button>
+              <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest group-hover:text-zinc-300 transition-colors whitespace-nowrap">Keep me signed in</span>
+            </label>
           </div>
 
           <button

@@ -4,6 +4,7 @@ import Nav from "./components/Nav";
 import RootWrapper from "./components/RootWrapper";
 import WhatsAppButton from "./components/WhatsAppButton";
 import "./globals.css";
+import { Toaster } from "sonner";
 import {
   DEFAULT_CITY,
   DEFAULT_COUNTRY,
@@ -80,6 +81,7 @@ export default function RootLayout({
           <div id="content">{children}</div>
         </RootWrapper>
         <WhatsAppButton />
+        <Toaster position="top-center" richColors />
         {/* PWA service worker registration */}
         <script
           dangerouslySetInnerHTML={{
