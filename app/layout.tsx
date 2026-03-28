@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import Nav from "./components/Nav";
-import Footer from "./components/Footer";
+import RootWrapper from "./components/RootWrapper";
 import WhatsAppButton from "./components/WhatsAppButton";
 import "./globals.css";
 import {
@@ -76,8 +76,9 @@ export default function RootLayout({
           Skip to content
         </a>
         <Nav />
-        <div id="content">{children}</div>
-        <Footer />
+        <RootWrapper>
+          <div id="content">{children}</div>
+        </RootWrapper>
         <WhatsAppButton />
         {/* PWA service worker registration */}
         <script

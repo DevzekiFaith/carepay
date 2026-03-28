@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, ShieldCheck, Zap, Star, Shield } from "lucide-react";
 import Image from "next/image";
+import Logo from "./Logo";
 
 export default function Gateway() {
   const containerVariants = {
@@ -33,14 +34,7 @@ export default function Gateway() {
       >
         {/* Branding / Logo */}
         <motion.div variants={itemVariants} className="mb-12 flex flex-col items-center">
-          <div className="h-20 w-20 rounded-3xl bg-gradient-to-tr from-brand-primary to-orange-400 p-0.5 shadow-[0_0_40px_-10px_rgba(249,115,22,1)] mb-6">
-             <div className="w-full h-full bg-background rounded-[22px] flex items-center justify-center">
-                <ShieldCheck className="text-brand-primary" size={36} strokeWidth={2.5} />
-             </div>
-          </div>
-          <h1 className="text-4xl sm:text-5xl font-heading font-extrabold tracking-tight text-gradient-primary">
-            CarePay
-          </h1>
+          <Logo size="lg" className="mb-4" />
           <p className="mt-3 text-xs font-bold uppercase tracking-[0.4em] text-zinc-500">
             Book it. Fix it. Done.
           </p>

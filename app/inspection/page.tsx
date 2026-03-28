@@ -116,9 +116,12 @@ export default function PropertyInspectionPage() {
 
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 pl-1">Target Date</label>
-                    <div className="relative">
-                      <Calendar size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
-                      <input required type="date" className="w-full rounded-2xl border border-white/10 bg-[#121214] pl-11 pr-4 py-3.5 text-sm font-medium text-zinc-400 outline-none transition-all focus:border-brand-primary/50" />
+                    <div className="relative group">
+                      <Calendar size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-brand-primary transition-colors" />
+                      <input required type="date" className="w-full rounded-2xl border border-white/10 dark:border-white/5 bg-background/50 pl-11 pr-4 py-3.5 text-sm font-medium text-foreground outline-none transition-all focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary appearance-none cursor-pointer" />
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-brand-primary/50">Select</span>
+                      </div>
                     </div>
                   </div>
                 </div>

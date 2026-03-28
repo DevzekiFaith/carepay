@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 import SurgeBadge from "@/app/components/SurgeBadge";
 import type { SurgeResult } from "@/lib/surge";
 
-import { Wrench, Zap, Hammer, Armchair, Snowflake, Paintbrush, PenTool, Camera, X, Loader2 } from "lucide-react";
+import { Wrench, Zap, Hammer, Armchair, Snowflake, Paintbrush, PenTool, Camera, X, Loader2, Calendar } from "lucide-react";
 import { toast } from "sonner";
 
 const REQUEST_HERO_IMAGE = "/su4.jpg";
@@ -372,28 +372,40 @@ export default function RequestPage() {
                   )}
                   {user && (
                     <div className="space-y-2">
-                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 pl-1">
                           Preferred Appointment Date
                         </label>
-                        <input
-                          type="datetime-local"
-                          name="preferredTime"
-                          className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-foreground outline-none focus:border-brand-primary transition-all"
-                        />
+                        <div className="relative group">
+                          <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-brand-primary transition-colors" size={16} />
+                          <input
+                            type="datetime-local"
+                            name="preferredTime"
+                            className="w-full rounded-xl border border-white/10 dark:border-white/5 bg-background/50 pl-12 pr-4 py-3.5 text-sm text-foreground outline-none transition-all focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary appearance-none cursor-pointer"
+                          />
+                          <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-brand-primary/50">Select</span>
+                          </div>
+                        </div>
                       </div>
                   )}
                 </div>
 
                 {!user && (
                     <div className="space-y-2">
-                      <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 pl-1">
                         Preferred time
                       </label>
-                      <input
-                        type="datetime-local"
-                        name="preferredTime"
-                        className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-foreground outline-none focus:border-brand-primary transition-all"
-                      />
+                      <div className="relative group">
+                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-brand-primary transition-colors" size={16} />
+                        <input
+                          type="datetime-local"
+                          name="preferredTime"
+                          className="w-full rounded-xl border border-white/10 dark:border-white/5 bg-background/50 pl-12 pr-4 py-3.5 text-sm text-foreground outline-none transition-all focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary appearance-none cursor-pointer"
+                        />
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-brand-primary/50">Select</span>
+                        </div>
+                      </div>
                     </div>
                 )}
 

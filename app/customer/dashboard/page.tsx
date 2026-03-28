@@ -4,10 +4,13 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Image as ImageIcon, Loader2, Shield, Star, Zap } from "lucide-react";
+import { Image as ImageIcon, Loader2, Shield, Star, Zap, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
+import Logo from "@/app/components/Logo";
 
 interface Request {
   id: string;
+  customer_id: string;
   service_type: string;
   description: string;
   status: string;
@@ -68,7 +71,43 @@ export default function CustomerDashboardPage() {
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+
+    // Set up Realtime Subscription
+    const channel = supabase
+      .channel('customer-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'service_requests',
+        },
+        async (payload) => {
+          const updatedReq = payload.new as Request;
+          // Check if this update is for the current customer (safety check)
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user && updatedReq.customer_id === user.id) {
+             // Show contextual toasts
+             if (payload.old.status !== 'in_progress' && updatedReq.status === 'in_progress') {
+                toast.success("Pro matched!", {
+                  description: `A professional has accepted your ${updatedReq.service_type} request.`
+                });
+             } else if (payload.old.status !== 'completed' && updatedReq.status === 'completed') {
+                toast.success("Job Completed!", {
+                  description: `Your ${updatedReq.service_type} request is marked as finished.`,
+                  icon: <CheckCircle2 className="text-emerald-500" />
+                });
+             }
+             fetchData();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchData, supabase]);
 
   return (
     <div className="relative min-h-screen bg-background px-4 py-8 text-foreground antialiased overflow-hidden">
@@ -77,31 +116,31 @@ export default function CustomerDashboardPage() {
 
       <div className="mx-auto max-w-5xl relative z-10">
         <header className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/10 pb-6">
-          <div>
-            <div className="flex items-center gap-2">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-primary">
-                Dashboard
-              </p>
-              <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider ${
-                tier === 'elite' ? 'bg-zinc-100 text-black' : 
-                tier === 'pro' ? 'bg-brand-primary text-background' : 
-                'bg-white/5 text-zinc-500 border border-white/10'
-              }`}>
-                {tier === 'elite' && <Shield size={8} />}
-                {tier === 'pro' && <Zap size={8} />}
-                {tier}
-              </span>
+          <div className="flex flex-col gap-4">
+            <Logo size="md" />
+            <div>
+               <div className="flex items-center gap-2">
+                 <h1 className="text-3xl font-heading font-extrabold tracking-tight text-gradient-primary">
+                   Welcome back
+                 </h1>
+                 <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider ${
+                   tier === 'elite' ? 'bg-zinc-100 text-black' : 
+                   tier === 'pro' ? 'bg-brand-primary text-background' : 
+                   'bg-white/5 text-zinc-500 border border-white/10'
+                 }`}>
+                   {tier === 'elite' && <Shield size={8} />}
+                   {tier === 'pro' && <Zap size={8} />}
+                   {tier}
+                 </span>
+               </div>
+               <p className="mt-1 text-sm text-zinc-400 font-medium">
+                 Track your requests, see your history, and manage your account.
+               </p>
             </div>
-            <h1 className="mt-2 text-3xl font-heading font-extrabold tracking-tight text-gradient-primary">
-              Welcome back
-            </h1>
-            <p className="mt-1 text-sm text-zinc-400 font-medium">
-              Track your requests, see your history, and manage your account.
-            </p>
           </div>
-          <div className="text-left sm:text-right text-xs text-zinc-500">
+          <div className="flex flex-col sm:items-end text-xs text-zinc-500">
             <p className="font-bold text-foreground capitalize">Premium User</p>
-            <p className="uppercase tracking-widest mt-1 text-[10px]">Active Profile</p>
+            <p className="uppercase tracking-widest mt-1 text-[9px] font-bold">Active Profile</p>
           </div>
         </header>
 
@@ -262,7 +301,7 @@ export default function CustomerDashboardPage() {
                     navigator.share({ title: "CarePay", text: shareText, url: shareUrl });
                   } else {
                     navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
-                    alert("Referral link copied!");
+                    toast.success("Link Copied!", { description: "Send it to your friends to earn ₦500." });
                   }
                 }}
                 className="btn-minimal inline-flex shrink-0 h-10 items-center justify-center rounded-full px-6 text-xs font-bold uppercase tracking-widest"

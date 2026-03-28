@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { motion } from "framer-motion";
-import { ShieldCheck, UserCircle, UploadCloud } from "lucide-react";
+import { ShieldCheck, UserCircle, UploadCloud, Eye, EyeOff } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import Image from "next/image";
 import { getDefaultAreas } from "@/lib/cities";
 import IdVerificationStatus, { type VerificationStatus } from "@/app/components/IdVerificationStatus";
+import Logo from "@/app/components/Logo";
 
 const NIN_LENGTH = 11;
 
@@ -26,6 +27,7 @@ const AREAS = getDefaultAreas();
 
 export default function WorkerRegisterPage() {
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [ninError, setNinError] = useState<string | null>(null);
   const [certFile, setCertFile] = useState<File | null>(null);
@@ -131,6 +133,8 @@ export default function WorkerRegisterPage() {
           className="glass-panel w-full p-8 lg:p-12 lg:w-2/3"
         >
           <div className="mb-10">
+            <Logo size="md" className="mb-6" />
+            <div className="h-px w-12 bg-brand-primary/20 mb-6" />
             <p className="text-[10px] font-bold uppercase tracking-widest text-brand-primary mb-2">
               For Professionals
             </p>
@@ -190,16 +194,36 @@ export default function WorkerRegisterPage() {
                   <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
                     6-Digit PIN
                   </label>
-                  <input
-                    required
-                    type="password"
-                    name="pin"
-                    minLength={6}
-                    maxLength={6}
-                    placeholder="e.g. 123456"
-                    className="w-full rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3 text-sm text-foreground outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary"
-                  />
+                  <div className="relative">
+                    <input
+                      required
+                      type={showPassword ? "text" : "password"}
+                      name="pin"
+                      minLength={6}
+                      maxLength={6}
+                      placeholder="e.g. 123456"
+                      className="w-full rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3 text-sm text-foreground outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary pr-12"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-brand-primary transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                 </div>
+              </div>
+
+              <div className="px-1 py-1">
+                <label className="flex items-center gap-2 cursor-pointer group w-fit">
+                   <div className="relative flex items-center justify-center h-4 w-4 rounded border border-white/20 bg-white/5 group-hover:border-brand-primary/50 transition-colors">
+                      <input type="checkbox" name="remember" className="peer sr-only" defaultChecked />
+                      <div className="h-2 w-2 rounded-sm bg-brand-primary opacity-0 peer-checked:opacity-100 transition-opacity" />
+                   </div>
+                   <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest group-hover:text-zinc-300 transition-colors underline-offset-4">Keep me signed in</span>
+                </label>
               </div>
 
               <div className="space-y-2">

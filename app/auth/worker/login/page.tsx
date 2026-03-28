@@ -4,9 +4,12 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
+import { Eye, EyeOff, Lock } from "lucide-react";
+import Logo from "@/app/components/Logo";
 
 export default function WorkerLoginPage() {
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -48,16 +51,15 @@ export default function WorkerLoginPage() {
         animate={{ opacity: 1, scale: 1 }}
         className="glass-panel w-full max-w-md p-8 lg:p-10"
       >
-        <div className="mb-10 text-center">
+        <div className="mb-10 flex flex-col items-center text-center">
+          <Logo size="md" className="mb-6" />
+          <div className="h-px w-12 bg-brand-primary/20 mb-6" />
           <p className="text-[10px] font-bold uppercase tracking-widest text-brand-primary mb-2">
             Professional Portal
           </p>
           <h1 className="text-2xl font-heading font-extrabold tracking-tight text-gradient-primary">
             Access your jobs
           </h1>
-          <p className="mt-2 text-sm font-medium text-zinc-400">
-            Enter the email registered to your CarePay account.
-          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -75,15 +77,35 @@ export default function WorkerLoginPage() {
           </div>
           <div className="space-y-2 text-left">
             <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-400">
-              PIN
+              Security PIN
             </label>
-            <input
-              required
-              type="password"
-              name="pin"
-              placeholder="6-digit PIN"
-              className="w-full rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3.5 text-sm text-foreground outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary"
-            />
+            <div className="relative">
+              <input
+                required
+                type={showPassword ? "text" : "password"}
+                name="pin"
+                placeholder="6-digit PIN"
+                className="w-full rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3.5 text-sm text-foreground outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary pr-12"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-brand-primary transition-colors"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between py-1">
+            <label className="flex items-center gap-2 cursor-pointer group">
+              <div className="relative flex items-center justify-center h-4 w-4 rounded border border-white/20 bg-white/5 group-hover:border-brand-primary/50 transition-colors">
+                 <input type="checkbox" name="remember" className="peer sr-only" defaultChecked />
+                 <div className="h-2 w-2 rounded-sm bg-brand-primary opacity-0 peer-checked:opacity-100 transition-opacity" />
+              </div>
+              <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest group-hover:text-zinc-300 transition-colors">Keep me signed in</span>
+            </label>
           </div>
 
           <button

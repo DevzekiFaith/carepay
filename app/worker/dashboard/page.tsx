@@ -3,7 +3,9 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { X, ExternalLink, AlertCircle, CheckCircle2 } from "lucide-react";
+import { X, ExternalLink, AlertCircle, CheckCircle2, Navigation, ClipboardList, Check } from "lucide-react";
+import { toast } from "sonner";
+import Logo from "@/app/components/Logo";
 
 // Types
 interface ServiceRequest {
@@ -15,6 +17,7 @@ interface ServiceRequest {
   preferred_time: string | null;
   status: string;
   image_url: string | null;
+  assigned_worker_id: string | null;
 }
 
 const containerVariants = {
@@ -35,29 +38,118 @@ export default function WorkerDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'radar' | 'my-jobs'>('radar');
+  const [user, setUser] = useState<any>(null);
+
+  const fetchRequests = async () => {
+    try {
+      const supabase = createClient();
+      const { data: { user: u } } = await supabase.auth.getUser();
+      setUser(u);
+
+      const { data, error: fetchError } = await supabase
+        .from("service_requests")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (fetchError) throw fetchError;
+      setRequests(data || []);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchRequests = async () => {
-      try {
-        const supabase = createClient();
-        const { data, error } = await supabase
-          .from("service_requests")
-          .select("*")
-          .order("created_at", { ascending: false });
-
-        if (error) throw error;
-        setRequests(data || []);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchRequests();
+
+    // Set up Realtime Subscription
+    const supabase = createClient();
+    const channel = supabase
+      .channel('worker-radar')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to INSERT, UPDATE, DELETE
+          schema: 'public',
+          table: 'service_requests',
+        },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            const newJob = payload.new as ServiceRequest;
+            setRequests((prev) => [newJob, ...prev]);
+            toast.info("New Job Nearby!", {
+              description: `${newJob.service_type} requested in ${newJob.address.split(',')[0]}`,
+              action: {
+                label: "View Radar",
+                onClick: () => setActiveTab('radar')
+              }
+            });
+          } else if (payload.eventType === 'UPDATE') {
+            const updatedJob = payload.new as ServiceRequest;
+            setRequests((prev) =>
+              prev.map((job) => (job.id === updatedJob.id ? updatedJob : job))
+            );
+          } else if (payload.eventType === 'DELETE') {
+            const deletedId = payload.old.id;
+            setRequests((prev) => prev.filter((job) => job.id !== deletedId));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      if (channel) supabase.removeChannel(channel);
+    };
   }, []);
 
-  const activeJobsCount = requests.filter(r => r.status !== 'completed').length;
+  const handleAcceptJob = async (jobId: string) => {
+    if (!user) return;
+    try {
+      const supabase = createClient();
+      const { error: updateError } = await supabase
+        .from("service_requests")
+        .update({ 
+          assigned_worker_id: user.id,
+          status: 'in_progress' 
+        })
+        .eq('id', jobId);
+
+      if (updateError) throw updateError;
+      
+      toast.success("Job Claimed!", {
+        description: "Moving to your active jobs list."
+      });
+      fetchRequests();
+      setActiveTab('my-jobs');
+    } catch (err: any) {
+      toast.error("Failed to claim job", { description: err.message });
+    }
+  };
+
+  const handleCompleteJob = async (jobId: string) => {
+     try {
+       const supabase = createClient();
+       const { error: updateError } = await supabase
+         .from("service_requests")
+         .update({ status: 'completed' })
+         .eq('id', jobId);
+ 
+       if (updateError) throw updateError;
+       
+       toast.success("Job Completed!", {
+         description: "Well done, Pro! Earnings updated."
+       });
+       fetchRequests();
+     } catch (err: any) {
+       toast.error("Update failed", { description: err.message });
+     }
+  };
+
+  const radarJobs = requests.filter(r => r.status === 'pending' || r.status === 'new' || !r.assigned_worker_id);
+  const myActiveJobs = requests.filter(r => r.assigned_worker_id === user?.id && r.status === 'in_progress');
+  const displayJobs = activeTab === 'radar' ? radarJobs : myActiveJobs;
 
   return (
     <div className="relative min-h-screen bg-background px-4 py-8 text-foreground antialiased overflow-hidden">
@@ -66,20 +158,20 @@ export default function WorkerDashboardPage() {
 
       <div className="mx-auto max-w-5xl relative z-10">
         <header className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/10 pb-6">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-primary">
-              Pro Dashboard
-            </p>
-            <h1 className="mt-2 text-3xl font-heading font-extrabold tracking-tight text-gradient-primary">
-              Live Radar & Earnings
-            </h1>
-            <p className="mt-1 text-sm text-zinc-400 font-medium">
-              Accept live requests and preview customer defect photos before deploying.
-            </p>
+          <div className="flex flex-col gap-4">
+            <Logo size="md" />
+            <div>
+              <h1 className="text-3xl font-heading font-extrabold tracking-tight text-gradient-primary">
+                Pro Center
+              </h1>
+              <p className="mt-1 text-sm text-zinc-400 font-medium whitespace-pre-wrap">
+                Accept live requests and preview customer defect photos before deploying.
+              </p>
+            </div>
           </div>
           <div className="text-left sm:text-right text-xs text-zinc-500">
-            <p className="font-bold text-foreground">Ibrahim Adewale</p>
-            <p className="uppercase tracking-widest mt-1 text-[10px]">Enugu • Plumber / Elect.</p>
+            <p className="font-bold text-foreground">Worker Profile</p>
+            <p className="uppercase tracking-widest mt-1 text-[10px]">Verified Professional</p>
             <span className="mt-2 inline-flex h-6 items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 text-[9px] font-bold uppercase tracking-widest text-emerald-500 shadow-[0_0_10px_-2px_rgba(16,185,129,0.3)]">
               Radar Active
             </span>
@@ -94,13 +186,16 @@ export default function WorkerDashboardPage() {
         >
           {/* Earnings stats */}
           <div className="grid gap-4 sm:grid-cols-3">
+             {/* ... same stats as before ... */}
             <motion.div variants={itemVariants} className="glass-panel p-6 shadow-premium border-brand-primary/20">
               <p className="text-[10px] uppercase tracking-widest font-bold text-brand-primary">This week</p>
               <p className="mt-2 text-3xl font-heading font-extrabold text-foreground">₦45,000</p>
             </motion.div>
             <motion.div variants={itemVariants} className="glass-panel p-6 shadow-premium">
               <p className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">Jobs completed</p>
-              <p className="mt-2 text-3xl font-heading font-extrabold text-foreground">8</p>
+              <p className="mt-2 text-3xl font-heading font-extrabold text-foreground">
+                {requests.filter(r => r.status === 'completed' && r.assigned_worker_id === user?.id).length}
+              </p>
             </motion.div>
             <motion.div variants={itemVariants} className="glass-panel p-6 shadow-premium">
               <p className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">Rating</p>
@@ -108,42 +203,69 @@ export default function WorkerDashboardPage() {
             </motion.div>
           </div>
 
-          {/* Incoming Request Radar */}
-          <motion.section variants={itemVariants} className="glass-panel p-6 shadow-premium">
-            <div className="mb-6 flex items-center justify-between border-b border-white/10 pb-4">
-              <div className="flex items-center gap-3">
-                <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-primary opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-brand-primary"></span>
-                </span>
-                <h2 className="text-[10px] uppercase tracking-widest font-bold text-zinc-400">Live Area Radar</h2>
-              </div>
-              <span className="rounded-full bg-brand-primary/10 border border-brand-primary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-primary">
-                {activeJobsCount} Available
-              </span>
-            </div>
+          {/* Navigation Tabs */}
+          <div className="flex bg-white/5 p-1 rounded-2xl border border-white/10 w-full sm:w-fit">
+            <button 
+              onClick={() => setActiveTab('radar')}
+              className={`flex-1 sm:flex-none flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold transition-all ${activeTab === 'radar' ? 'bg-brand-primary text-background' : 'text-zinc-500 hover:text-foreground'}`}
+            >
+              <Navigation size={14} /> Area Radar
+            </button>
+            <button 
+              onClick={() => setActiveTab('my-jobs')}
+              className={`flex-1 sm:flex-none flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold transition-all ${activeTab === 'my-jobs' ? 'bg-brand-primary text-background' : 'text-zinc-500 hover:text-foreground'}`}
+            >
+              <ClipboardList size={14} /> My Active Jobs 
+              {myActiveJobs.length > 0 && <span className="flex h-4 w-4 items-center justify-center rounded-full bg-white/20 text-[9px]">{myActiveJobs.length}</span>}
+            </button>
+          </div>
 
-            <div className="divide-y divide-white/5">
-              {loading ? (
-                <div className="py-12 flex flex-col items-center justify-center text-zinc-500">
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-primary border-t-transparent mb-4" />
-                  <p className="text-xs font-medium">Scanning for local jobs...</p>
-                </div>
-              ) : error ? (
-                <div className="py-6 flex flex-col items-center justify-center text-red-400">
-                  <AlertCircle size={24} className="mb-2 opacity-50" />
-                  <p className="text-xs font-bold uppercase tracking-widest">Connection Error</p>
-                  <p className="text-xs text-red-500/70 mt-1 text-center">{error}</p>
-                </div>
-              ) : requests.length === 0 ? (
-                <div className="py-12 flex flex-col items-center justify-center text-zinc-500">
-                  <CheckCircle2 size={32} className="mb-3 opacity-20" />
-                  <p className="text-sm font-bold text-foreground">No active jobs in your area</p>
-                  <p className="text-xs mt-1">Leave your radar on to get notified instantly.</p>
-                </div>
-              ) : (
-                <AnimatePresence>
-                  {requests.map((job) => (
+          {/* Jobs Feed */}
+          <motion.section variants={itemVariants} className="glass-panel p-6 shadow-premium">
+             <div className="mb-6 flex items-center justify-between border-b border-white/10 pb-4">
+               <div className="flex items-center gap-3">
+                 {activeTab === 'radar' ? (
+                    <span className="relative flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-primary opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-brand-primary"></span>
+                    </span>
+                 ) : (
+                    <ClipboardList size={16} className="text-brand-primary" />
+                 )}
+                 <h2 className="text-[10px] uppercase tracking-widest font-bold text-zinc-400">
+                    {activeTab === 'radar' ? 'Incoming Request Radar' : 'Your Ongoing Projects'}
+                 </h2>
+               </div>
+               <span className="rounded-full bg-brand-primary/10 border border-brand-primary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-primary">
+                 {displayJobs.length} Total
+               </span>
+             </div>
+
+             <div className="divide-y divide-white/5">
+               {loading ? (
+                 <div className="py-12 flex flex-col items-center justify-center text-zinc-500">
+                   <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-primary border-t-transparent mb-4" />
+                   <p className="text-xs font-medium">Updating boards...</p>
+                 </div>
+               ) : error ? (
+                 <div className="py-6 flex flex-col items-center justify-center text-red-400">
+                   <AlertCircle size={24} className="mb-2 opacity-50" />
+                   <p className="text-xs font-bold uppercase tracking-widest">Connection Error</p>
+                   <p className="text-xs text-red-500/70 mt-1 text-center">{error}</p>
+                 </div>
+               ) : displayJobs.length === 0 ? (
+                 <div className="py-12 flex flex-col items-center justify-center text-zinc-500">
+                   <CheckCircle2 size={32} className="mb-3 opacity-20" />
+                   <p className="text-sm font-bold text-foreground">
+                      {activeTab === 'radar' ? 'Radar is empty' : 'You have no active jobs'}
+                   </p>
+                   <p className="text-xs mt-1">
+                      {activeTab === 'radar' ? 'Leave your radar on to get notified instantly.' : 'Claim a job from the radar to get started.'}
+                   </p>
+                 </div>
+               ) : (
+                 <AnimatePresence mode="wait">
+                   {displayJobs.map((job) => (
                     <motion.div
                       key={job.id}
                       initial={{ opacity: 0, x: -10 }}
@@ -204,9 +326,21 @@ export default function WorkerDashboardPage() {
                                 <p className="text-[11px] font-extrabold tracking-widest text-brand-primary">₦15,000</p>
                                 <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-500 mt-0.5">Base Call-Out</p>
                             </div>
-                            <button className="btn-minimal h-9 px-6 rounded-full text-[10px] font-bold uppercase tracking-[0.15em] shadow-premium hover:shadow-[0_0_15px_rgba(249,115,22,0.3)]">
-                              Accept Job
-                            </button>
+                            {activeTab === 'radar' ? (
+                                <button 
+                                  onClick={() => handleAcceptJob(job.id)}
+                                  className="btn-minimal h-9 px-6 rounded-full text-[10px] font-bold uppercase tracking-[0.15em] shadow-premium hover:shadow-[0_0_15px_rgba(249,115,22,0.3)] transition-all"
+                                >
+                                  Accept Job
+                                </button>
+                            ) : (
+                                <button 
+                                  onClick={() => handleCompleteJob(job.id)}
+                                  className="flex items-center gap-2 h-9 px-6 bg-emerald-500 text-white rounded-full text-[10px] font-bold uppercase tracking-[0.15em] shadow-premium hover:bg-emerald-600 transition-all"
+                                >
+                                  <Check size={14} /> Mark Complete
+                                </button>
+                            )}
                         </div>
                       </div>
                     </motion.div>
