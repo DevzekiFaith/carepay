@@ -128,15 +128,6 @@ export default function RequestPage() {
         return;
       } else {
         currentUserId = signUpData.user?.id;
-        if (currentUserId) {
-          // New Profile
-          await supabase.from('profiles').insert({
-            id: currentUserId,
-            full_name: fullName,
-            phone: phone,
-            address: address
-          });
-        }
       }
     }
 
@@ -145,6 +136,14 @@ export default function RequestPage() {
       setSubmitting(false);
       return;
     }
+
+    // ENSURE PROFILE EXISTS (This prevents the FK violation if user was created but profile was not)
+    await supabase.from('profiles').upsert({
+      id: currentUserId,
+      full_name: fullName || user?.user_metadata?.full_name || 'Customer',
+      phone: phone || user?.user_metadata?.phone || '',
+      address: address || ''
+    });
 
     const preferredTime = appointmentDate ? new Date(new Date(appointmentDate).setHours(parseInt(appointmentTime.split(':')[0]), parseInt(appointmentTime.split(':')[1]))).toISOString() : null;
 
