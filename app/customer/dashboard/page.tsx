@@ -49,7 +49,7 @@ export default function CustomerDashboardPage() {
         .from('wallets')
         .select('balance')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
       
       if (wallet) setBalance(wallet.balance);
 
@@ -58,7 +58,7 @@ export default function CustomerDashboardPage() {
         .from('profiles')
         .select('subscription_tier')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
       
       if (profile) setTier(profile.subscription_tier || 'basic');
 

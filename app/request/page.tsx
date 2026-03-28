@@ -9,8 +9,10 @@ import { createClient } from "@/lib/supabase/client";
 import SurgeBadge from "@/app/components/SurgeBadge";
 import type { SurgeResult } from "@/lib/surge";
 
-import { Wrench, Zap, Hammer, Armchair, Snowflake, Paintbrush, PenTool, Camera, X, Loader2, Calendar } from "lucide-react";
+import { Wrench, Zap, Hammer, Armchair, Snowflake, Paintbrush, PenTool, Camera, X, Loader2, Calendar, Clock } from "lucide-react";
 import { toast } from "sonner";
+import ErrorAlert from "@/app/components/ErrorAlert";
+import ModernDatePicker from "@/app/components/ModernDatePicker";
 
 const REQUEST_HERO_IMAGE = "/su4.jpg";
 
@@ -34,6 +36,9 @@ export default function RequestPage() {
   const [surgeLoading, setSurgeLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  
+  const [appointmentDate, setAppointmentDate] = useState<Date | null>(new Date());
+  const [appointmentTime, setAppointmentTime] = useState("09:00");
 
   const [user, setUser] = useState<any>(null);
 
@@ -80,7 +85,6 @@ export default function RequestPage() {
     const address = ((formData.get("address") as string) || "").trim();
     const serviceType = selectedService || "";
     const details = ((formData.get("details") as string) || "").trim();
-    const preferredTimeRaw = formData.get("preferredTime") as string;
 
     if (!serviceType) {
       toast.error("Service required", {
@@ -142,7 +146,7 @@ export default function RequestPage() {
       return;
     }
 
-    const preferredTime = preferredTimeRaw ? new Date(preferredTimeRaw).toISOString() : null;
+    const preferredTime = appointmentDate ? new Date(new Date(appointmentDate).setHours(parseInt(appointmentTime.split(':')[0]), parseInt(appointmentTime.split(':')[1]))).toISOString() : null;
 
     // Handle Image Upload First
     let imageUrl = null;
@@ -370,44 +374,37 @@ export default function RequestPage() {
                        />
                      </div>
                   )}
-                  {user && (
-                    <div className="space-y-2">
-                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 pl-1">
-                          Preferred Appointment Date
-                        </label>
-                        <div className="relative group">
-                          <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-brand-primary transition-colors" size={16} />
-                          <input
-                            type="datetime-local"
-                            name="preferredTime"
-                            className="w-full rounded-xl border border-white/10 dark:border-white/5 bg-background/50 pl-12 pr-4 py-3.5 text-sm text-foreground outline-none transition-all focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary appearance-none cursor-pointer"
-                          />
-                          <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-brand-primary/50">Select</span>
-                          </div>
-                        </div>
-                      </div>
-                  )}
                 </div>
 
-                {!user && (
-                    <div className="space-y-2">
-                      <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 pl-1">
-                        Preferred time
-                      </label>
-                      <div className="relative group">
-                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-brand-primary transition-colors" size={16} />
-                        <input
-                          type="datetime-local"
-                          name="preferredTime"
-                          className="w-full rounded-xl border border-white/10 dark:border-white/5 bg-background/50 pl-12 pr-4 py-3.5 text-sm text-foreground outline-none transition-all focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary appearance-none cursor-pointer"
-                        />
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-brand-primary/50">Select</span>
-                        </div>
-                      </div>
+                <div className="pt-8 border-t border-white/5 space-y-8">
+                  <ModernDatePicker 
+                    selectedDate={appointmentDate} 
+                    onSelect={(date) => setAppointmentDate(date)} 
+                  />
+
+                  <div className="space-y-4">
+                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 flex items-center gap-2">
+                      <Clock size={12} className="text-brand-primary" strokeWidth={3} />
+                      Preferred Time
+                    </label>
+                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                      {["08:00", "10:00", "12:00", "14:00", "16:00"].map((time) => (
+                        <button
+                          key={time}
+                          type="button"
+                          onClick={() => setAppointmentTime(time)}
+                          className={`h-11 rounded-xl text-[11px] font-bold border transition-all ${
+                            appointmentTime === time 
+                              ? "bg-brand-primary border-brand-primary text-background shadow-lg" 
+                              : "glass-panel border-white/5 text-zinc-400 hover:border-brand-primary/30"
+                          }`}
+                        >
+                          {time}
+                        </button>
+                      ))}
                     </div>
-                )}
+                  </div>
+                </div>
 
                 <div className="space-y-2">
                   <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
@@ -497,11 +494,11 @@ export default function RequestPage() {
                   </button>
                 </div>
 
-                {errorMsg && (
-                  <p className="p-4 rounded-xl border border-red-200 dark:border-red-800/30 bg-red-50 dark:bg-red-900/10 text-sm font-semibold text-red-800 dark:text-red-400 mt-4 leading-relaxed">
-                    {errorMsg}
-                  </p>
-                )}
+                <ErrorAlert 
+                  error={errorMsg} 
+                  onClear={() => setErrorMsg(null)}
+                  className="mt-6"
+                />
 
                 {submitted && (
                   <motion.div

@@ -9,6 +9,7 @@ import Image from "next/image";
 import { getDefaultAreas } from "@/lib/cities";
 import IdVerificationStatus, { type VerificationStatus } from "@/app/components/IdVerificationStatus";
 import Logo from "@/app/components/Logo";
+import ErrorAlert from "@/app/components/ErrorAlert";
 
 const NIN_LENGTH = 11;
 
@@ -28,6 +29,7 @@ const AREAS = getDefaultAreas();
 export default function WorkerRegisterPage() {
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
   const [ninError, setNinError] = useState<string | null>(null);
   const [certFile, setCertFile] = useState<File | null>(null);
@@ -217,13 +219,23 @@ export default function WorkerRegisterPage() {
               </div>
 
               <div className="px-1 py-1">
-                <label className="flex items-center gap-2 cursor-pointer group w-fit">
+                <button 
+                  type="button"
+                  onClick={() => setRememberMe(!rememberMe)}
+                  className="flex items-center gap-2 cursor-pointer group w-fit"
+                >
                    <div className="relative flex items-center justify-center h-4 w-4 rounded border border-white/20 bg-white/5 group-hover:border-brand-primary/50 transition-colors">
-                      <input type="checkbox" name="remember" className="peer sr-only" defaultChecked />
-                      <div className="h-2 w-2 rounded-sm bg-brand-primary opacity-0 peer-checked:opacity-100 transition-opacity" />
+                      <input 
+                        type="checkbox" 
+                        name="remember" 
+                        className="sr-only" 
+                        checked={rememberMe} 
+                        onChange={() => {}} 
+                      />
+                      <div className={`h-2 w-2 rounded-sm bg-brand-primary transition-opacity ${rememberMe ? 'opacity-100' : 'opacity-0'}`} />
                    </div>
                    <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest group-hover:text-zinc-300 transition-colors underline-offset-4">Keep me signed in</span>
-                </label>
+                </button>
               </div>
 
               <div className="space-y-2">
@@ -460,7 +472,13 @@ export default function WorkerRegisterPage() {
               </button>
             </div>
 
-            {message && (
+            <ErrorAlert 
+              error={message && message.includes("failed") ? message : null} 
+              onClear={() => setMessage(null)}
+              className="mt-6"
+            />
+
+            {message && !message.includes("failed") && (
               <p className="p-6 rounded-xl border border-emerald-200 dark:border-emerald-800/30 bg-emerald-50 dark:bg-emerald-900/10 text-sm font-semibold text-emerald-800 dark:text-emerald-400 mt-6 leading-relaxed">
                 {message}
               </p>

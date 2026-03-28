@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { Zap, LayoutDashboard } from "lucide-react";
+import { LayoutDashboard, ShieldCheck, Zap } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import LogoutButton from "./LogoutButton";
+import Logo from "./Logo";
 
 export default async function Nav() {
   const supabase = await createClient();
@@ -16,15 +17,10 @@ export default async function Nav() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-6 lg:px-12 relative z-10">
         <Link
           href="/"
-          className="flex items-center gap-3 transition-opacity hover:opacity-80 group"
+          className="flex items-center transition-opacity hover:opacity-80"
           aria-label="CarePay home"
         >
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-brand-primary to-rose-500 text-white flex items-center justify-center font-bold text-lg shadow-[0_0_15px_-3px_rgba(249,115,22,0.4)] group-hover:scale-105 transition-transform">
-            <Zap size={16} fill="currentColor" />
-          </div>
-          <span className="hidden font-heading font-extrabold tracking-tight text-foreground sm:inline text-xl">
-            Care<span className="text-brand-primary">Pay</span>
-          </span>
+          <Logo size="sm" />
         </Link>
         <div className="flex items-center gap-2 sm:gap-4">
           {!user ? (
@@ -37,6 +33,14 @@ export default async function Nav() {
             </Link>
           ) : (
             <>
+              <Link
+                href="/customer/subscription"
+                className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-zinc-500 hover:text-brand-primary hover:bg-brand-primary/10 transition-colors"
+                title="Manage Tiers"
+              >
+                <ShieldCheck size={16} />
+                <span className="hidden lg:inline">Subscription</span>
+              </Link>
               <Link
                 href="/customer/dashboard"
                 className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-zinc-500 hover:text-brand-primary hover:bg-brand-primary/10 transition-colors"

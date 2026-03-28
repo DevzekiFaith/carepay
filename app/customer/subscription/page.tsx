@@ -3,8 +3,9 @@
 import { motion } from "framer-motion";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, Check, Shield, Star, Zap, Loader2, AlertCircle } from "lucide-react";
+import { ArrowLeft, Check, Shield, Star, Zap, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import ErrorAlert from "@/app/components/ErrorAlert";
 
 import { toast } from "sonner";
 
@@ -26,10 +27,10 @@ export default function SubscriptionPage() {
         .from('profiles')
         .select('subscription_tier')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
       if (profileError) throw profileError;
-      setCurrentTier(profile.subscription_tier || 'basic');
+      setCurrentTier(profile?.subscription_tier || 'basic');
     } catch (err: any) {
       console.error(err);
       setError(err.message);
@@ -118,12 +119,11 @@ export default function SubscriptionPage() {
           </div>
         </header>
 
-        {error && (
-          <div className="mb-6 glass-panel p-4 border-red-500/20 bg-red-500/5 flex items-center gap-3 text-red-400 text-sm max-w-xl mx-auto">
-            <AlertCircle size={18} />
-            <p>{error}</p>
-          </div>
-        )}
+        <ErrorAlert 
+          error={error} 
+          onClear={() => setError(null)} 
+          className="mb-8 max-w-xl mx-auto"
+        />
 
         <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid gap-6 md:grid-cols-3 max-w-5xl mx-auto mt-12">
           

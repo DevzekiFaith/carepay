@@ -1,13 +1,16 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Check, ClipboardCheck, ArrowLeft, Home, User, Calendar, MapPin } from "lucide-react";
+import { Check, ClipboardCheck, ArrowLeft, Home, User, MapPin, Clock } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
+import ModernDatePicker from "@/app/components/ModernDatePicker";
 
 export default function PropertyInspectionPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [appointmentDate, setAppointmentDate] = useState<Date | null>(new Date());
+  const [appointmentTime, setAppointmentTime] = useState("10:00");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,10 +91,10 @@ export default function PropertyInspectionPage() {
                 </Link>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-5 relative z-10">
+              <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
                 <h3 className="text-lg font-bold text-foreground mb-6">Book an Inspection</h3>
                 
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 pl-1">Property Full Address</label>
                   <div className="relative">
                     <MapPin size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
@@ -99,34 +102,51 @@ export default function PropertyInspectionPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 pl-1">Property Type</label>
-                    <div className="relative">
-                      <Home size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
-                      <select required className="w-full appearance-none rounded-2xl border border-white/10 bg-[#121214] pl-11 pr-4 py-3.5 text-sm font-medium text-foreground outline-none transition-all focus:border-brand-primary/50">
-                        <option value="">Select type...</option>
-                        <option value="apartment">Apartment / Flat</option>
-                        <option value="duplex">Duplex</option>
-                        <option value="bungalow">Bungalow</option>
-                        <option value="commercial">Commercial / Office</option>
-                      </select>
-                    </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 pl-1">Property Type</label>
+                  <div className="relative">
+                    <Home size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
+                    <select required className="w-full appearance-none rounded-2xl border border-white/10 bg-[#121214] pl-11 pr-4 py-3.5 text-sm font-medium text-foreground outline-none transition-all focus:border-brand-primary/50">
+                      <option value="">Select type...</option>
+                      <option value="apartment">Apartment / Flat</option>
+                      <option value="duplex">Duplex</option>
+                      <option value="bungalow">Bungalow</option>
+                      <option value="commercial">Commercial / Office</option>
+                    </select>
                   </div>
+                </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 pl-1">Target Date</label>
-                    <div className="relative group">
-                      <Calendar size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-brand-primary transition-colors" />
-                      <input required type="date" className="w-full rounded-2xl border border-white/10 dark:border-white/5 bg-background/50 pl-11 pr-4 py-3.5 text-sm font-medium text-foreground outline-none transition-all focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary appearance-none cursor-pointer" />
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-brand-primary/50">Select</span>
-                      </div>
+                <div className="pt-4 border-t border-white/5 space-y-8">
+                  <ModernDatePicker 
+                    selectedDate={appointmentDate} 
+                    onSelect={(date) => setAppointmentDate(date)} 
+                  />
+
+                  <div className="space-y-4">
+                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 flex items-center gap-2">
+                      <Clock size={12} className="text-brand-primary" strokeWidth={3} />
+                      Preferred Time
+                    </label>
+                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                      {["09:00", "11:00", "13:00", "15:00", "17:00"].map((time) => (
+                        <button
+                          key={time}
+                          type="button"
+                          onClick={() => setAppointmentTime(time)}
+                          className={`h-11 rounded-xl text-[11px] font-bold border transition-all ${
+                            appointmentTime === time 
+                              ? "bg-brand-primary border-brand-primary text-background shadow-lg" 
+                              : "glass-panel border-white/5 text-zinc-400 hover:border-brand-primary/30"
+                          }`}
+                        >
+                          {time}
+                        </button>
+                      ))}
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 pl-1">Landlord / Agent Details (Optional)</label>
                   <div className="relative">
                     <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
@@ -134,7 +154,7 @@ export default function PropertyInspectionPage() {
                   </div>
                 </div>
 
-                <button type="submit" className="btn-minimal mt-8 w-full rounded-full px-6 py-4 text-xs font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2">
+                <button type="submit" className="btn-minimal mt-8 w-full rounded-full px-6 py-4 text-xs font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2 shadow-premium hover:shadow-[0_0_20px_rgba(249,115,22,0.4)] transition-all">
                   <ClipboardCheck size={16} /> Secure Your Inspection
                 </button>
               </form>

@@ -53,9 +53,10 @@ export default function AdminPaymentsPage() {
         .from('wallets')
         .select('id, balance')
         .eq('user_id', payment.user_id)
-        .single();
+        .maybeSingle();
       
       if (walletError) throw walletError;
+      if (!wallet) throw new Error("This user does not have a wallet initialized yet.");
 
       // 2. Update Payment Status
       const { error: statusError } = await supabase

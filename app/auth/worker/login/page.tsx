@@ -6,10 +6,12 @@ import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import Logo from "@/app/components/Logo";
+import ErrorAlert from "@/app/components/ErrorAlert";
 
 export default function WorkerLoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -99,13 +101,23 @@ export default function WorkerLoginPage() {
           </div>
 
           <div className="flex items-center justify-between py-1">
-            <label className="flex items-center gap-2 cursor-pointer group">
+            <button 
+              type="button"
+              onClick={() => setRememberMe(!rememberMe)}
+              className="flex items-center gap-2 cursor-pointer group w-fit"
+            >
               <div className="relative flex items-center justify-center h-4 w-4 rounded border border-white/20 bg-white/5 group-hover:border-brand-primary/50 transition-colors">
-                 <input type="checkbox" name="remember" className="peer sr-only" defaultChecked />
-                 <div className="h-2 w-2 rounded-sm bg-brand-primary opacity-0 peer-checked:opacity-100 transition-opacity" />
+                 <input 
+                   type="checkbox" 
+                   name="remember" 
+                   className="sr-only" 
+                   checked={rememberMe} 
+                   onChange={() => {}} 
+                 />
+                 <div className={`h-2 w-2 rounded-sm bg-brand-primary transition-opacity ${rememberMe ? 'opacity-100' : 'opacity-0'}`} />
               </div>
               <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest group-hover:text-zinc-300 transition-colors">Keep me signed in</span>
-            </label>
+            </button>
           </div>
 
           <button
@@ -116,7 +128,13 @@ export default function WorkerLoginPage() {
             {submitting ? "Authenticating..." : "Sign In"}
           </button>
 
-          {message && (
+          <ErrorAlert 
+            error={message && message.includes("failed") ? message : null} 
+            onClear={() => setMessage(null)}
+            className="mt-6"
+          />
+          
+          {message && !message.includes("failed") && (
              <p className="pt-4 text-center text-xs font-bold text-brand-primary">
                {message}
              </p>

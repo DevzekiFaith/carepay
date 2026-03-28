@@ -3,8 +3,9 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, History, ArrowUpRight, ArrowDownLeft, Loader2, AlertCircle, Camera, Upload, CheckCircle2, Building2 } from "lucide-react";
+import { ArrowLeft, Plus, History, ArrowUpRight, ArrowDownLeft, Loader2, Camera, Upload, CheckCircle2, Building2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import ErrorAlert from "@/app/components/ErrorAlert";
 
 import { toast } from "sonner";
 
@@ -49,7 +50,7 @@ export default function CustomerWalletPage() {
         .from('wallets')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (walletError && walletError.code === 'PGRST116') {
         // Wallet doesn't exist, create it
@@ -57,7 +58,7 @@ export default function CustomerWalletPage() {
           .from('wallets')
           .insert({ user_id: user.id, balance: 0 })
           .select()
-          .single();
+          .maybeSingle();
         
         if (createError) throw createError;
         wallet = newWallet;
@@ -97,15 +98,22 @@ export default function CustomerWalletPage() {
     try {
       setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
 
       const { data: wallet } = await supabase
         .from('wallets')
         .select('id, balance')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (!wallet) return;
+      if (!wallet) {
+        toast.error("Wallet not found. Please refresh the page.");
+        setLoading(false);
+        return;
+      }
 
       // 1. Update Balance
       const { error: balanceError } = await supabase
@@ -133,6 +141,7 @@ export default function CustomerWalletPage() {
       setAmount("");
       toast.success(`Successfully funded ₦${val.toLocaleString()}`);
     } catch (err: any) {
+      setError(`Funding failed: ${err.message}`);
       toast.error(`Funding failed: ${err.message}`);
     } finally {
       setLoading(false);
@@ -187,6 +196,7 @@ export default function CustomerWalletPage() {
       setSenderName("");
       setReceiptFile(null);
     } catch (err: any) {
+      setError(`Submission failed: ${err.message}`);
       toast.error(`Submission failed: ${err.message}`);
     } finally {
       setUploading(false);
@@ -219,12 +229,11 @@ export default function CustomerWalletPage() {
           </div>
         </header>
 
-        {error && (
-          <div className="mb-6 glass-panel p-4 border-red-500/20 bg-red-500/5 flex items-center gap-3 text-red-400 text-sm">
-            <AlertCircle size={18} />
-            <p>{error}</p>
-          </div>
-        )}
+        <ErrorAlert 
+          error={error} 
+          onClear={() => setError(null)} 
+          className="mb-8"
+        />
 
         <motion.main variants={containerVariants} initial="hidden" animate="show" className="space-y-8">
           {/* Balance Card */}
