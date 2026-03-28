@@ -82,7 +82,7 @@ export default function CustomerDashboardPage() {
           schema: 'public',
           table: 'service_requests',
         },
-        async (payload) => {
+        async (payload: any) => {
           const updatedReq = payload.new as Request;
           // Check if this update is for the current customer (safety check)
           const { data: { user } } = await supabase.auth.getUser();

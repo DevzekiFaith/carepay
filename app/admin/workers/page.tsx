@@ -24,12 +24,16 @@ export default function AdminWorkersPage() {
   const supabase = createClient();
 
   useEffect(() => {
-    supabase
-      .from("professionals")
-      .select("id, full_name, phone, primary_skill, nin, is_verified, ai_verified, created_at")
-      .order("created_at", { ascending: false })
-      .limit(100)
-      .then(({ data }) => { setWorkers(data ?? []); setLoading(false); });
+    async function fetchWorkers() {
+      const { data } = await supabase
+        .from("professionals")
+        .select("id, full_name, phone, primary_skill, nin, is_verified, ai_verified, created_at")
+        .order("created_at", { ascending: false })
+        .limit(100);
+      setWorkers(data ?? []);
+      setLoading(false);
+    }
+    fetchWorkers();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

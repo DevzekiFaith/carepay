@@ -380,30 +380,9 @@ export default function RequestPage() {
                   <ModernDatePicker 
                     selectedDate={appointmentDate} 
                     onSelect={(date) => setAppointmentDate(date)} 
+                    selectedTime={appointmentTime}
+                    onTimeSelect={(time) => setAppointmentTime(time)}
                   />
-
-                  <div className="space-y-4">
-                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 flex items-center gap-2">
-                      <Clock size={12} className="text-brand-primary" strokeWidth={3} />
-                      Preferred Time
-                    </label>
-                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
-                      {["08:00", "10:00", "12:00", "14:00", "16:00"].map((time) => (
-                        <button
-                          key={time}
-                          type="button"
-                          onClick={() => setAppointmentTime(time)}
-                          className={`h-11 rounded-xl text-[11px] font-bold border transition-all ${
-                            appointmentTime === time 
-                              ? "bg-brand-primary border-brand-primary text-background shadow-lg" 
-                              : "glass-panel border-white/5 text-zinc-400 hover:border-brand-primary/30"
-                          }`}
-                        >
-                          {time}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
                 </div>
 
                 <div className="space-y-2">

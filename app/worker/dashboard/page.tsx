@@ -75,7 +75,7 @@ export default function WorkerDashboardPage() {
           schema: 'public',
           table: 'service_requests',
         },
-        (payload) => {
+        (payload: any) => {
           if (payload.eventType === 'INSERT') {
             const newJob = payload.new as ServiceRequest;
             setRequests((prev) => [newJob, ...prev]);

@@ -1,21 +1,33 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Calendar as CalendarIcon, ChevronRight, ChevronLeft, Clock } from "lucide-react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { Calendar as CalendarIcon, ChevronRight, ChevronLeft, LayoutGrid, ListFilter, Clock } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ModernDatePickerProps {
   onSelect: (date: Date) => void;
   selectedDate?: Date | null;
+  selectedTime?: string;
+  onTimeSelect?: (time: string) => void;
 }
 
-export default function ModernDatePicker({ onSelect, selectedDate }: ModernDatePickerProps) {
+const TIME_SLOTS = ["08:00", "10:00", "12:00", "14:00", "16:00", "18:00"];
+
+export default function ModernDatePicker({ 
+  onSelect, 
+  selectedDate,
+  selectedTime,
+  onTimeSelect 
+}: ModernDatePickerProps) {
+  const [viewMode, setViewMode] = useState<'strip' | 'grid'>('strip');
+  const [currentMonth, setCurrentMonth] = useState(new Date());
   const [dates, setDates] = useState<Date[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Generate next 14 days
+    // Generate next 21 days for the strip
     const nextDates = [];
-    for (let i = 0; i < 14; i++) {
+    for (let i = 0; i < 21; i++) {
       const d = new Date();
       d.setDate(d.getDate() + i);
       nextDates.push(d);
@@ -23,9 +35,31 @@ export default function ModernDatePicker({ onSelect, selectedDate }: ModernDateP
     setDates(nextDates);
   }, []);
 
+  const daysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
+  const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
+
+  const monthGridDates = useMemo(() => {
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+    const totalDays = daysInMonth(year, month);
+    const grid = [];
+    
+    // Empty slots before the first day
+    for (let i = 0; i < firstDayOfMonth; i++) {
+      grid.push(null);
+    }
+    
+    // Actual days
+    for (let i = 1; i <= totalDays; i++) {
+        grid.push(new Date(year, month, i));
+    }
+    
+    return grid;
+  }, [currentMonth]);
+
   const handleScroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
-      const scrollAmount = 200;
+      const scrollAmount = 240;
       scrollRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth'
@@ -39,63 +73,176 @@ export default function ModernDatePicker({ onSelect, selectedDate }: ModernDateP
            d1.getDate() === d2.getDate();
   };
 
-  const formatDay = (date: Date) => {
-    return new Intl.DateTimeFormat('en-US', { weekday: 'short' }).format(date);
-  };
-
-  const formatDate = (date: Date) => {
-    return date.getDate();
-  };
+  const formatDay = (date: Date) => new Intl.DateTimeFormat('en-US', { weekday: 'short' }).format(date);
+  const formatDate = (date: Date) => date.getDate();
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between mb-4">
-        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 flex items-center gap-2">
+    <div className="space-y-8 glass-panel p-6 sm:p-8 relative overflow-hidden group">
+      {/* Decorative Ambience */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-brand-primary/10 blur-[60px] -mr-16 -mt-16 pointer-events-none group-hover:bg-brand-primary/20 transition-colors" />
+      
+      <div className="flex items-center justify-between gap-4 mb-2 relative z-10">
+        <label className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500 flex items-center gap-2.5">
           <CalendarIcon size={12} className="text-brand-primary" strokeWidth={3} />
-          Choose Date
+          {viewMode === 'strip' ? "Select Appointment" : `${currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}`}
         </label>
-        <div className="flex gap-2">
-           <button type="button" onClick={() => handleScroll('left')} className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-white/5 transition-colors text-zinc-500">
-             <ChevronLeft size={18} />
-           </button>
-           <button type="button" onClick={() => handleScroll('right')} className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-white/5 transition-colors text-zinc-500">
-             <ChevronRight size={18} />
-           </button>
+        
+        <div className="flex items-center gap-1.5 p-1 bg-white/5 rounded-full border border-white/10 backdrop-blur-md">
+            <button 
+                type="button"
+                onClick={() => setViewMode('strip')}
+                className={`h-7 px-3 rounded-full flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest transition-all ${viewMode === 'strip' ? "bg-brand-primary text-background shadow-lg" : "text-zinc-500 hover:text-zinc-300"}`}
+            >
+                <ListFilter size={10} /> Strip
+            </button>
+            <button 
+                type="button"
+                onClick={() => setViewMode('grid')}
+                className={`h-7 px-3 rounded-full flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest transition-all ${viewMode === 'grid' ? "bg-brand-primary text-background shadow-lg" : "text-zinc-500 hover:text-zinc-300"}`}
+            >
+                <LayoutGrid size={10} /> Grid
+            </button>
         </div>
       </div>
 
-      <div 
-        ref={scrollRef}
-        className="flex gap-3 overflow-x-auto pb-4 -mx-1 px-1 scrollbar-hide snap-x"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
-        {dates.map((date, i) => {
-          const isSelected = selectedDate && isSameDay(date, selectedDate);
-          const isToday = isSameDay(date, new Date());
-          
-          return (
-            <button
-              key={i}
-              type="button"
-              onClick={() => onSelect(date)}
-              className={`flex-shrink-0 snap-center w-[72px] h-[90px] rounded-[24px] flex flex-col items-center justify-center transition-all duration-300 border ${
-                isSelected 
-                  ? "bg-brand-primary border-brand-primary shadow-[0_15px_30px_-10px_rgba(249,115,22,0.5)] scale-[1.05]" 
-                  : "glass-panel border-white/5 hover:border-brand-primary/20 bg-white/[0.02]"
-              }`}
+      <AnimatePresence mode="wait">
+        {viewMode === 'strip' ? (
+          <motion.div 
+            key="strip"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 10 }}
+            className="relative"
+          >
+            <div className="flex items-center justify-between mb-4">
+                 <p className="text-[11px] font-bold text-zinc-400">Next 3 weeks</p>
+                 <div className="flex gap-2">
+                    <button type="button" onClick={() => handleScroll('left')} className="h-8 w-8 rounded-xl flex items-center justify-center bg-white/5 border border-white/5 hover:border-brand-primary/30 transition-all text-zinc-400">
+                      <ChevronLeft size={16} />
+                    </button>
+                    <button type="button" onClick={() => handleScroll('right')} className="h-8 w-8 rounded-xl flex items-center justify-center bg-white/5 border border-white/5 hover:border-brand-primary/30 transition-all text-zinc-400">
+                      <ChevronRight size={16} />
+                    </button>
+                 </div>
+            </div>
+
+            <div 
+              ref={scrollRef}
+              className="flex gap-4 overflow-x-auto pb-6 -mx-2 px-2 scrollbar-hide snap-x"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
-              <span className={`text-[9px] font-extrabold uppercase tracking-[0.15em] ${isSelected ? "text-background" : "text-zinc-500"}`}>
-                {formatDay(date)}
-              </span>
-              <span className={`text-2xl font-heading font-extrabold mt-1.5 leading-none ${isSelected ? "text-background" : "text-foreground"}`}>
-                {formatDate(date)}
-              </span>
-              {isToday && !isSelected && (
-                 <div className="h-1.5 w-1.5 rounded-full bg-brand-primary mt-2 shadow-[0_0_8px_rgba(249,115,22,0.6)]" />
-              )}
-            </button>
-          );
-        })}
+              {dates.map((date, i) => {
+                const isSelected = selectedDate && isSameDay(date, selectedDate);
+                const isToday = isSameDay(date, new Date());
+                
+                return (
+                  <motion.button
+                    key={i}
+                    type="button"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => onSelect(date)}
+                    className={`flex-shrink-0 snap-center w-[76px] h-[98px] rounded-[28px] flex flex-col items-center justify-center transition-all duration-500 border relative ${
+                      isSelected 
+                        ? "bg-brand-primary border-brand-primary shadow-[0_15px_40px_-10px_rgba(249,115,22,0.6)]" 
+                        : "glass-panel border-white/5 hover:border-brand-primary/30 bg-white/[0.03]"
+                    }`}
+                  >
+                    <span className={`text-[9.5px] font-black uppercase tracking-[0.2em] ${isSelected ? "text-background" : "text-zinc-500"}`}>
+                      {formatDay(date)}
+                    </span>
+                    <span className={`text-2xl font-heading font-extrabold mt-2 leading-none ${isSelected ? "text-background" : "text-foreground"}`}>
+                      {formatDate(date)}
+                    </span>
+                    {isToday && !isSelected && (
+                       <div className="absolute bottom-3 h-1.5 w-1.5 rounded-full bg-brand-primary shadow-[0_0_10px_rgba(249,115,22,0.8)]" />
+                    )}
+                  </motion.button>
+                );
+              })}
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div 
+            key="grid"
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            className="space-y-4"
+          >
+            <div className="flex items-center justify-between mb-4">
+                 <p className="text-[11px] font-bold text-zinc-400">Select any day</p>
+                 <div className="flex gap-2">
+                    <button type="button" onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))} className="h-8 w-8 rounded-xl flex items-center justify-center bg-white/5 border border-white/5 hover:border-brand-primary/30 transition-all text-zinc-400">
+                      <ChevronLeft size={16} />
+                    </button>
+                    <button type="button" onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))} className="h-8 w-8 rounded-xl flex items-center justify-center bg-white/5 border border-white/5 hover:border-brand-primary/30 transition-all text-zinc-400">
+                      <ChevronRight size={16} />
+                    </button>
+                 </div>
+            </div>
+
+            <div className="grid grid-cols-7 gap-1 sm:gap-2">
+                {["S", "M", "T", "W", "T", "F", "S"].map(d => (
+                    <div key={d} className="h-8 flex items-center justify-center text-[9px] font-black text-zinc-600 uppercase tracking-widest">{d}</div>
+                ))}
+                {monthGridDates.map((date, i) => {
+                    if (!date) return <div key={`empty-${i}`} />;
+                    const isSelected = selectedDate && isSameDay(date, selectedDate);
+                    const isToday = isSameDay(date, new Date());
+                    const isPast = date < new Date(new Date().setHours(0,0,0,0));
+
+                    return (
+                        <button
+                            key={i}
+                            type="button"
+                            disabled={isPast}
+                            onClick={() => onSelect(date)}
+                            className={`aspect-square sm:h-11 sm:w-11 rounded-xl sm:rounded-2xl flex items-center justify-center text-xs font-bold transition-all ${
+                                isSelected 
+                                    ? "bg-brand-primary text-background shadow-lg shadow-brand-primary/20" 
+                                    : isPast 
+                                        ? "text-zinc-800 opacity-30 cursor-not-allowed"
+                                        : "text-zinc-400 hover:bg-white/5 hover:text-brand-primary border border-transparent hover:border-white/10"
+                            }`}
+                        >
+                            {date.getDate()}
+                            {isToday && !isSelected && <div className="absolute top-1 right-1 h-1 w-1 rounded-full bg-brand-primary" />}
+                        </button>
+                    );
+                })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Integrated Time Picker */}
+      <div className="mt-8 pt-8 border-t border-white/5 relative z-10">
+        <label className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500 flex items-center gap-2.5 mb-6">
+          <Clock size={12} className="text-brand-primary" strokeWidth={3} />
+          Available Slots
+        </label>
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+          {TIME_SLOTS.map((time) => {
+            const isSelected = selectedTime === time;
+            return (
+                <motion.button
+                key={time}
+                type="button"
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => onTimeSelect?.(time)}
+                className={`h-11 rounded-2xl text-[11px] font-black border transition-all duration-300 flex items-center justify-center ${
+                    isSelected 
+                    ? "bg-brand-primary border-brand-primary text-background shadow-[0_10px_20px_-5px_rgba(249,115,22,0.4)]" 
+                    : "glass-panel border-white/5 text-zinc-400 hover:border-brand-primary/30"
+                }`}
+                >
+                {time}
+                </motion.button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
