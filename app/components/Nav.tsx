@@ -5,8 +5,14 @@ import LogoutButton from "./LogoutButton";
 import Logo from "./Logo";
 
 export default async function Nav() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch (error) {
+    console.error('Nav: Failed to initialize Supabase client:', error);
+  }
 
   return (
     <nav
