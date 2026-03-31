@@ -30,6 +30,12 @@ export async function middleware(request: NextRequest) {
                     )
                 },
             },
+            cookieOptions: {
+                name: 'sb-auth',
+                maxAge: 60 * 60 * 24 * 7,
+                path: '/',
+                sameSite: 'lax',
+            }
         }
     )
 

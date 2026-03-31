@@ -30,6 +30,20 @@ export function createClient() {
 
     return createBrowserClient(
         supabaseUrl,
-        supabaseAnonKey
+        supabaseAnonKey,
+        {
+            auth: {
+                persistSession: true,
+                autoRefreshToken: true,
+                detectSessionInUrl: true
+            },
+            cookieOptions: {
+                name: 'sb-auth',
+                maxAge: 60 * 60 * 24 * 7, // 7 days
+                domain: '',
+                path: '/',
+                sameSite: 'lax'
+            }
+        }
     )
 }

@@ -25,12 +25,16 @@ export async function createClient() {
                             cookieStore.set(name, value, options)
                         )
                     } catch {
-                        // The `setAll` method was called from a Server Component.
-                        // This can be ignored if you have middleware refreshing
-                        // user sessions.
+                        // handled
                     }
                 },
             },
+            cookieOptions: {
+                name: 'sb-auth',
+                maxAge: 60 * 60 * 24 * 7,
+                path: '/',
+                sameSite: 'lax',
+            }
         }
     )
 }

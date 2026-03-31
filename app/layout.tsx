@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import Nav from "./components/Nav";
 import RootWrapper from "./components/RootWrapper";
 import WhatsAppButton from "./components/WhatsAppButton";
@@ -12,16 +11,6 @@ import {
   SITE_NAME,
   getSiteUrl,
 } from "@/lib/site";
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
-
-const plusJakartaSans = Plus_Jakarta_Sans({
-  variable: "--font-plus-jakarta-sans",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   metadataBase: getSiteUrl(),
@@ -68,7 +57,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.variable} ${plusJakartaSans.variable} min-w-0 overflow-x-hidden font-sans antialiased`}
+        className="min-w-0 overflow-x-hidden font-sans antialiased"
       >
         <a
           href="#content"

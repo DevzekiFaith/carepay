@@ -62,7 +62,7 @@ export default function CustomerRegisterPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-background px-4 py-12 text-foreground antialiased w-full overflow-hidden">
+    <div className="relative flex min-h-screen items-center justify-center bg-background px-4 py-12 text-foreground antialiased w-full">
       {/* Background Ambience */}
       <div className="absolute inset-x-0 -top-[30%] -z-10 h-[80%] w-full rounded-full bg-brand-primary/10 opacity-30 blur-[120px] mix-blend-screen" />
 
@@ -174,7 +174,7 @@ export default function CustomerRegisterPage() {
         <div className="mt-8 flex flex-col items-center justify-center space-y-4 border-t border-white/10 pt-6 text-xs text-zinc-500">
           <Link
             href="/auth/customer/login"
-            className="font-bold text-foreground hover:text-brand-primary transition-colors hover:underline"
+            className="font-bold text-foreground hover:text-brand-primary transition-colors hover:underline py-2 block"
           >
             Already have an account? Log in
           </Link>
