@@ -31,11 +31,14 @@ export default function CustomerWalletPage() {
   const [senderName, setSenderName] = useState("");
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
 
   const supabase = createClient();
 
   const fetchData = useCallback(async () => {
+    if (isFetching) return;
     try {
+      setIsFetching(true);
       setLoading(true);
       setError(null);
       const { data: { user } } = await supabase.auth.getUser();
@@ -45,26 +48,15 @@ export default function CustomerWalletPage() {
         return;
       }
 
-      // Fetch or Create Wallet
-      let { data: wallet, error: walletError } = await supabase
+      // Fetch or Create Wallet (Upsert style to avoid race conditions)
+      const { data: wallet, error: walletError } = await supabase
         .from('wallets')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
+        .upsert({ user_id: user.id, balance: 0 }, { onConflict: 'user_id', ignoreDuplicates: false })
+        .select()
+        .single();
 
-      if (walletError && walletError.code === 'PGRST116') {
-        // Wallet doesn't exist, create it
-        const { data: newWallet, error: createError } = await supabase
-          .from('wallets')
-          .insert({ user_id: user.id, balance: 0 })
-          .select()
-          .maybeSingle();
-        
-        if (createError) throw createError;
-        wallet = newWallet;
-      } else if (walletError) {
-        throw walletError;
-      }
+      if (walletError) throw walletError;
+      if (!wallet) throw new Error("Failed to initialize wallet.");
 
       setBalance(wallet.balance);
 
@@ -83,8 +75,9 @@ export default function CustomerWalletPage() {
       setError(err.message);
     } finally {
       setLoading(false);
+      setIsFetching(false);
     }
-  }, [supabase]);
+  }, [supabase, isFetching]);
 
   useEffect(() => {
     fetchData();
@@ -103,16 +96,23 @@ export default function CustomerWalletPage() {
         return;
       }
 
-      const { data: wallet } = await supabase
+      let { data: wallet } = await supabase
         .from('wallets')
         .select('id, balance')
         .eq('user_id', user.id)
         .maybeSingle();
 
       if (!wallet) {
-        toast.error("Wallet not found. Please refresh the page.");
-        setLoading(false);
-        return;
+        // Just in case it was missing, create it
+        const { data: newWallet, error: createError } = await supabase
+          .from('wallets')
+          .insert({ user_id: user.id, balance: 0 })
+          .select()
+          .maybeSingle();
+
+        if (createError) throw createError;
+        if (!newWallet) throw new Error("Wallet initialization failed.");
+        wallet = newWallet;
       }
 
       // 1. Update Balance
@@ -306,7 +306,7 @@ export default function CustomerWalletPage() {
                         </div>
                         <div className="space-y-1">
                            <p className="text-[9px] uppercase tracking-widest font-bold text-zinc-500">Account Name</p>
-                           <p className="text-sm font-bold text-foreground">CarePay Services Ltd.</p>
+                           <p className="text-sm font-bold text-foreground">HomeCare Services Ltd.</p>
                         </div>
                      </div>
                      <div className="flex-1 space-y-4">
@@ -359,7 +359,7 @@ export default function CustomerWalletPage() {
                         disabled={uploading}
                         className="btn-minimal flex-1 h-12 rounded-full text-xs font-bold uppercase tracking-widest disabled:opacity-50"
                      >
-                        {uploading ? <Loader2 className="animate-spin" size={16} /> : "Notify CarePay Admin"}
+                        {uploading ? <Loader2 className="animate-spin" size={16} /> : "Notify HomeCare Admin"}
                      </button>
                      <button 
                         type="button" 

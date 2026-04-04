@@ -40,7 +40,7 @@ export default function PropertyInspectionPage() {
 
           <div className="inline-flex items-center gap-2 rounded-full border border-brand-primary/30 bg-brand-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-primary mb-6 shadow-[0_0_15px_-3px_rgba(249,115,22,0.3)]">
             <ClipboardCheck size={12} />
-            <span>CarePay Elite Service</span>
+            <span>HomeCare Elite Service</span>
           </div>
 
           <h1 className="text-4xl sm:text-5xl font-heading font-extrabold tracking-tight text-white leading-tight">

@@ -75,7 +75,7 @@ export default function Footer() {
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-between border-t border-brand-primary/10 pt-8 text-xs font-bold text-zinc-500">
-          <p>&copy; {new Date().getFullYear()} CarePay. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} HomeCare. All rights reserved.</p>
           <p className="mt-2 sm:mt-0 uppercase tracking-widest text-[10px] text-brand-primary/60">
             Engineered for minimalist perfection.
           </p>

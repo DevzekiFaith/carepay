@@ -24,7 +24,7 @@ export default async function Nav() {
         <Link
           href="/"
           className="flex items-center transition-opacity hover:opacity-80"
-          aria-label="CarePay home"
+          aria-label="HomeCare home"
         >
           <Logo size="sm" />
         </Link>

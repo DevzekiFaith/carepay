@@ -102,7 +102,7 @@ export default function Gateway() {
 
       {/* Floating decorative elements */}
        <div className="fixed bottom-0 left-0 w-full p-4 text-[10px] font-bold text-zinc-700 uppercase tracking-widest text-center pointer-events-none">
-          © 2026 CarePay Technologies • Enugu, Nigeria
+          © 2026 HomeCare Technologies • Enugu, Nigeria
        </div>
     </div>
   );

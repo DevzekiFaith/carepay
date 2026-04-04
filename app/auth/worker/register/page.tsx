@@ -498,7 +498,7 @@ export default function WorkerRegisterPage() {
               <ShieldCheck size={14} /> Trust & Safety First
             </h2>
             <p className="text-xs font-medium text-zinc-500 leading-relaxed">
-              CarePay customers pay up-front for security. In return, we demand absolute verification of our pros. Unverified profiles or those missing Guarantors will not receive jobs.
+              HomeCare customers pay up-front for security. In return, we demand absolute verification of our pros. Unverified profiles or those missing Guarantors will not receive jobs.
             </p>
           </div>
 

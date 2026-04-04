@@ -32,7 +32,7 @@ export default function Logo({ className = "", size = "md", href = "/" }: LogoPr
         </div>
       </div>
       <span className="text-foreground">
-        Care<span className="text-brand-primary">Pay</span>
+        Home<span className="text-brand-primary">Care</span>
       </span>
     </div>
   );

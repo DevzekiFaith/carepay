@@ -30,7 +30,7 @@ export default function OfflinePage() {
           You're offline
         </h1>
         <p className="text-sm text-zinc-500 leading-relaxed mb-8">
-          CarePay needs an internet connection to book services and match professionals. Please check your connection and try again.
+          HomeCare needs an internet connection to book services and match professionals. Please check your connection and try again.
         </p>
         <button
           onClick={() => window.location.reload()}

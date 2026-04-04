@@ -68,15 +68,15 @@ export default function HomeClient() {
             >
               <h2 className="text-2xl font-heading font-bold text-foreground mb-4">Refer & Get ₦500</h2>
               <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-6 max-w-md">
-                Share CarePay with your community safely, and both you and your friend get <span className="text-brand-primary font-bold">₦500 credit</span> on your next booking.
+                Share HomeCare with your community safely, and both you and your friend get <span className="text-brand-primary font-bold">₦500 credit</span> on your next booking.
               </p>
               <button
                 type="button"
                 onClick={() => {
-                  const shareText = encodeURIComponent("Check out CarePay - book handymen in 2 mins! Book it. Fix it. Done.");
+                  const shareText = encodeURIComponent("Check out HomeCare - book handymen in 2 mins! Book it. Fix it. Done.");
                   const shareUrl = window.location.origin;
                   if (navigator.share) {
-                    navigator.share({ title: "CarePay", text: shareText, url: shareUrl });
+                    navigator.share({ title: "HomeCare", text: shareText, url: shareUrl });
                   } else {
                     navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
                     alert("Referral link copied!");

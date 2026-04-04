@@ -13,7 +13,6 @@ import ErrorAlert from "@/app/components/ErrorAlert";
 export default function CustomerRegisterPage() {
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const supabase = createClient();
@@ -45,7 +44,7 @@ export default function CustomerRegisterPage() {
 
       if (data.user) {
         toast.success("Account created successfully", {
-          description: "Welcome to CarePay! Redirecting..."
+          description: "Welcome to HomeCare! Redirecting..."
         });
         setTimeout(() => {
           router.push('/');
@@ -142,19 +141,7 @@ export default function CustomerRegisterPage() {
             </div>
           </div>
 
-          <label className="flex items-center gap-2 py-2 cursor-pointer group w-fit">
-             <div className="relative flex items-center justify-center h-4 w-4 rounded border border-white/20 bg-white/5 group-hover:border-brand-primary/50 transition-colors">
-                <input 
-                  type="checkbox" 
-                  name="remember" 
-                  className="sr-only" 
-                  checked={rememberMe} 
-                  onChange={(e) => setRememberMe(e.target.checked)} 
-                />
-                <div className={`h-2 w-2 rounded-sm bg-brand-primary transition-opacity ${rememberMe ? 'opacity-100' : 'opacity-0'}`} />
-             </div>
-             <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest group-hover:text-zinc-300 transition-colors whitespace-nowrap">Stay logged in</span>
-          </label>
+          <div className="py-2" />
 
           <button
             type="submit"

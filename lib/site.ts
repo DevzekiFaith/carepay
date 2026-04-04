@@ -1,8 +1,8 @@
-export const SITE_NAME = "CarePay";
+export const SITE_NAME = "HomeCare";
 
-// Set this in production (e.g. https://carepay.ng)
+// Set this in production (e.g. https://homecare.ng)
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://carepay.example";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://homecare.example";
 
 export const DEFAULT_CITY = "Enugu";
 export const DEFAULT_STATE = "Enugu State";

@@ -26,11 +26,13 @@ export default function CustomerDashboardPage() {
   const [balance, setBalance] = useState(0);
   const [tier, setTier] = useState<'basic' | 'pro' | 'elite'>('basic');
   const [loading, setLoading] = useState(true);
-
+  const [isFetching, setIsFetching] = useState(false);
   const supabase = createClient();
 
   const fetchData = useCallback(async () => {
+    if (isFetching) return;
     try {
+      setIsFetching(true);
       setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -44,12 +46,12 @@ export default function CustomerDashboardPage() {
       
       setRequests(reqData || []);
 
-      // 2. Fetch Wallet Balance
+      // 2. Fetch or Create Wallet Balance (Atomic Upsert)
       const { data: wallet } = await supabase
         .from('wallets')
+        .upsert({ user_id: user.id, balance: 0 }, { onConflict: 'user_id', ignoreDuplicates: false })
         .select('balance')
-        .eq('user_id', user.id)
-        .maybeSingle();
+        .single();
       
       if (wallet) setBalance(wallet.balance);
 
@@ -66,8 +68,9 @@ export default function CustomerDashboardPage() {
       console.error(err);
     } finally {
       setLoading(false);
+      setIsFetching(false);
     }
-  }, [supabase]);
+  }, [supabase, isFetching]);
 
   useEffect(() => {
     fetchData();
@@ -289,16 +292,16 @@ export default function CustomerDashboardPage() {
               <div>
                 <h3 className="text-sm font-bold text-foreground">Invite friends, get rewarded</h3>
                 <p className="mt-1 text-xs font-medium text-zinc-400 max-w-md">
-                  Share CarePay with your network. When they book their first pro, you both receive ₦500 in service credits.
+                  Share HomeCare with your network. When they book their first pro, you both receive ₦500 in service credits.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => {
-                  const shareText = encodeURIComponent("Check out CarePay - elite home services!");
+                  const shareText = encodeURIComponent("Check out HomeCare - elite home services!");
                   const shareUrl = window.location.origin;
                   if (navigator.share) {
-                    navigator.share({ title: "CarePay", text: shareText, url: shareUrl });
+                    navigator.share({ title: "HomeCare", text: shareText, url: shareUrl });
                   } else {
                     navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
                     toast.success("Link Copied!", { description: "Send it to your friends to earn ₦500." });

@@ -77,7 +77,7 @@ export default function SubscriptionPage() {
       if (subError) throw subError;
 
       setCurrentTier(tier);
-      toast.success(`Welcome to CarePay ${tier.toUpperCase()}! Your benefits are now active.`, {
+      toast.success(`Welcome to HomeCare ${tier.toUpperCase()}! Your benefits are now active.`, {
         description: "Zero convenience fees have been applied to your profile."
       });
     } catch (err: any) {
@@ -111,7 +111,7 @@ export default function SubscriptionPage() {
           </Link>
           <div className="mt-8">
             <h1 className="text-3xl sm:text-4xl font-heading font-extrabold tracking-tight text-gradient-primary">
-              Choose your CarePay Tier
+              Choose your HomeCare Tier
             </h1>
             <p className="mt-2 text-sm text-zinc-400 font-medium max-w-md mx-auto">
               Upgrade your account to unlock zero surge fees, priority matching, and dedicated facility managers.
@@ -162,7 +162,7 @@ export default function SubscriptionPage() {
               </span>
             </div>
             
-            <h3 className="text-lg font-bold text-brand-primary relative z-10">CarePay Pro</h3>
+            <h3 className="text-lg font-bold text-brand-primary relative z-10">HomeCare Pro</h3>
             <p className="text-sm text-zinc-300 mt-1 relative z-10">For busy professionals</p>
             <div className="my-6 relative z-10">
               <span className="text-4xl font-heading font-extrabold text-foreground tracking-tight">₦35k</span>
@@ -192,7 +192,7 @@ export default function SubscriptionPage() {
 
           {/* Elite Tier */}
           <motion.div variants={itemVariants} className={`glass-panel p-8 shadow-premium border-white/10 relative flex flex-col ${currentTier === 'elite' ? 'border-brand-primary/50 bg-brand-primary/5 shadow-[0_0_30px_rgba(249,115,22,0.15)]' : ''}`}>
-            <h3 className="text-lg font-bold text-foreground">CarePay Elite</h3>
+            <h3 className="text-lg font-bold text-foreground">HomeCare Elite</h3>
             <p className="text-sm text-zinc-400 mt-1">Facility management level</p>
             <div className="my-6">
               <span className="text-4xl font-heading font-extrabold text-foreground tracking-tight">₦150k</span>
