@@ -1,5 +1,5 @@
-// CarePay Service Worker — Network-first with offline fallback
-const CACHE_NAME = 'carepay-v1';
+// HomeCare Service Worker — Network-first with offline fallback
+const CACHE_NAME = 'homecare-v1';
 const OFFLINE_URL = '/offline';
 
 const PRECACHE_URLS = [

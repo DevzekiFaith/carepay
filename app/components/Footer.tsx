@@ -13,7 +13,7 @@ export default function Footer() {
                 <Zap size={16} fill="currentColor" />
               </div>
               <span className="font-heading font-extrabold tracking-tight text-foreground text-xl">
-                Care<span className="text-brand-primary">Pay</span>
+                Home<span className="text-brand-primary">Care</span>
               </span>
             </div>
 
@@ -21,7 +21,7 @@ export default function Footer() {
               Book it. Fix it. Done.
             </h3>
             <p className="text-sm font-medium text-zinc-400 max-w-xs leading-relaxed mb-6">
-              Premium handymen. Rapid matching. Pay seamlessly before the job begins.
+              Premium professionals. Rapid matching. Pay seamlessly before the job begins.
             </p>
 
             <div className="flex flex-col gap-3 text-xs font-semibold text-brand-primary/80">

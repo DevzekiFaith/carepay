@@ -185,7 +185,7 @@ export default function LiveMap({
                 {(showRoute || proPos) && targetPos && proPos && (
                     <>
                         <Marker position={proPos} icon={emeraldIcon}>
-                            <Popup>Nearest CarePro</Popup>
+                            <Popup>Nearest HomePro</Popup>
                         </Marker>
 
                         <Polyline

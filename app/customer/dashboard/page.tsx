@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Image as ImageIcon, Loader2, Shield, Star, Zap, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
@@ -26,14 +26,14 @@ export default function CustomerDashboardPage() {
   const [balance, setBalance] = useState(0);
   const [tier, setTier] = useState<'basic' | 'pro' | 'elite'>('basic');
   const [loading, setLoading] = useState(true);
-  const [isFetching, setIsFetching] = useState(false);
-  const supabase = createClient();
+  const isFetchingRef = useRef(false);
+  const supabase = useMemo(() => createClient(), []);
 
-  const fetchData = useCallback(async () => {
-    if (isFetching) return;
+  const fetchData = useCallback(async (isSilent = false) => {
+    if (isFetchingRef.current) return;
     try {
-      setIsFetching(true);
-      setLoading(true);
+      isFetchingRef.current = true;
+      if (!isSilent) setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
@@ -68,9 +68,9 @@ export default function CustomerDashboardPage() {
       console.error(err);
     } finally {
       setLoading(false);
-      setIsFetching(false);
+      isFetchingRef.current = false;
     }
-  }, [supabase, isFetching]);
+  }, [supabase]);
 
   useEffect(() => {
     fetchData();
@@ -101,7 +101,7 @@ export default function CustomerDashboardPage() {
                   icon: <CheckCircle2 className="text-emerald-500" />
                 });
              }
-             fetchData();
+             fetchData(true);
           }
         }
       )

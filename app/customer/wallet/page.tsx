@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowLeft, Plus, History, ArrowUpRight, ArrowDownLeft, Loader2, Camera, Upload, CheckCircle2, Building2 } from "lucide-react";
@@ -31,15 +31,15 @@ export default function CustomerWalletPage() {
   const [senderName, setSenderName] = useState("");
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [isFetching, setIsFetching] = useState(false);
+  const isFetchingRef = useRef(false);
 
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
-  const fetchData = useCallback(async () => {
-    if (isFetching) return;
+  const fetchData = useCallback(async (isSilent = false) => {
+    if (isFetchingRef.current) return;
     try {
-      setIsFetching(true);
-      setLoading(true);
+      isFetchingRef.current = true;
+      if (!isSilent) setLoading(true);
       setError(null);
       const { data: { user } } = await supabase.auth.getUser();
 
@@ -75,9 +75,9 @@ export default function CustomerWalletPage() {
       setError(err.message);
     } finally {
       setLoading(false);
-      setIsFetching(false);
+      isFetchingRef.current = false;
     }
-  }, [supabase, isFetching]);
+  }, [supabase]);
 
   useEffect(() => {
     fetchData();

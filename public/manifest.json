@@ -1,7 +1,7 @@
 {
-  "name": "CarePay — Book it. Fix it. Done.",
-  "short_name": "CarePay",
-  "description": "Book vetted home-repair professionals in Enugu. Plumbers, electricians, carpenters & more.",
+  "name": "HomeCare — Book it. Fix it. Done.",
+  "short_name": "HomeCare",
+  "description": "Book vetted home-repair professionals in Enugu, Lagos, and Abeokuta. Plumbers, electricians, carpenters & more.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
