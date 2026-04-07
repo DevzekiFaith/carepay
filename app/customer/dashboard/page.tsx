@@ -142,7 +142,7 @@ export default function CustomerDashboardPage() {
             </div>
           </div>
           <div className="flex flex-col sm:items-end text-xs text-zinc-500">
-            <p className="font-bold text-foreground capitalize">Premium User</p>
+            <p className="font-bold text-foreground capitalize">{tier} {tier !== 'basic' ? 'Member' : 'User'}</p>
             <p className="uppercase tracking-widest mt-1 text-[9px] font-bold">Active Profile</p>
           </div>
         </header>

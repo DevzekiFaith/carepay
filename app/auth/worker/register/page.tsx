@@ -50,6 +50,7 @@ export default function WorkerRegisterPage() {
     const formData = new FormData(form);
 
     // Extract fields
+    const email = (formData.get("email") as string)?.trim() ?? "";
     const nin = (formData.get("nin") as string)?.trim() ?? "";
     const phone = (formData.get("phone") as string)?.trim() ?? "";
     const pin = (formData.get("pin") as string)?.trim() ?? "";
@@ -67,13 +68,15 @@ export default function WorkerRegisterPage() {
 
     const supabase = createClient();
 
-    // We use a synthetic email from the phone number since SMS auth typically
-    // requires configuring an SMS provider inside the Supabase dashboard
-    const email = `${phone.replace(/\D/g, '')}@unovaconsultingfirstafrica@gmail.com`;
-
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password: pin,
+      options: {
+        data: {
+          full_name: fullName,
+          role: 'worker'
+        }
+      }
     });
 
     if (authError || !authData?.user) {

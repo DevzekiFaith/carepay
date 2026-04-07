@@ -10,8 +10,12 @@ export default async function Nav() {
     const supabase = await createClient();
     const { data } = await supabase.auth.getUser();
     user = data.user;
-  } catch (error) {
-    console.error('Nav: Failed to initialize Supabase client:', error);
+  } catch (error: any) {
+    if (error.message?.includes('Dynamic server usage')) {
+      // Expected during static pre-rendering
+    } else {
+      console.error('Nav: Failed to initialize Supabase client:', error);
+    }
   }
 
   return (

@@ -141,6 +141,31 @@ h6,
     0 16px 32px -4px var(--brand-glow);
 }
 
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--glass-border);
+  border: 3px solid var(--background);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-primary);
+}
+
+/* Selection */
+::selection {
+  background: var(--brand-primary);
+  color: #fff;
+}
+
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   .btn-minimal:hover,
@@ -149,4 +174,14 @@ h6,
     transform: none;
     transition: none;
   }
+}
+
+/* Utility: Pulse for images/loaders */
+.animate-soft-pulse {
+  animation: soft-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes soft-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }

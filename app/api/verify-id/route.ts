@@ -43,13 +43,16 @@ export async function POST(request: NextRequest): Promise<NextResponse<VerifyIdR
             {
               parts: [
                 {
-                  text: `You are an identity verification assistant. Evaluate this image:
-1. Is there a clear, real human face visible? (YES/NO)
-2. Is the photo high enough quality for identity verification? (YES/NO)
-3. Does it appear to be a genuine photo (not a photo of a photo or screen)? (YES/NO)
+                  text: `You are an AI identity verification assistant for an elite home-care platform. 
+Examine the following image (Base64) to determine if it is a suitable, genuine profile photo:
+1. Face Visibility: Is there a single, clear, front-facing human face visible? (YES/NO)
+2. Photo Quality: Is the lighting, focus, and resolution sufficient for identity verification? (YES/NO)
+3. Authenticity: Does the image appear to be a live, genuine photo of a person? Reject if it looks like a "photo of a photo", a computer screen, or a printout. (YES/NO)
+
+Analyze subtle cues: moire patterns, screen reflections, or unnatural shadows that suggest fraud.
 
 Respond ONLY in this JSON format:
-{"faceVisible": true/false, "qualityOk": true/false, "genuine": true/false, "confidence": "high"/"medium"/"low", "reason": "brief explanation"}`,
+{"faceVisible": boolean, "qualityOk": boolean, "genuine": boolean, "confidence": "high"|"medium"|"low", "reason": "concise explanation of the verdict"}`,
                 },
                 {
                   inline_data: {

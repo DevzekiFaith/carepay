@@ -16,7 +16,7 @@ export async function GET(
         style={{
           width: size,
           height: size,
-          background: '#09090b',
+          background: '#f97316',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -28,12 +28,12 @@ export async function GET(
             fontFamily: 'serif',
             fontSize: fontSize,
             fontWeight: 700,
-            color: '#fafafa',
+            color: '#ffffff',
             letterSpacing: '-0.04em',
             lineHeight: 1,
           }}
         >
-          C
+          H
         </div>
       </div>
     ),

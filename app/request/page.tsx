@@ -106,28 +106,39 @@ export default function RequestPage() {
         return;
       }
 
+      if (pin.length !== 6) {
+        setErrorMsg("PIN must be exactly 6 digits.");
+        setSubmitting(false);
+        return;
+      }
+
+      // Try initial signup first
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password: pin,
       });
 
       if (signUpError && signUpError.message.includes("already registered")) {
+        // User exists, try signing in instead
         const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password: pin,
         });
+
         if (signInError) {
-          setErrorMsg("Incorrect PIN for this email.");
+          setErrorMsg("Incorrect PIN. If you've forgotten it, please visit the login page.");
           setSubmitting(false);
           return;
         }
         currentUserId = signInData.user?.id;
+        toast.info("Welcome back!", { description: "Resuming booking with your saved details." });
       } else if (signUpError) {
-        setErrorMsg(`Auth Error: ${signUpError.message}`);
+        setErrorMsg(`Authentication Error: ${signUpError.message}`);
         setSubmitting(false);
         return;
       } else {
         currentUserId = signUpData.user?.id;
+        toast.success("Account created!", { description: "We've saved your progress for next time." });
       }
     }
 
