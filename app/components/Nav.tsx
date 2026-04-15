@@ -4,6 +4,7 @@ import Link from "next/link";
 import { LayoutDashboard, ShieldCheck, Wallet, Zap } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import type { User, UserResponse, Session, AuthChangeEvent } from "@supabase/supabase-js";
 import LogoutButton from "./LogoutButton";
 import Logo from "./Logo";
@@ -11,6 +12,7 @@ import Logo from "./Logo";
 export default function Nav() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const pathname = usePathname();
 
   useEffect(() => {
     const supabase = createClient();
@@ -51,17 +53,18 @@ export default function Nav() {
             <div className="h-8 w-20 animate-pulse rounded-full bg-zinc-100 dark:bg-zinc-800/50" />
           ) : (
             <>
-              <Link
-                href="/customer/wallet"
-                className="hidden md:flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] uppercase tracking-widest font-bold text-zinc-500 hover:text-brand-primary hover:bg-brand-primary/10 transition-colors"
-                title="Your Wallet"
-              >
-                <Wallet size={14} />
-                <span>Wallet</span>
-              </Link>
-
               {user ? (
                 <>
+                  {pathname !== "/" && (
+                    <Link
+                      href="/customer/wallet"
+                      className="hidden md:flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] uppercase tracking-widest font-bold text-zinc-500 hover:text-brand-primary hover:bg-brand-primary/10 transition-colors"
+                      title="Your Wallet"
+                    >
+                      <Wallet size={14} />
+                      <span>Wallet</span>
+                    </Link>
+                  )}
                   <Link
                     href="/customer/dashboard"
                     className="hidden md:flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] uppercase tracking-widest font-bold text-zinc-500 hover:text-brand-primary hover:bg-brand-primary/10 transition-colors"
