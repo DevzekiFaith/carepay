@@ -24,7 +24,7 @@ export default function MobileBottomNav() {
       setUser(session?.user ?? null);
     });
 
-    return () => subscription.unsubscribe();
+    return () => subscription?.unsubscribe?.();
   }, [supabase]);
 
   const handleLogout = async () => {

@@ -32,7 +32,7 @@ export default function Nav() {
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => subscription?.unsubscribe?.();
   }, []);
 
   return (

@@ -20,7 +20,11 @@ export function createClient() {
                         return (resolve: any) => new Promise(() => {});
                     }
                     if (prop === 'auth') return proxy;
-                    if (prop === 'data') return { user: null, session: null }; // Return structured null data
+                    if (prop === 'data') return { 
+                        user: null, 
+                        session: null,
+                        subscription: { unsubscribe: () => {} }
+                    }; // Return structured data with safe unsubscribe
                     if (prop === 'error') return null;
                     return proxy;
                 }
