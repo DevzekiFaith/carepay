@@ -34,7 +34,8 @@ export default function CustomerDashboardPage() {
     try {
       isFetchingRef.current = true;
       if (!isSilent) setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data } = await supabase.auth.getUser();
+      const user = data.user;
       if (!user) return;
 
       // 1. Fetch Requests
@@ -98,7 +99,8 @@ export default function CustomerDashboardPage() {
         async (payload: any) => {
           const updatedReq = payload.new as Request;
           // Check if this update is for the current customer (safety check)
-          const { data: { user } } = await supabase.auth.getUser();
+          const { data } = await supabase.auth.getUser();
+      const user = data.user;
           if (user && updatedReq.customer_id === user.id) {
              // Show contextual toasts
              if (payload.old.status !== 'in_progress' && updatedReq.status === 'in_progress') {

@@ -20,7 +20,8 @@ export default function SubscriptionPage() {
   const fetchProfile = useCallback(async () => {
     try {
       setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data } = await supabase.auth.getUser();
+      const user = data.user;
       if (!user) return;
 
       const { data: profile, error: profileError } = await supabase
@@ -47,7 +48,8 @@ export default function SubscriptionPage() {
     try {
       setUpgrading(tier);
       setError(null);
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data } = await supabase.auth.getUser();
+      const user = data.user;
       if (!user) {
         setError("Please log in to upgrade.");
         return;

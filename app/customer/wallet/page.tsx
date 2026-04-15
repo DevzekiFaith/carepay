@@ -41,7 +41,8 @@ export default function CustomerWalletPage() {
       isFetchingRef.current = true;
       if (!isSilent) setLoading(true);
       setError(null);
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data } = await supabase.auth.getUser();
+      const user = data.user;
 
       if (!user) {
         setError("You must be logged in to view your wallet.");
@@ -100,7 +101,8 @@ export default function CustomerWalletPage() {
 
     try {
       setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data } = await supabase.auth.getUser();
+      const user = data.user;
       if (!user) {
         setLoading(false);
         return;
@@ -167,7 +169,8 @@ export default function CustomerWalletPage() {
 
     try {
       setUploading(true);
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data } = await supabase.auth.getUser();
+      const user = data.user;
       if (!user) throw new Error("Not authenticated");
 
       // 1. Upload Receipt to Storage
@@ -429,7 +432,8 @@ function PendingVerifications() {
 
   useEffect(() => {
     const fetchPending = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: userData } = await supabase.auth.getUser();
+      const user = userData.user;
       if (!user) return;
       
       const { data } = await supabase

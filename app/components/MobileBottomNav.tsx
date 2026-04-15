@@ -14,11 +14,13 @@ export default function MobileBottomNav() {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user);
-    });
+    const checkUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      setUser(data.user);
+    };
+    checkUser();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null);
     });
 
@@ -58,7 +60,11 @@ export default function MobileBottomNav() {
                 isActive ? "text-brand-primary" : "text-zinc-500 hover:text-zinc-300"
               }`}
             >
-              <item.icon size={20} variant={isActive ? "fill" : "outline"} />
+              <item.icon 
+                size={20} 
+                fill={isActive ? "currentColor" : "none"} 
+                strokeWidth={isActive ? 2.5 : 2} 
+              />
               <span className="text-[9px] font-bold uppercase tracking-widest">{item.label}</span>
             </Link>
           );

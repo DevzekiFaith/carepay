@@ -45,8 +45,8 @@ export default function RequestPage() {
   useEffect(() => {
     const checkUser = async () => {
        const supabase = createClient();
-       const { data: { user: u } } = await supabase.auth.getUser();
-       setUser(u);
+       const { data } = await supabase.auth.getUser();
+       setUser(data.user);
     };
     checkUser();
   }, []);

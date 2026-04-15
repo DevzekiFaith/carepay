@@ -41,11 +41,11 @@ export default function WorkerDashboardPage() {
   const [activeTab, setActiveTab] = useState<'radar' | 'my-jobs'>('radar');
   const [user, setUser] = useState<any>(null);
 
-  const fetchRequests = async () => {
-    try {
-      const supabase = createClient();
-      const { data: { user: u } } = await supabase.auth.getUser();
-      setUser(u);
+    const fetchRequests = async () => {
+      try {
+        const supabase = createClient();
+        const { data: userData } = await supabase.auth.getUser();
+        setUser(userData.user);
 
       const { data, error: fetchError } = await supabase
         .from("service_requests")
