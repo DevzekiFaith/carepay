@@ -48,12 +48,22 @@ export default function CustomerWalletPage() {
         return;
       }
 
-      // Fetch or Create Wallet (Upsert style to avoid race conditions)
-      const { data: wallet, error: walletError } = await supabase
+      // Fetch or Create Wallet (Non-destructive)
+      let { data: wallet, error: walletError } = await supabase
         .from('wallets')
-        .upsert({ user_id: user.id, balance: 0 }, { onConflict: 'user_id', ignoreDuplicates: false })
-        .select()
-        .single();
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!wallet && !walletError) {
+        const { data: newWallet, error: createError } = await supabase
+          .from('wallets')
+          .insert({ user_id: user.id, balance: 0 })
+          .select()
+          .single();
+        wallet = newWallet;
+        walletError = createError;
+      }
 
       if (walletError) throw walletError;
       if (!wallet) throw new Error("Failed to initialize wallet.");

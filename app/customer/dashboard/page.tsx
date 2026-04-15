@@ -46,14 +46,24 @@ export default function CustomerDashboardPage() {
       
       setRequests(reqData || []);
 
-      // 2. Fetch or Create Wallet Balance (Atomic Upsert)
-      const { data: wallet } = await supabase
+      // 2. Fetch or Create Wallet Balance (Non-destructive)
+      let { data: wallet } = await supabase
         .from('wallets')
-        .upsert({ user_id: user.id, balance: 0 }, { onConflict: 'user_id', ignoreDuplicates: false })
         .select('balance')
-        .single();
+        .eq('user_id', user.id)
+        .maybeSingle();
       
-      if (wallet) setBalance(wallet.balance);
+      if (!wallet) {
+        // Create only if missing
+        const { data: newWallet } = await supabase
+          .from('wallets')
+          .insert({ user_id: user.id, balance: 0 })
+          .select('balance')
+          .single();
+        wallet = newWallet;
+      }
+      
+      if (wallet) setBalance(Number(wallet.balance));
 
       // 3. Fetch Profile Tier
       const { data: profile } = await supabase

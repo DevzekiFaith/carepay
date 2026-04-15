@@ -15,9 +15,12 @@ export function createClient() {
         const createSafeProxy = (): any => {
             const proxy: any = new Proxy(() => proxy, {
                 get: (target, prop) => {
-                    if (prop === 'then') return undefined; // Prevent infinite promise loops
+                    if (prop === 'then') {
+                        // Return a function that behaves like a promise that never resolves
+                        return (resolve: any) => new Promise(() => {});
+                    }
                     if (prop === 'auth') return proxy;
-                    if (prop === 'data') return null;
+                    if (prop === 'data') return { user: null, session: null }; // Return structured null data
                     if (prop === 'error') return null;
                     return proxy;
                 }

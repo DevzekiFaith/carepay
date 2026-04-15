@@ -17,11 +17,11 @@ export default function LogoutButton() {
   return (
     <button
       onClick={handleLogout}
-      className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
+      className="flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] uppercase tracking-widest font-bold text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
       title="Logout"
     >
-      <LogOut size={16} />
-      <span className="hidden lg:inline">Logout</span>
+      <LogOut size={14} />
+      <span>Logout</span>
     </button>
   );
 }
