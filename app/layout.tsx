@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Nav from "./components/Nav";
+import MobileBottomNav from "./components/MobileBottomNav";
 import RootWrapper from "./components/RootWrapper";
 import WhatsAppButton from "./components/WhatsAppButton";
 import "./globals.css";
@@ -69,6 +70,7 @@ export default function RootLayout({
         <RootWrapper>
           <div id="content">{children}</div>
         </RootWrapper>
+        <MobileBottomNav />
         <WhatsAppButton />
         <Toaster position="top-center" richColors />
         {/* PWA service worker registration */}

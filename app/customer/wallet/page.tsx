@@ -226,32 +226,32 @@ export default function CustomerWalletPage() {
       {/* Background Ambience */}
       <div className="absolute inset-x-0 -top-[10%] -z-10 h-[40%] w-full rounded-full bg-brand-primary/10 opacity-60 blur-[100px] mix-blend-screen pointer-events-none" />
 
-      <div className="mx-auto max-w-3xl relative z-10">
-        <header className="mb-8 flex flex-col gap-4 border-b border-white/10 pb-6">
-          <Link href="/customer/dashboard" className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-brand-primary transition-colors w-fit">
+      <div className="mx-auto max-w-3xl relative z-10 px-2 sm:px-0">
+        <header className="mb-6 sm:mb-8 flex flex-col gap-4 border-b border-white/10 pb-6">
+          <Link href="/customer/dashboard" className="flex items-center gap-1.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-brand-primary transition-colors w-fit">
             <ArrowLeft size={12} /> Back to Dashboard
           </Link>
           <div>
-            <h1 className="text-3xl font-heading font-extrabold tracking-tight text-gradient-primary">
+            <h1 className="text-2xl sm:text-3xl font-heading font-extrabold tracking-tight text-gradient-primary">
               Wallet
             </h1>
-            <p className="mt-1 text-sm text-zinc-400 font-medium">Manage your funds and transaction history securely.</p>
+            <p className="mt-1 text-[11px] sm:text-sm text-zinc-400 font-medium leading-relaxed">Manage your funds and transaction history securely.</p>
           </div>
         </header>
 
         <ErrorAlert 
           error={error} 
           onClear={() => setError(null)} 
-          className="mb-8"
+          className="mb-6 sm:mb-8"
         />
 
-        <motion.main variants={containerVariants} initial="hidden" animate="show" className="space-y-8">
+        <motion.main variants={containerVariants} initial="hidden" animate="show" className="space-y-6 sm:space-y-8">
           {/* Balance Card */}
-          <motion.section variants={itemVariants} className="glass-panel p-8 shadow-premium border-brand-primary/30 relative overflow-hidden">
+          <motion.section variants={itemVariants} className="glass-panel p-6 sm:p-8 shadow-premium border-brand-primary/30 relative overflow-hidden text-center sm:text-left">
             <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/10 blur-[50px] -mr-32 -mt-32 pointer-events-none" />
             
-            <p className="text-[10px] uppercase tracking-widest font-bold text-zinc-400 mb-2">Available Balance</p>
-            <p className="text-3xl sm:text-4xl lg:text-5xl font-heading font-extrabold text-foreground tracking-tight">
+            <p className="text-[9px] sm:text-[10px] uppercase tracking-widest font-bold text-zinc-400 mb-2">Available Balance</p>
+            <p className="text-2xl sm:text-4xl lg:text-5xl font-heading font-extrabold text-foreground tracking-tight">
               <span className="text-brand-primary mr-1">₦</span>{balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
             
@@ -388,28 +388,28 @@ export default function CustomerWalletPage() {
           <PendingVerifications />
 
           {/* Transactions */}
-          <motion.section variants={itemVariants} className="glass-panel p-6 shadow-premium">
-            <div className="mb-6 flex items-center gap-2 border-b border-white/10 pb-4">
-              <History size={16} className="text-brand-primary" />
-              <h2 className="text-[10px] uppercase tracking-widest font-bold text-zinc-400">Transaction History</h2>
+          <motion.section variants={itemVariants} className="glass-panel p-4 sm:p-6 shadow-premium">
+            <div className="mb-4 sm:mb-6 flex items-center gap-2 border-b border-white/10 pb-4">
+              <History size={14} className="text-brand-primary" />
+              <h2 className="text-[9px] sm:text-[10px] uppercase tracking-widest font-bold text-zinc-400">Transaction History</h2>
             </div>
             
-            <div className="divide-y divide-white/5">
+            <div className="space-y-2">
               {transactions.length === 0 ? (
                 <p className="py-8 text-center text-sm text-zinc-500">No transactions yet.</p>
               ) : (
                 transactions.map((tx) => (
-                  <div key={tx.id} className="flex items-center justify-between py-4 glass-panel-hover px-3 sm:px-4 rounded-xl transition-colors -mx-2 sm:-mx-4 group overflow-hidden">
-                    <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                      <div className={`flex shrink-0 h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-white/5 border border-white/10 ${tx.transaction_type === 'credit' ? 'text-emerald-500' : 'text-zinc-400'}`}>
-                        {tx.transaction_type === 'credit' ? <ArrowDownLeft size={14} /> : <ArrowUpRight size={14} />}
+                  <div key={tx.id} className="flex items-center justify-between py-3 px-3 sm:py-4 sm:px-4 glass-panel glass-panel-hover rounded-xl transition-all group overflow-hidden">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={`flex shrink-0 h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl bg-white/5 border border-white/10 ${tx.transaction_type === 'credit' ? 'text-emerald-500' : 'text-zinc-400'}`}>
+                        {tx.transaction_type === 'credit' ? <ArrowDownLeft size={12} className="sm:size-[14px]" /> : <ArrowUpRight size={12} className="sm:size-[14px]" />}
                       </div>
                       <div className="overflow-hidden min-w-0">
-                        <p className="text-xs sm:text-sm font-bold text-foreground group-hover:text-brand-primary transition-colors truncate">{tx.description}</p>
-                        <p className="text-[9px] sm:text-[10px] uppercase tracking-widest text-zinc-500 mt-1 truncate">{new Date(tx.created_at).toLocaleDateString()}</p>
+                        <p className="text-[11px] sm:text-sm font-bold text-foreground group-hover:text-brand-primary transition-colors truncate">{tx.description}</p>
+                        <p className="text-[8px] sm:text-[10px] uppercase tracking-widest text-zinc-500 mt-0.5 truncate">{new Date(tx.created_at).toLocaleDateString()}</p>
                       </div>
                     </div>
-                    <p className={`text-xs sm:text-sm font-extrabold font-mono tracking-tight shrink-0 pl-3 sm:pl-4 ${tx.transaction_type === 'credit' ? 'text-emerald-500' : 'text-foreground'}`}>
+                    <p className={`text-[11px] sm:text-sm font-extrabold font-mono tracking-tighter sm:tracking-tight shrink-0 pl-2 ${tx.transaction_type === 'credit' ? 'text-emerald-500' : 'text-foreground'}`}>
                       {tx.transaction_type === 'credit' ? '+' : '-'}₦{tx.amount.toLocaleString()}
                     </p>
                   </div>
@@ -450,13 +450,12 @@ function PendingVerifications() {
   if (pending.length === 0) return null;
 
   return (
-    <motion.section variants={itemVariants} className="glass-panel p-6 shadow-premium border-amber-500/20 bg-amber-500/5">
+    <motion.section variants={itemVariants} className="glass-panel p-4 sm:p-6 shadow-premium border-amber-500/20 bg-amber-500/5">
       <div className="mb-4 flex items-center justify-between border-b border-amber-500/10 pb-4">
         <div className="flex items-center gap-2">
-          <Loader2 size={16} className="text-amber-500 animate-spin" />
-          <h2 className="text-[10px] uppercase tracking-widest font-bold text-amber-500/80">Pending Verifications</h2>
+          <Loader2 size={12} className="text-amber-500 animate-spin" />
+          <h2 className="text-[9px] sm:text-[10px] uppercase tracking-widest font-bold text-amber-500/80">Pending Verifications</h2>
         </div>
-        <span className="text-[9px] font-bold text-amber-500/50 uppercase tracking-widest">Admin Review In Progress</span>
       </div>
       <div className="space-y-3">
         {pending.map(p => (

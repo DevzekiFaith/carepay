@@ -127,16 +127,16 @@ export default function CustomerDashboardPage() {
       {/* Background Ambience */}
       <div className="absolute inset-x-0 top-0 -z-10 h-[50%] w-full rounded-full bg-brand-primary/5 opacity-50 blur-[120px] mix-blend-screen pointer-events-none" />
 
-      <div className="mx-auto max-w-5xl relative z-10">
-        <header className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/10 pb-6">
+      <div className="mx-auto max-w-5xl relative z-10 px-2 sm:px-0">
+        <header className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/10 pb-6">
           <div className="flex flex-col gap-4">
-            <Logo size="md" />
+            <Logo size="sm" />
             <div>
                <div className="flex items-center gap-2">
-                 <h1 className="text-3xl font-heading font-extrabold tracking-tight text-gradient-primary">
+                 <h1 className="text-2xl sm:text-3xl font-heading font-extrabold tracking-tight text-gradient-primary">
                    Welcome back
                  </h1>
-                 <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider ${
+                 <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[7px] sm:text-[8px] font-bold uppercase tracking-wider ${
                    tier === 'elite' ? 'bg-zinc-100 text-black' : 
                    tier === 'pro' ? 'bg-brand-primary text-background' : 
                    'bg-white/5 text-zinc-500 border border-white/10'
@@ -146,14 +146,14 @@ export default function CustomerDashboardPage() {
                    {tier}
                  </span>
                </div>
-               <p className="mt-1 text-sm text-zinc-400 font-medium">
+               <p className="mt-1 text-[11px] sm:text-sm text-zinc-400 font-medium leading-relaxed">
                  Track your requests, see your history, and manage your account.
                </p>
             </div>
           </div>
-          <div className="flex flex-col sm:items-end text-xs text-zinc-500">
+          <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-end text-[10px] sm:text-xs text-zinc-500 border-t border-white/5 sm:border-0 pt-3 sm:pt-0">
             <p className="font-bold text-foreground capitalize">{tier} {tier !== 'basic' ? 'Member' : 'User'}</p>
-            <p className="uppercase tracking-widest mt-1 text-[9px] font-bold">Active Profile</p>
+            <p className="uppercase tracking-widest sm:mt-1 text-[8px] sm:text-[9px] font-bold bg-white/5 sm:bg-transparent px-2 py-1 sm:p-0 rounded-full">Active Profile</p>
           </div>
         </header>
 
@@ -164,27 +164,27 @@ export default function CustomerDashboardPage() {
           className="space-y-6"
         >
           {/* Wallet Summary */}
-          <motion.section variants={itemVariants} className="glass-panel p-6 shadow-premium flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border-brand-primary/30 relative overflow-hidden">
+          <motion.section variants={itemVariants} className="glass-panel p-4 sm:p-6 shadow-premium flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 border-brand-primary/30 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/10 blur-[50px] -mr-32 -mt-32 pointer-events-none" />
-            <div className="relative z-10">
-              <p className="text-[10px] uppercase tracking-widest font-bold text-zinc-400">Available Balance</p>
-              <div className="flex items-baseline gap-1">
-                <p className="mt-1 text-4xl font-heading font-extrabold text-brand-primary tracking-tight">₦{balance.toLocaleString()}</p>
-                <span className="text-xl text-brand-primary/50 font-heading font-bold">.00</span>
+            <div className="relative z-10 text-center sm:text-left">
+              <p className="text-[9px] sm:text-[10px] uppercase tracking-widest font-bold text-zinc-400">Available Balance</p>
+              <div className="flex items-baseline justify-center sm:justify-start gap-1">
+                <p className="mt-1 text-3xl sm:text-4xl font-heading font-extrabold text-brand-primary tracking-tight">₦{balance.toLocaleString()}</p>
+                <span className="text-lg sm:text-xl text-brand-primary/50 font-heading font-bold">.00</span>
               </div>
             </div>
             <div className="relative z-10 flex items-center gap-3 w-full sm:w-auto mt-2 sm:mt-0">
-              <Link href="/customer/wallet" className="btn-minimal rounded-full px-8 h-12 w-full sm:w-auto text-[11px] font-bold uppercase tracking-[0.2em] flex items-center justify-center">
+              <Link href="/customer/wallet" className="btn-minimal rounded-full px-8 h-12 w-full sm:w-auto text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.2em] flex items-center justify-center">
                 Fund Wallet
               </Link>
             </div>
           </motion.section>
 
           {/* Stats */}
-          <div className="grid gap-4 sm:grid-cols-3">
-            <motion.div variants={itemVariants} className="glass-panel p-6 shadow-premium">
-              <p className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">Total requests</p>
-              <p className="mt-2 text-3xl font-heading font-extrabold text-foreground">{requests.length}</p>
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3">
+            <motion.div variants={itemVariants} className="glass-panel p-4 sm:p-6 shadow-premium text-center sm:text-left">
+              <p className="text-[9px] sm:text-[10px] uppercase tracking-widest font-bold text-zinc-500">Total requests</p>
+              <p className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-heading font-extrabold text-foreground">{requests.length}</p>
             </motion.div>
             <motion.div variants={itemVariants} className="glass-panel p-6 shadow-premium border-brand-primary/20">
               <p className="text-[10px] uppercase tracking-widest font-bold text-brand-primary">Completed</p>
@@ -198,27 +198,25 @@ export default function CustomerDashboardPage() {
                 {requests.filter(r => r.status?.toLowerCase() !== 'completed').length}
               </p>
             </motion.div>
-          </div>
-
-          {/* Quick actions */}
-          <motion.section variants={itemVariants} className="glass-panel p-6 shadow-premium">
-            <h2 className="mb-4 text-[10px] uppercase tracking-widest font-bold text-zinc-400">Quick actions</h2>
-            <div className="flex flex-wrap gap-3">
+          </div>          {/* Quick actions */}
+          <motion.section variants={itemVariants} className="glass-panel p-4 sm:p-6 shadow-premium">
+            <h2 className="mb-4 text-[9px] sm:text-[10px] uppercase tracking-widest font-bold text-zinc-400">Quick actions</h2>
+            <div className="grid grid-cols-1 sm:flex sm:flex-wrap gap-3">
               <Link
                 href="/request"
-                className="btn-minimal inline-flex items-center rounded-full px-6 h-10 text-xs font-bold uppercase tracking-widest"
+                className="btn-minimal inline-flex items-center justify-center rounded-full px-6 h-12 text-[10px] font-bold uppercase tracking-widest bg-brand-primary text-background sm:bg-transparent sm:text-foreground"
               >
                 New request
               </Link>
               <Link
                 href="/customer/subscription"
-                className="inline-flex h-10 items-center justify-center rounded-full border border-brand-primary/30 bg-brand-primary/10 px-6 text-xs font-bold uppercase tracking-widest text-brand-primary hover:bg-brand-primary/20 transition-colors"
+                className="inline-flex h-12 items-center justify-center rounded-full border border-brand-primary/30 bg-brand-primary/10 px-6 text-[10px] font-bold uppercase tracking-widest text-brand-primary hover:bg-brand-primary/20 transition-colors"
               >
                 Subscription Tiers
               </Link>
               <Link
                 href="/inspection"
-                className="inline-flex h-10 items-center justify-center rounded-full border border-white/10 dark:border-white/5 bg-background/50 backdrop-blur-sm px-6 text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-foreground hover:bg-white/5 transition-colors"
+                className="inline-flex h-12 items-center justify-center rounded-full border border-white/10 dark:border-white/5 bg-background/50 backdrop-blur-sm px-6 text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-foreground hover:bg-white/5 transition-colors"
               >
                 Property Inspection
               </Link>
@@ -226,14 +224,14 @@ export default function CustomerDashboardPage() {
           </motion.section>
 
           {/* Recent requests */}
-          <motion.section variants={itemVariants} className="glass-panel p-6 shadow-premium">
+          <motion.section variants={itemVariants} className="glass-panel p-4 sm:p-6 shadow-premium">
             <div className="mb-6 border-b border-white/10 pb-4 flex items-center justify-between">
-              <h2 className="text-[10px] uppercase tracking-widest font-bold text-zinc-400">
+              <h2 className="text-[9px] sm:text-[10px] uppercase tracking-widest font-bold text-zinc-400">
                 Recent requests
               </h2>
               <Link
                 href="/request"
-                className="text-xs font-bold text-brand-primary hover:text-brand-glow transition-colors"
+                className="text-[10px] sm:text-xs font-bold text-brand-primary hover:text-brand-glow transition-colors"
               >
                 View all →
               </Link>
@@ -249,37 +247,37 @@ export default function CustomerDashboardPage() {
                  <p className="text-xs mt-1">When you book a professional, it will appear here.</p>
               </div>
             ) : (
-              <div className="divide-y divide-white/5">
+              <div className="space-y-3">
                 {requests.slice(0, 5).map((request) => (
                   <div
                     key={request.id}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between py-4 gap-4 glass-panel-hover px-4 rounded-xl transition-colors -mx-4 group"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 sm:py-4 sm:px-4 gap-4 glass-panel glass-panel-hover rounded-xl transition-all group"
                   >
-                    <div className="flex items-center gap-4 w-full sm:w-auto">
+                    <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
                       {/* Photo Thumbnail */}
                       {request.image_url ? (
-                        <div className="w-12 h-12 rounded-lg bg-black/20 overflow-hidden shrink-0 border border-white/10 group-hover:border-brand-primary/30 transition-colors pointer-events-none">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-black/20 overflow-hidden shrink-0 border border-white/10 group-hover:border-brand-primary/30 transition-colors pointer-events-none">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={request.image_url} alt="Uploaded issue" className="w-full h-full object-cover" />
                         </div>
                       ) : (
-                        <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center shrink-0 border border-white/10 text-zinc-600 transition-colors">
-                          <ImageIcon size={16} />
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-white/5 flex items-center justify-center shrink-0 border border-white/10 text-zinc-600 transition-colors">
+                          <ImageIcon size={14} className="sm:size-16" />
                         </div>
                       )}
                       
                       <div className="space-y-1 overflow-hidden">
-                        <p className="text-sm font-bold text-foreground group-hover:text-brand-primary transition-colors">
+                        <p className="text-xs sm:text-sm font-bold text-foreground group-hover:text-brand-primary transition-colors">
                           {request.service_type}
                         </p>
-                        <p className="text-xs font-medium text-zinc-400 truncate max-w-[200px] sm:max-w-xs">{request.description}</p>
-                        <p className="text-[10px] uppercase tracking-widest text-zinc-500">
+                        <p className="text-[10px] sm:text-xs font-medium text-zinc-400 truncate max-w-[150px] sm:max-w-xs">{request.description}</p>
+                        <p className="text-[8px] sm:text-[10px] uppercase tracking-widest text-zinc-500">
                           {new Date(request.created_at).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
 
-                    <span className={`inline-flex self-start sm:self-center shrink-0 h-6 items-center rounded-full border px-3 text-[10px] font-bold uppercase tracking-widest transition-colors ${
+                    <span className={`inline-flex self-start sm:self-center shrink-0 h-6 items-center rounded-full border px-3 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest transition-colors ${
                       !request.status || request.status.toLowerCase() === 'pending' || request.status.toLowerCase() === 'new'
                         ? 'border-brand-primary/30 bg-brand-primary/10 text-brand-primary'
                         : request.status.toLowerCase() === 'completed'

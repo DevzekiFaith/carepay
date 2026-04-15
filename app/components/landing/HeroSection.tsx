@@ -36,11 +36,11 @@ export default function HeroSection() {
           <span>Flash Match Technology</span>
         </motion.div>
 
-        <motion.h1 variants={itemVariants} className="text-4xl md:text-6xl font-extrabold text-foreground mb-6 leading-tight tracking-tight">
+        <motion.h1 variants={itemVariants} className="text-3xl sm:text-4xl md:text-6xl font-extrabold text-foreground mb-6 leading-[1.15] tracking-tight">
           Find Vetted Home Service Pros in <span className="text-brand-primary">Minutes.</span>
         </motion.h1>
 
-        <motion.p variants={itemVariants} className="text-base md:text-lg font-medium text-zinc-400 max-w-xl mx-auto leading-relaxed mb-10">
+        <motion.p variants={itemVariants} className="text-sm sm:text-base md:text-lg font-medium text-zinc-400 max-w-xl mx-auto leading-relaxed mb-8 sm:mb-10 lg:px-0 px-2">
           Connecting you to skilled workers, service providers, and artisans instantly. 
           Snap a photo, get a match, and fix your home with absolute confidence.
         </motion.p>

@@ -53,7 +53,7 @@ export default function Nav() {
             <>
               <Link
                 href="/customer/wallet"
-                className="flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] uppercase tracking-widest font-bold text-zinc-500 hover:text-brand-primary hover:bg-brand-primary/10 transition-colors"
+                className="hidden md:flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] uppercase tracking-widest font-bold text-zinc-500 hover:text-brand-primary hover:bg-brand-primary/10 transition-colors"
                 title="Your Wallet"
               >
                 <Wallet size={14} />
@@ -64,20 +64,22 @@ export default function Nav() {
                 <>
                   <Link
                     href="/customer/dashboard"
-                    className="flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] uppercase tracking-widest font-bold text-zinc-500 hover:text-brand-primary hover:bg-brand-primary/10 transition-colors"
+                    className="hidden md:flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] uppercase tracking-widest font-bold text-zinc-500 hover:text-brand-primary hover:bg-brand-primary/10 transition-colors"
                   >
                     <LayoutDashboard size={14} />
                     <span className="hidden sm:inline">Dashboard</span>
                   </Link>
                   <Link
                     href="/customer/subscription"
-                    className="flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] uppercase tracking-widest font-bold text-zinc-500 hover:text-brand-primary hover:bg-brand-primary/10 transition-colors"
+                    className="hidden md:flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] uppercase tracking-widest font-bold text-zinc-500 hover:text-brand-primary hover:bg-brand-primary/10 transition-colors"
                     title="Manage Tiers"
                   >
                     <ShieldCheck size={14} />
                     <span className="hidden sm:inline">Subscription</span>
                   </Link>
-                  <LogoutButton />
+                  <div className="hidden md:block">
+                    <LogoutButton />
+                  </div>
                 </>
               ) : null}
             </>

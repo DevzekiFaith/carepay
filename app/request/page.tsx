@@ -217,29 +217,29 @@ export default function RequestPage() {
       {/* Background Ambience */}
       <div className="absolute inset-x-0 -top-[30%] -z-10 h-[80%] w-full rounded-full bg-brand-primary/5 opacity-50 blur-[120px] mix-blend-screen pointer-events-none" />
 
-      <div className="mx-auto flex min-w-0 max-w-5xl flex-col px-0 sm:px-6 lg:px-8 relative z-10">
+      <div className="mx-auto flex min-w-0 max-w-5xl flex-col px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.header
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-12 flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between"
+          className="mb-8 sm:mb-12 flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between"
         >
           <div className="min-w-0">
-            <h1 className="text-3xl font-heading font-extrabold tracking-tight text-gradient-primary sm:text-4xl">
+            <h1 className="text-2xl font-heading font-extrabold tracking-tight text-gradient-primary sm:text-4xl">
               Book a Professional
             </h1>
-            <p className="mt-2 text-sm text-zinc-400 font-medium max-w-md">
+            <p className="mt-2 text-[11px] sm:text-sm text-zinc-400 font-medium max-w-md leading-relaxed">
               Fastest matching in Nigeria. {user ? "Your details are pre-filled." : "Signup instantly during checkout."}
             </p>
           </div>
           <Link
             href="/"
-            className="flex h-10 w-fit items-center justify-center rounded-full border border-white/10 dark:border-white/5 glass-panel px-6 text-[10px] font-bold uppercase tracking-widest text-zinc-400 glass-panel-hover transition-colors"
+            className="flex h-9 sm:h-10 w-fit items-center justify-center rounded-full border border-white/10 dark:border-white/5 glass-panel px-5 sm:px-6 text-[9px] font-bold uppercase tracking-widest text-zinc-400 glass-panel-hover transition-colors"
           >
             ← Home
           </Link>
         </motion.header>
 
-        <main className="grid flex-1 gap-12 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+        <main className="grid flex-1 gap-8 sm:gap-12 grid-cols-1 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

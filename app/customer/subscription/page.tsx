@@ -105,15 +105,15 @@ export default function SubscriptionPage() {
       <div className="absolute inset-x-0 -top-[10%] -z-10 h-[40%] w-full rounded-full bg-brand-primary/10 opacity-60 blur-[100px] mix-blend-screen pointer-events-none" />
 
       <div className="mx-auto max-w-5xl relative z-10">
-        <header className="mb-8 flex flex-col items-center text-center gap-4 pb-6">
-          <Link href="/customer/dashboard" className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-brand-primary transition-colors absolute left-0 top-0">
-            <ArrowLeft size={12} /> Dashboard
+        <header className="mb-6 sm:mb-8 flex flex-col items-center text-center gap-4 pb-6">
+          <Link href="/customer/dashboard" className="flex items-center gap-1.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-brand-primary transition-colors absolute left-0 top-0">
+            <ArrowLeft size={12} /> <span className="hidden sm:inline">Dashboard</span>
           </Link>
-          <div className="mt-8">
-            <h1 className="text-3xl sm:text-4xl font-heading font-extrabold tracking-tight text-gradient-primary">
-              Choose your HomeCare Tier
+          <div className="mt-8 sm:mt-12">
+            <h1 className="text-2xl sm:text-4xl font-heading font-extrabold tracking-tight text-gradient-primary">
+              HomeCare Tiers
             </h1>
-            <p className="mt-2 text-sm text-zinc-400 font-medium max-w-md mx-auto">
+            <p className="mt-2 text-[11px] sm:text-sm text-zinc-400 font-medium max-w-md mx-auto leading-relaxed">
               Upgrade your account to unlock zero surge fees, priority matching, and dedicated facility managers.
             </p>
           </div>
@@ -122,18 +122,18 @@ export default function SubscriptionPage() {
         <ErrorAlert 
           error={error} 
           onClear={() => setError(null)} 
-          className="mb-8 max-w-xl mx-auto"
+          className="mb-6 sm:mb-8 max-w-xl mx-auto"
         />
 
-        <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid gap-6 md:grid-cols-3 max-w-5xl mx-auto mt-12">
+        <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid gap-8 md:grid-cols-3 max-w-5xl mx-auto mt-8 sm:mt-12">
           
           {/* Base Tier */}
           <motion.div variants={itemVariants} className={`glass-panel p-6 sm:p-8 shadow-premium flex flex-col relative ${currentTier === 'basic' ? 'border-brand-primary/20 bg-brand-primary/5' : ''}`}>
-            <h3 className="text-lg font-bold text-foreground">Pay-As-You-Go</h3>
-            <p className="text-sm text-zinc-400 mt-1">For occasional fixes</p>
+            <h3 className="text-base sm:text-lg font-bold text-foreground">Pay-As-You-Go</h3>
+            <p className="text-xs sm:text-sm text-zinc-400 mt-1">For occasional fixes</p>
             <div className="my-6">
               <span className="text-3xl sm:text-4xl font-heading font-extrabold text-foreground tracking-tight">Free</span>
-              <span className="text-zinc-500 text-xs">/ forever</span>
+              <span className="text-zinc-500 text-[10px] sm:text-xs">/ forever</span>
             </div>
             <ul className="space-y-4 flex-1 mb-8">
               {[
@@ -154,19 +154,19 @@ export default function SubscriptionPage() {
           </motion.div>
 
           {/* Pro Tier (Popular) */}
-          <motion.div variants={itemVariants} className={`glass-panel p-8 shadow-[0_0_30px_rgba(249,115,22,0.15)] border-brand-primary/50 relative flex flex-col transform md:-translate-y-4 ${currentTier === 'pro' ? 'border-brand-primary shadow-[0_0_40px_rgba(249,115,22,0.3)] bg-brand-primary/5' : ''}`}>
+          <motion.div variants={itemVariants} className={`glass-panel p-6 sm:p-8 shadow-[0_0_30px_rgba(249,115,22,0.15)] border-brand-primary/50 relative flex flex-col transform md:-translate-y-4 ${currentTier === 'pro' ? 'border-brand-primary shadow-[0_0_40px_rgba(249,115,22,0.3)] bg-brand-primary/5' : ''}`}>
             <div className="absolute top-0 right-0 w-full h-full bg-brand-primary/5 blur-xl pointer-events-none" />
-            <div className="absolute top-0 inset-x-0 transform -translate-y-1/2 flex justify-center">
-              <span className="bg-brand-primary text-background text-[10px] font-bold uppercase tracking-[0.2em] px-4 py-1 rounded-full shadow-premium">
+            <div className="absolute top-0 inset-x-0 transform -translate-y-1/2 flex justify-center z-20">
+              <span className="bg-brand-primary text-background text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] px-4 py-1.5 rounded-full shadow-premium">
                 Most Popular
               </span>
             </div>
             
-            <h3 className="text-lg font-bold text-brand-primary relative z-10">HomeCare Pro</h3>
-            <p className="text-sm text-zinc-300 mt-1 relative z-10">For busy professionals</p>
+            <h3 className="text-base sm:text-lg font-bold text-brand-primary relative z-10">HomeCare Pro</h3>
+            <p className="text-xs sm:text-sm text-zinc-300 mt-1 relative z-10">For busy professionals</p>
             <div className="my-6 relative z-10">
-              <span className="text-4xl font-heading font-extrabold text-foreground tracking-tight">₦35k</span>
-              <span className="text-zinc-400 text-xs">/ month</span>
+              <span className="text-3xl sm:text-4xl font-heading font-extrabold text-foreground tracking-tight">₦35k</span>
+              <span className="text-zinc-400 text-[10px] sm:text-xs">/ month</span>
             </div>
             <ul className="space-y-4 flex-1 mb-8 relative z-10">
               {[
@@ -175,8 +175,8 @@ export default function SubscriptionPage() {
                 { text: "Priority matching (3x faster)", icon: Zap },
                 { text: "Surge pricing capped at 1.5x", icon: Zap },
               ].map((feature, i) => (
-                <li key={i} className="flex gap-3 text-sm text-zinc-200 items-start">
-                  <feature.icon size={16} className="text-brand-primary shrink-0 mt-0.5" />
+                <li key={i} className="flex gap-3 text-xs sm:text-sm text-zinc-200 items-start">
+                  <feature.icon size={14} className="text-brand-primary shrink-0 mt-0.5 sm:mt-1 sm:size-4" />
                   <span>{feature.text}</span>
                 </li>
               ))}
@@ -184,19 +184,19 @@ export default function SubscriptionPage() {
             <button 
               onClick={() => handleUpgrade('pro')}
               disabled={currentTier === 'pro' || currentTier === 'elite' || !!upgrading}
-              className={`btn-minimal relative z-10 w-full rounded-full px-6 h-12 text-xs font-bold uppercase tracking-[0.2em] flex items-center justify-center disabled:opacity-50`}
+              className={`btn-minimal relative z-10 w-full rounded-full px-6 h-12 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] flex items-center justify-center disabled:opacity-50`}
             >
               {upgrading === 'pro' ? <Loader2 className="animate-spin" size={16} /> : currentTier === 'pro' ? "Current Plan" : currentTier === 'elite' ? "Included" : "Upgrade to Pro"}
             </button>
           </motion.div>
 
           {/* Elite Tier */}
-          <motion.div variants={itemVariants} className={`glass-panel p-8 shadow-premium border-white/10 relative flex flex-col ${currentTier === 'elite' ? 'border-brand-primary/50 bg-brand-primary/5 shadow-[0_0_30px_rgba(249,115,22,0.15)]' : ''}`}>
-            <h3 className="text-lg font-bold text-foreground">HomeCare Elite</h3>
-            <p className="text-sm text-zinc-400 mt-1">Facility management level</p>
+          <motion.div variants={itemVariants} className={`glass-panel p-6 sm:p-8 shadow-premium border-white/10 relative flex flex-col ${currentTier === 'elite' ? 'border-brand-primary/50 bg-brand-primary/5 shadow-[0_0_30px_rgba(249,115,22,0.15)]' : ''}`}>
+            <h3 className="text-base sm:text-lg font-bold text-foreground">HomeCare Elite</h3>
+            <p className="text-xs sm:text-sm text-zinc-400 mt-1">Facility management level</p>
             <div className="my-6">
-              <span className="text-4xl font-heading font-extrabold text-foreground tracking-tight">₦150k</span>
-              <span className="text-zinc-500 text-xs">/ month</span>
+              <span className="text-3xl sm:text-4xl font-heading font-extrabold text-foreground tracking-tight">₦150k</span>
+              <span className="text-zinc-500 text-[10px] sm:text-xs">/ month</span>
             </div>
             <ul className="space-y-4 flex-1 mb-8">
               {[
@@ -205,8 +205,8 @@ export default function SubscriptionPage() {
                 { text: "Matched with top 5% Artisans only", icon: Star },
                 { text: "4 Free routine sweeps /mo", icon: Shield },
               ].map((feature, i) => (
-                <li key={i} className="flex gap-3 text-sm text-zinc-400 items-start">
-                  <feature.icon size={16} className="text-zinc-200 shrink-0 mt-0.5" />
+                <li key={i} className="flex gap-3 text-xs sm:text-sm text-zinc-400 items-start">
+                  <feature.icon size={14} className="text-zinc-200 shrink-0 mt-0.5 sm:mt-1 sm:size-4" />
                   <span>{feature.text}</span>
                 </li>
               ))}
@@ -214,7 +214,7 @@ export default function SubscriptionPage() {
             <button 
               onClick={() => handleUpgrade('elite')}
               disabled={currentTier === 'elite' || !!upgrading}
-              className={`w-full rounded-full border border-white/20 bg-white/10 hover:bg-white/20 px-6 h-12 text-xs font-bold uppercase tracking-widest text-zinc-200 transition-colors disabled:opacity-50 flex items-center justify-center`}
+              className={`w-full rounded-full border border-white/20 bg-white/10 hover:bg-white/20 px-6 h-12 text-[10px] sm:text-xs font-bold uppercase tracking-widest text-zinc-200 transition-colors disabled:opacity-50 flex items-center justify-center`}
             >
               {upgrading === 'elite' ? <Loader2 className="animate-spin" size={16} /> : currentTier === 'elite' ? "Current Plan" : "Upgrade to Elite"}
             </button>
