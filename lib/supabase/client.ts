@@ -16,8 +16,11 @@ export function createClient() {
             const proxy: any = new Proxy(() => proxy, {
                 get: (target, prop) => {
                     if (prop === 'then') {
-                        // Return a function that behaves like a promise that never resolves
-                        return (resolve: any) => new Promise(() => {});
+                        // Return a function that behaves like a promise that resolves with a helpful error
+                        return (resolve: any) => resolve({ 
+                            data: { user: null, session: null }, 
+                            error: { message: 'Supabase configuration missing' } 
+                        });
                     }
                     if (prop === 'auth') return proxy;
                     if (prop === 'data') return { 

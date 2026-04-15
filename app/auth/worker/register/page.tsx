@@ -10,6 +10,7 @@ import { getDefaultAreas } from "@/lib/cities";
 import IdVerificationStatus, { type VerificationStatus } from "@/app/components/IdVerificationStatus";
 import Logo from "@/app/components/Logo";
 import ErrorAlert from "@/app/components/ErrorAlert";
+import NinVerificationCard, { type NinDetails } from "@/app/components/NinVerificationCard";
 
 const NIN_LENGTH = 11;
 
@@ -39,6 +40,10 @@ export default function WorkerRegisterPage() {
   const [verifyConfidence, setVerifyConfidence] = useState<"high" | "medium" | "low" | null>(null);
   const [aiVerified, setAiVerified] = useState(false);
   const [aiVerifyReason, setAiVerifyReason] = useState<string>("");
+  const [ninStatus, setNinStatus] = useState<'idle' | 'verifying' | 'verified' | 'rejected' | 'error'>("idle");
+  const [ninDetails, setNinDetails] = useState<NinDetails | undefined>(undefined);
+  const [ninVerifyReason, setNinVerifyReason] = useState<string | undefined>(undefined);
+  const [lockedName, setLockedName] = useState("");
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -115,6 +120,37 @@ export default function WorkerRegisterPage() {
     setPhotoFile(null);
   };
 
+  const handleVerifyNin = async (nin: string) => {
+    if (nin.length !== NIN_LENGTH) return;
+    
+    setNinStatus('verifying');
+    setNinError(null);
+    
+    try {
+      const res = await fetch("/api/verify-nin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nin }),
+      });
+      
+      const data = await res.json();
+      
+      setNinStatus(data.status);
+      setNinVerifyReason(data.reason);
+      
+      if (data.status === 'verified' && data.details) {
+        setNinDetails(data.details);
+        setLockedName(data.details.fullName);
+      } else {
+        setNinDetails(undefined);
+        setLockedName("");
+      }
+    } catch {
+      setNinStatus('error');
+      setNinVerifyReason("Connection to identity service failed.");
+    }
+  };
+
   return (
     <div className="relative min-h-screen bg-background text-foreground antialiased py-12 sm:py-24">
       <div className="fixed inset-0 z-0 pointer-events-none">
@@ -167,9 +203,15 @@ export default function WorkerRegisterPage() {
                   <input
                     required
                     name="fullName"
+                    value={lockedName || undefined}
+                    readOnly={!!lockedName}
+                    onChange={(e) => !lockedName && (e.target as any).value}
                     placeholder="Matches your NIN"
-                    className="w-full rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3 text-sm text-foreground outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary"
+                    className={`w-full rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3 text-sm text-foreground outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary ${lockedName ? 'opacity-70 cursor-not-allowed border-emerald-500/30' : ''}`}
                   />
+                  {lockedName && (
+                    <p className="text-[9px] font-bold text-emerald-500 uppercase tracking-widest mt-1 ml-1">Verified Name Locked</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
@@ -268,20 +310,48 @@ export default function WorkerRegisterPage() {
                   <p className="text-xs font-medium text-zinc-500 mb-3 mt-1">
                     Your 11-digit NIN is rigorously vetted against national databases to guarantee customer safety.
                   </p>
-                  <input
-                    required
-                    inputMode="numeric"
-                    pattern="[0-9]{11}"
-                    maxLength={11}
-                    name="nin"
-                    placeholder="12345678901"
-                    className="w-full max-w-sm rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3 text-sm text-foreground tabular-nums outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary shadow-sm"
-                  />
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <input
+                      required
+                      inputMode="numeric"
+                      pattern="[0-9]{11}"
+                      maxLength={11}
+                      name="nin"
+                      id="nin-input"
+                      placeholder="12345678901"
+                      className="w-full max-w-sm rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3 text-sm text-foreground tabular-nums outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary shadow-sm"
+                      onChange={(e) => {
+                        if (e.target.value.length === 11) {
+                          setNinError(null);
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const input = document.getElementById('nin-input') as HTMLInputElement;
+                        if (input.value.length === 11) {
+                          handleVerifyNin(input.value);
+                        } else {
+                          setNinError("Enter 11 digits to verify.");
+                        }
+                      }}
+                      disabled={ninStatus === 'verifying'}
+                      className="h-12 px-6 rounded-xl bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest text-foreground hover:bg-brand-primary/10 hover:border-brand-primary/30 transition-all disabled:opacity-50"
+                    >
+                      {ninStatus === 'verifying' ? "Checking..." : "Verify NIN"}
+                    </button>
+                  </div>
                   {ninError && (
                     <p className="text-xs font-semibold text-red-500 mt-2">
                       {ninError}
                     </p>
                   )}
+                  <NinVerificationCard 
+                    status={ninStatus} 
+                    details={ninDetails} 
+                    reason={ninVerifyReason} 
+                  />
                 </div>
 
                 <div className="pt-2">
