@@ -9,10 +9,14 @@ import { createClient } from "@/lib/supabase/client";
 import SurgeBadge from "@/app/components/SurgeBadge";
 import type { SurgeResult } from "@/lib/surge";
 
-import { Wrench, Zap, Hammer, Armchair, Snowflake, Paintbrush, PenTool, Camera, X, Loader2, Calendar, Clock } from "lucide-react";
+import { Wrench, Zap, Hammer, Armchair, Snowflake, Paintbrush, PenTool, Camera, X, Loader2, Calendar, Clock, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
 import ErrorAlert from "@/app/components/ErrorAlert";
 import ModernDatePicker from "@/app/components/ModernDatePicker";
+import { PRODUCTS, Product } from "@/lib/products";
+import ProductCard from "@/app/components/ProductCard";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 const REQUEST_HERO_IMAGE = "/su4.jpg";
 
@@ -27,7 +31,7 @@ const SERVICES = [
 ];
 
 
-export default function RequestPage() {
+function RequestContent() {
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -41,6 +45,22 @@ export default function RequestPage() {
   const [appointmentTime, setAppointmentTime] = useState("09:00");
 
   const [user, setUser] = useState<any>(null);
+  const [selectedParts, setSelectedParts] = useState<Product[]>([]);
+  const searchParams = useSearchParams();
+
+  // Handle pre-selected part from store
+  useEffect(() => {
+    const partId = searchParams.get('part');
+    if (partId) {
+      const part = PRODUCTS.find(p => p.id === partId);
+      if (part && !selectedParts.find(p => p.id === partId)) {
+        setSelectedParts(prev => [...prev, part]);
+        if (part.serviceLink.length > 0) {
+           setSelectedService(part.serviceLink[0]);
+        }
+      }
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -185,7 +205,9 @@ export default function RequestPage() {
     const { error: requestError } = await supabase.from('service_requests').insert({
       customer_id: currentUserId,
       service_type: serviceType,
-      description: details,
+      description: selectedParts.length > 0 
+        ? `${details}\n\n[SELECTED PARTS FROM STORE]\n${selectedParts.map(p => `- ${p.name} (₦${p.price})`).join('\n')}`
+        : details,
       address: address,
       preferred_time: preferredTime,
       image_url: imageUrl
@@ -303,6 +325,57 @@ export default function RequestPage() {
                 <div className="flex items-center gap-2 mt-4">
                   <Loader2 className="animate-spin text-zinc-500" size={14} />
                   <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Calculating live rate...</span>
+                </div>
+              )}
+
+              {/* Recommended Parts Section */}
+              {selectedService && (
+                <div className="mt-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">
+                      1b. Recommended Parts
+                    </h2>
+                    <Link href="/store" className="text-[9px] font-bold uppercase tracking-widest text-brand-primary hover:underline">
+                      View Full Store
+                    </Link>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    {PRODUCTS.filter(p => p.serviceLink.includes(selectedService)).map((product) => {
+                      const isSelected = selectedParts.find(p => p.id === product.id);
+                      return (
+                        <ProductCard
+                          key={product.id}
+                          product={product}
+                          isAdded={!!isSelected}
+                          onAddStep={(p) => {
+                            if (isSelected) {
+                              setSelectedParts(prev => prev.filter(x => x.id !== p.id));
+                            } else {
+                              setSelectedParts(prev => [...prev, p]);
+                              toast.success("Part added to job", {
+                                description: `${p.name} will be brought by the professional.`
+                              });
+                            }
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+                  
+                  {selectedParts.length > 0 && (
+                     <div className="mt-6 p-4 rounded-xl bg-brand-primary/5 border border-brand-primary/20 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                           <ShoppingBag size={14} className="text-brand-primary" />
+                           <span className="text-[10px] font-bold uppercase tracking-widest text-foreground">
+                              {selectedParts.length} item(s) to be brought for you
+                           </span>
+                        </div>
+                        <span className="text-xs font-extrabold text-brand-primary">
+                           +₦{selectedParts.reduce((acc, p) => acc + p.price, 0).toLocaleString()}
+                        </span>
+                     </div>
+                  )}
                 </div>
               )}
             </div>
@@ -590,5 +663,13 @@ export default function RequestPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function RequestPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="animate-spin text-brand-primary" size={32} /></div>}>
+      <RequestContent />
+    </Suspense>
   );
 }

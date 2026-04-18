@@ -89,6 +89,14 @@ export default function Nav() {
           )}
 
           <Link
+            href="/store"
+            className="hidden md:flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] uppercase tracking-widest font-bold text-zinc-500 hover:text-brand-primary hover:bg-brand-primary/10 transition-colors mr-2"
+          >
+            <Zap size={14} className="text-brand-primary" />
+            <span>Store</span>
+          </Link>
+
+          <Link
             href="/request"
             className="btn-minimal flex items-center rounded-full px-4 sm:px-6 py-2.5 text-xs font-bold uppercase tracking-widest shadow-premium ml-2"
           >

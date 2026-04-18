@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Home, LayoutDashboard, ShieldCheck, Wallet, LogOut } from "lucide-react";
+import { Home, LayoutDashboard, ShieldCheck, Wallet, LogOut, ShoppingBag } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
@@ -35,6 +35,7 @@ export default function MobileBottomNav() {
 
   const navItems = [
     { label: "Home", href: "/", icon: Home },
+    { label: "Store", href: "/store", icon: ShoppingBag },
     ...(user ? [
       { label: "Wallet", href: "/customer/wallet", icon: Wallet },
       { label: "Dashboard", href: "/customer/dashboard", icon: LayoutDashboard },
