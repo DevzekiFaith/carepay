@@ -81,34 +81,47 @@ export default function CheckoutPage() {
     const orderRef = `HC-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
 
     try {
-      // Save order to Supabase
-      const { error } = await supabase.from("store_orders").insert({
-        order_ref: orderRef,
-        customer_name: fullName,
-        customer_email: email,
-        customer_phone: phone,
-        delivery_address: address,
-        notes: notes || null,
-        items: cartItems.map((item) => ({
-          id: item.product.id,
-          name: item.product.name,
-          price: item.product.price,
-          quantity: item.quantity,
-          image: item.product.image,
-        })),
-        subtotal: cartTotal,
-        delivery_fee: DELIVERY_FEE,
-        total: cartTotal + DELIVERY_FEE,
-        status: "pending_payment",
-        user_id: user?.id || null,
-      });
+      // Save order to Supabase with a promise timeout
+      const saveOrder = async () => {
+        const { error } = await supabase.from("store_orders").insert({
+          order_ref: orderRef,
+          customer_name: fullName,
+          customer_email: email,
+          customer_phone: phone,
+          delivery_address: address,
+          notes: notes || null,
+          items: cartItems.map((item) => ({
+            id: item.product.id,
+            name: item.product.name,
+            price: item.product.price,
+            quantity: item.quantity,
+            image: item.product.image,
+          })),
+          subtotal: cartTotal,
+          delivery_fee: DELIVERY_FEE,
+          total: cartTotal + DELIVERY_FEE,
+          status: "pending_payment",
+          user_id: user?.id || null,
+        });
+        return error;
+      };
 
-      if (error) {
-        // If table doesn't exist yet, still proceed (order confirmation will show)
-        console.warn("Order save error (table may not exist yet):", error.message);
+      // Create a timeout promise
+      const timeout = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Timeout")), 8000)
+      );
+
+      // Race the save against the timeout
+      try {
+        const error = await Promise.race([saveOrder(), timeout]);
+        if (error) {
+          console.warn("Order save error:", (error as any).message);
+        }
+      } catch (timeoutErr) {
+        console.warn("Order save timed out, proceeding anyway.");
       }
 
-      // Clear cart and redirect
+      // Clear cart and redirect immediately
       clearCart();
       router.push(
         `/store/order-confirmation?ref=${orderRef}&total=${cartTotal + DELIVERY_FEE}`
@@ -116,13 +129,14 @@ export default function CheckoutPage() {
     } catch (err) {
       console.error("Checkout error:", err);
       // Still proceed even if DB save fails
-      const orderRef = `HC-${Date.now().toString(36).toUpperCase()}`;
       clearCart();
       router.push(
         `/store/order-confirmation?ref=${orderRef}&total=${cartTotal + DELIVERY_FEE}`
       );
     } finally {
-      setSubmitting(false);
+      // Don't set submitting false here because we are navigating away
+      // If we stay on page, we want it false
+      setTimeout(() => setSubmitting(false), 2000);
     }
   };
 
