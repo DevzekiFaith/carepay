@@ -7,10 +7,20 @@ import { useState } from "react";
 import { toast } from "sonner";
 import ModernDatePicker from "@/app/components/ModernDatePicker";
 
+const PRICING = {
+  apartment: 50000,
+  duplex: 150000,
+  mansion: 300000,
+  commercial: 200000,
+} as const;
+
+type PropertyType = keyof typeof PRICING | "";
+
 export default function PropertyInspectionPage() {
   const [submitted, setSubmitted] = useState(false);
   const [appointmentDate, setAppointmentDate] = useState<Date | null>(new Date());
   const [appointmentTime, setAppointmentTime] = useState("10:00");
+  const [propertyType, setPropertyType] = useState<PropertyType>("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +40,7 @@ export default function PropertyInspectionPage() {
       {/* Ambience */}
       <div className="absolute inset-x-0 -top-[20%] -z-10 h-[60%] w-full rounded-full bg-brand-primary/10 blur-[120px] mix-blend-screen pointer-events-none" />
 
-      <main className="mx-auto max-w-6xl px-4 py-12 lg:py-24 relative z-10 grid gap-12 lg:grid-cols-2 lg:items-center">
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:py-12 lg:py-24 relative z-10 grid gap-10 lg:gap-12 lg:grid-cols-2 lg:items-start">
         
         {/* Left: Copy & Value Prop */}
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
@@ -68,9 +78,17 @@ export default function PropertyInspectionPage() {
           </div>
 
           <div className="mt-10 pt-8 border-t border-white/10">
-            <p className="text-[10px] uppercase tracking-widest font-bold text-zinc-500 mb-2">Flat Rate Pricing</p>
-            <p className="text-4xl font-heading font-extrabold text-white tracking-tight">₦50,000</p>
-            <p className="text-xs text-zinc-400 mt-1">For standard 2-3 bedroom apartments. Mansions/Duplexes may vary.</p>
+            <p className="text-[10px] uppercase tracking-widest font-bold text-zinc-500 mb-2">
+              {propertyType ? "Fixed Pricing" : "Base Pricing"}
+            </p>
+            <p className="text-4xl font-heading font-extrabold text-white tracking-tight">
+              ₦{(propertyType ? PRICING[propertyType] : 50000).toLocaleString()}
+            </p>
+            <p className="text-xs text-zinc-400 mt-1">
+              {propertyType 
+                ? `Standard pricing for ${propertyType} inspections.`
+                : "Select a property type to see exact pricing."}
+            </p>
           </div>
         </motion.div>
 
@@ -106,12 +124,17 @@ export default function PropertyInspectionPage() {
                   <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 pl-1">Property Type</label>
                   <div className="relative">
                     <Home size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
-                    <select required className="w-full appearance-none rounded-2xl border border-white/10 bg-[#121214] pl-11 pr-4 py-3.5 text-sm font-medium text-foreground outline-none transition-all focus:border-brand-primary/50">
+                    <select 
+                      required 
+                      value={propertyType}
+                      onChange={(e) => setPropertyType(e.target.value as PropertyType)}
+                      className="w-full appearance-none rounded-2xl border border-white/10 bg-[#121214] pl-11 pr-4 py-3.5 text-sm font-medium text-foreground outline-none transition-all focus:border-brand-primary/50"
+                    >
                       <option value="">Select type...</option>
-                      <option value="apartment">Apartment / Flat</option>
-                      <option value="duplex">Duplex</option>
-                      <option value="bungalow">Bungalow</option>
-                      <option value="commercial">Commercial / Office</option>
+                      <option value="apartment">Apartment / Flat (Single Level)</option>
+                      <option value="duplex">Standard Duplex (2+ Floors)</option>
+                      <option value="mansion">Luxury Mansion (Large Detached)</option>
+                      <option value="commercial">Commercial / Office Space</option>
                     </select>
                   </div>
                 </div>
