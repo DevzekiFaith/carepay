@@ -1,91 +1,62 @@
 "use client";
 
-import { useState } from "react";
-import { PRODUCTS, Product } from "@/lib/products";
+import { useState, useMemo } from "react";
+import { PRODUCTS } from "@/lib/products";
 import ProductCard from "@/app/components/ProductCard";
-import { Search, ShoppingBag, Filter, ArrowLeft } from "lucide-react";
+import {
+  Search,
+  ShoppingCart,
+  ArrowLeft,
+  SlidersHorizontal,
+  ArrowUpDown,
+  Package,
+} from "lucide-react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import { toast } from "sonner";
-import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { useCart } from "@/lib/cart";
+
+type SortOption = "default" | "price-asc" | "price-desc" | "rating" | "newest";
 
 export default function StorePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
-  const router = useRouter();
-  const supabase = createClient();
+  const [sortBy, setSortBy] = useState<SortOption>("default");
+  const { cartCount, cartTotal, setIsCartOpen } = useCart();
 
   const categories = ["All", "Plumbing", "Electrical", "Carpentry", "General"];
 
-  const filteredProducts = PRODUCTS.filter((product) => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         product.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "All" || product.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
-
-  const handleBuy = async (product: Product) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      toast.error("Authentication required", {
-        description: "Please login to purchase items from the store."
-      });
-      router.push("/auth/login?returnTo=/store");
-      return;
-    }
-
-    // Check wallet balance
-    const { data: wallet } = await supabase
-      .from('wallets')
-      .select('balance')
-      .eq('user_id', user.id)
-      .maybeSingle();
-
-    if (!wallet || wallet.balance < product.price) {
-      toast.error("Insufficient Balance", {
-        description: `Your balance (₦${(wallet?.balance || 0).toLocaleString()}) is not enough. Please fund your wallet.`,
-        action: {
-          label: "Fund Wallet",
-          onClick: () => router.push("/customer/wallet")
-        }
-      });
-      return;
-    }
-
-    // Direct purchase logic (Debit wallet)
-    try {
-      // In a real app, this would be a server action or a transaction
-      const { error: debitError } = await supabase
-        .from('wallets')
-        .update({ balance: wallet.balance - product.price })
-        .eq('user_id', user.id);
-
-      if (debitError) throw debitError;
-
-      await supabase.from('transactions').insert({
-        wallet_id: (await supabase.from('wallets').select('id').eq('user_id', user.id).single()).data?.id,
-        amount: product.price,
-        transaction_type: 'debit',
-        description: `Purchased: ${product.name}`,
-        status: 'success'
-      });
-
-      toast.success("Purchase Successful!", {
-        description: `${product.name} has been paid for. Our team will contact you for delivery.`
-      });
-    } catch (err) {
-      toast.error("Purchase failed", { description: "An error occurred during transaction." });
-    }
-  };
-
-  const handleAddToJob = (product: Product) => {
-    toast.success("Added to recommendation", {
-      description: `You can now select ${product.name} when booking a service.`
+  const filteredProducts = useMemo(() => {
+    let results = PRODUCTS.filter((product) => {
+      const matchesSearch =
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory =
+        selectedCategory === "All" || product.category === selectedCategory;
+      return matchesSearch && matchesCategory;
     });
-    router.push(`/request?part=${product.id}`);
-  };
+
+    // Sort
+    switch (sortBy) {
+      case "price-asc":
+        results = [...results].sort((a, b) => a.price - b.price);
+        break;
+      case "price-desc":
+        results = [...results].sort((a, b) => b.price - a.price);
+        break;
+      case "rating":
+        results = [...results].sort(
+          (a, b) => (b.rating || 0) - (a.rating || 0)
+        );
+        break;
+      case "newest":
+        results = [...results].sort((a, b) =>
+          (a.badge === "New" ? -1 : 1) - (b.badge === "New" ? -1 : 1)
+        );
+        break;
+    }
+
+    return results;
+  }, [searchQuery, selectedCategory, sortBy]);
 
   return (
     <div className="relative min-h-screen bg-background text-foreground antialiased py-8 sm:py-20 overflow-hidden px-4 sm:px-0">
@@ -106,38 +77,83 @@ export default function StorePage() {
                 HomeCare Store
               </h1>
               <p className="mt-2 text-sm sm:text-lg text-zinc-400 font-medium max-w-2xl leading-relaxed">
-                Premium parts and fittings curated for professional installations. High-quality imports with a satisfaction guarantee.
+                Premium parts and fittings curated for professional
+                installations. Browse, add to cart, and checkout — no account
+                needed.
               </p>
             </div>
-            <div className="flex items-center gap-4">
-               <div className="glass-panel px-4 py-2 flex items-center gap-3">
-                  <ShoppingBag size={18} className="text-brand-primary" />
-                  <span className="text-xs font-bold uppercase tracking-widest">Quality Guaranteed</span>
-               </div>
+            <div className="flex items-center gap-3">
+              <div className="glass-panel px-4 py-2 flex items-center gap-3">
+                <Package size={16} className="text-brand-primary" />
+                <span className="text-[10px] font-bold uppercase tracking-widest">
+                  {PRODUCTS.length} Products
+                </span>
+              </div>
+
+              {/* Cart Button */}
+              <button
+                onClick={() => setIsCartOpen(true)}
+                className="relative flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-primary text-background text-[10px] font-bold uppercase tracking-widest hover:bg-brand-primary/90 transition-all shadow-lg shadow-brand-primary/20"
+              >
+                <ShoppingCart size={16} />
+                Cart
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-background text-[9px] font-extrabold ring-2 ring-background">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
             </div>
           </div>
         </header>
 
-        {/* Filters and Search */}
-        <div className="mb-12 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-6 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
-                  selectedCategory === category
-                    ? "bg-brand-primary text-background shadow-lg shadow-brand-primary/20"
-                    : "glass-panel glass-panel-hover text-zinc-400"
-                }`}
-              >
-                {category}
-              </button>
-            ))}
+        {/* Filters, Search, Sort */}
+        <div className="mb-10 space-y-4">
+          {/* Category pills + Sort */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="flex flex-wrap gap-2">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
+                    selectedCategory === category
+                      ? "bg-brand-primary text-background shadow-lg shadow-brand-primary/20"
+                      : "glass-panel glass-panel-hover text-zinc-400"
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-3">
+              {/* Sort */}
+              <div className="relative">
+                <div className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-white/10 bg-white/5 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+                  <ArrowUpDown size={12} />
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as SortOption)}
+                    className="bg-transparent outline-none text-foreground cursor-pointer appearance-none pr-4"
+                  >
+                    <option value="default">Default</option>
+                    <option value="price-asc">Price: Low → High</option>
+                    <option value="price-desc">Price: High → Low</option>
+                    <option value="rating">Top Rated</option>
+                    <option value="newest">Newest First</option>
+                  </select>
+                </div>
+              </div>
+            </div>
           </div>
 
+          {/* Search */}
           <div className="relative w-full lg:max-w-md">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
+            <Search
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500"
+              size={16}
+            />
             <input
               type="text"
               placeholder="Search premium parts..."
@@ -149,23 +165,42 @@ export default function StorePage() {
         </div>
 
         {/* Product Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          <AnimatePresence mode="popLayout">
-            {filteredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onBuy={handleBuy}
-                onAddStep={handleAddToJob}
-              />
-            ))}
-          </AnimatePresence>
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+          {filteredProducts.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
         </div>
 
         {filteredProducts.length === 0 && (
           <div className="py-20 text-center">
-            <p className="text-zinc-500 font-medium">No products found matching your search.</p>
+            <p className="text-zinc-500 font-medium">
+              No products found matching your search.
+            </p>
           </div>
+        )}
+
+        {/* Floating Cart Summary Bar (Mobile) */}
+        {cartCount > 0 && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="fixed bottom-20 left-4 right-4 z-[55] md:hidden"
+          >
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="w-full flex items-center justify-between px-6 py-4 rounded-2xl bg-brand-primary text-background shadow-[0_0_30px_rgba(249,115,22,0.3)]"
+            >
+              <div className="flex items-center gap-3">
+                <ShoppingCart size={18} />
+                <span className="text-[11px] font-bold uppercase tracking-widest">
+                  {cartCount} item{cartCount !== 1 ? "s" : ""} in cart
+                </span>
+              </div>
+              <span className="text-sm font-extrabold">
+                ₦{cartTotal.toLocaleString()}
+              </span>
+            </button>
+          </motion.div>
         )}
       </div>
     </div>

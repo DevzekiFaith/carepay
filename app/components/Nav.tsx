@@ -1,18 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { LayoutDashboard, ShieldCheck, Wallet, Zap } from "lucide-react";
+import { LayoutDashboard, ShieldCheck, Wallet, Zap, ShoppingCart } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import type { User, UserResponse, Session, AuthChangeEvent } from "@supabase/supabase-js";
 import LogoutButton from "./LogoutButton";
 import Logo from "./Logo";
+import { useCart } from "@/lib/cart";
 
 export default function Nav() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const pathname = usePathname();
+  const { cartCount, setIsCartOpen } = useCart();
 
   useEffect(() => {
     const supabase = createClient();
@@ -90,15 +92,29 @@ export default function Nav() {
 
           <Link
             href="/store"
-            className="hidden md:flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] uppercase tracking-widest font-bold text-zinc-500 hover:text-brand-primary hover:bg-brand-primary/10 transition-colors mr-2"
+            className="hidden md:flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] uppercase tracking-widest font-bold text-zinc-500 hover:text-brand-primary hover:bg-brand-primary/10 transition-colors mr-1"
           >
             <Zap size={14} className="text-brand-primary" />
             <span>Store</span>
           </Link>
 
+          {/* Cart Icon */}
+          <button
+            onClick={() => setIsCartOpen(true)}
+            className="relative flex items-center justify-center h-10 w-10 rounded-full border border-white/10 bg-white/5 text-zinc-400 hover:text-brand-primary hover:border-brand-primary/30 hover:bg-brand-primary/10 transition-all mr-1"
+            title="Shopping Cart"
+          >
+            <ShoppingCart size={16} />
+            {cartCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-brand-primary text-background text-[9px] font-extrabold ring-2 ring-background animate-in zoom-in duration-200">
+                {cartCount > 9 ? "9+" : cartCount}
+              </span>
+            )}
+          </button>
+
           <Link
             href="/request"
-            className="btn-minimal flex items-center rounded-full px-4 sm:px-6 py-2.5 text-xs font-bold uppercase tracking-widest shadow-premium ml-2"
+            className="btn-minimal flex items-center rounded-full px-4 sm:px-6 py-2.5 text-xs font-bold uppercase tracking-widest shadow-premium"
           >
             {user ? "New Request" : "Book Now"}
           </Link>
