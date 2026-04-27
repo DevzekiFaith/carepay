@@ -5,42 +5,36 @@ import RootWrapper from "./components/RootWrapper";
 import { CartProvider } from "@/lib/cart";
 import "./globals.css";
 import { Toaster } from "sonner";
-import {
-  DEFAULT_CITY,
-  DEFAULT_COUNTRY,
-  DEFAULT_STATE,
-  SITE_NAME,
-  getSiteUrl,
-} from "@/lib/site";
+import * as SiteConfig from "@/lib/site";
 
 export const metadata: Metadata = {
-  metadataBase: getSiteUrl(),
+  metadataBase: SiteConfig.getSiteUrl(),
   title: {
-    default: `${SITE_NAME} — Book it. Fix it. Done.`,
-    template: `%s | ${SITE_NAME}`,
+    default: `${SiteConfig.SITE_NAME} — Book it. Fix it. Done.`,
+    template: `%s | ${SiteConfig.SITE_NAME}`,
   },
-  description: `Plumbers, electricians, carpenters & more in ${DEFAULT_CITY}. Book in 2 mins. Vetted pros across ${DEFAULT_STATE}, ${DEFAULT_COUNTRY}.`,
+  description: `Plumbers, electricians, carpenters & more in ${SiteConfig.DEFAULT_CITY}. Book in 2 mins. Vetted pros across ${SiteConfig.DEFAULT_STATE}, ${SiteConfig.DEFAULT_COUNTRY}.`,
   alternates: {
     canonical: "/",
   },
   openGraph: {
     type: "website",
-    siteName: SITE_NAME,
-    title: `${SITE_NAME} — Book it. Fix it. Done.`,
-    description: `Book trusted handymen in ${DEFAULT_CITY}.`,
+    siteName: SiteConfig.SITE_NAME,
+    title: `${SiteConfig.SITE_NAME} — Book it. Fix it. Done.`,
+    description: `Book trusted handymen in ${SiteConfig.DEFAULT_CITY}.`,
     locale: "en_NG",
     url: "/",
   },
   twitter: {
     card: "summary_large_image",
-    title: `${SITE_NAME} — Book it. Fix it. Done.`,
-    description: `Book trusted handymen in ${DEFAULT_CITY}.`,
+    title: `${SiteConfig.SITE_NAME} — Book it. Fix it. Done.`,
+    description: `Book trusted handymen in ${SiteConfig.DEFAULT_CITY}.`,
   },
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: SITE_NAME,
+    title: SiteConfig.SITE_NAME,
   },
 };
 

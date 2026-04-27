@@ -177,7 +177,7 @@ export default function HomeClient() {
               viewport={{ once: true }}
               className="rounded-3xl glass-panel bg-gradient-to-tr from-brand-primary to-rose-500 p-8 shadow-[0_12px_40px_-8px_rgba(249,115,22,0.6)] text-white relative overflow-hidden"
             >
-              <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay pointer-events-none" />
+              <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none" />
               <p className="text-center text-xs font-bold text-white/80 relative z-10">
                 <span className="text-4xl font-heading font-extrabold text-white drop-shadow-md">
                   {JOBS_COMPLETED.toLocaleString()}+
