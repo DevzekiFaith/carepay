@@ -1,12 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Image as ImageIcon, Loader2, Shield, Star, Zap, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import Logo from "@/app/components/Logo";
+import dynamic from "next/dynamic";
+import { X, MessageCircle, Navigation } from "lucide-react";
+
+const LiveMap = dynamic(() => import("@/app/components/LiveMap"), { ssr: false });
+const ChatModal = dynamic(() => import("@/app/components/ChatModal"), { ssr: false });
 
 interface Request {
   id: string;
@@ -16,6 +21,17 @@ interface Request {
   status: string;
   created_at: string;
   image_url: string | null;
+  address: string;
+}
+
+interface Order {
+  id: string;
+  order_ref: string;
+  items: any[];
+  total: number;
+  status: string;
+  created_at: string;
+  delivery_address: string;
 }
 
 const containerVariants = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.1 } } };
@@ -23,9 +39,14 @@ const itemVariants = { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0, 
 
 export default function CustomerDashboardPage() {
   const [requests, setRequests] = useState<Request[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [user, setUser] = useState<any>(null);
   const [balance, setBalance] = useState(0);
   const [tier, setTier] = useState<'basic' | 'pro' | 'elite'>('basic');
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'requests' | 'orders'>('requests');
+  const [trackingJob, setTrackingJob] = useState<Request | null>(null);
+  const [chatJob, setChatJob] = useState<Request | null>(null);
   const isFetchingRef = useRef(false);
   const supabase = useMemo(() => createClient(), []);
 
@@ -35,8 +56,9 @@ export default function CustomerDashboardPage() {
       isFetchingRef.current = true;
       if (!isSilent) setLoading(true);
       const { data } = await supabase.auth.getUser();
-      const user = data.user;
-      if (!user) return;
+      const currentUser = data.user;
+      if (!currentUser) return;
+      setUser(currentUser);
 
       // 1. Fetch Requests
       const { data: reqData } = await supabase
@@ -46,6 +68,15 @@ export default function CustomerDashboardPage() {
         .order('created_at', { ascending: false });
       
       setRequests(reqData || []);
+
+      // 1b. Fetch Store Orders
+      const { data: orderData } = await supabase
+        .from('store_orders')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      
+      setOrders(orderData || []);
 
       // 2. Fetch or Create Wallet Balance (Non-destructive)
       let { data: wallet } = await supabase
@@ -114,6 +145,28 @@ export default function CustomerDashboardPage() {
                 });
              }
              fetchData(true);
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'wallets',
+        },
+        async (payload: any) => {
+          const updatedWallet = payload.new;
+          const { data } = await supabase.auth.getUser();
+          if (data.user && updatedWallet.user_id === data.user.id) {
+             setBalance(Number(updatedWallet.balance));
+             // Optional contextual toast if balance increased
+             if (payload.old && Number(updatedWallet.balance) > Number(payload.old.balance)) {
+                 toast.success("Wallet Credited!", {
+                   description: `Your balance is now ₦${Number(updatedWallet.balance).toLocaleString()}`,
+                   icon: <CheckCircle2 className="text-emerald-500" />
+                 });
+             }
           }
         }
       )
@@ -238,59 +291,147 @@ export default function CustomerDashboardPage() {
                 View all →
               </Link>
             </div>
+
+            <div className="flex gap-4 mb-6 border-b border-white/5">
+               <button 
+                 onClick={() => setActiveTab('requests')}
+                 className={`pb-3 text-[10px] font-bold uppercase tracking-widest transition-all relative ${
+                   activeTab === 'requests' ? 'text-brand-primary' : 'text-zinc-500 hover:text-zinc-300'
+                 }`}
+               >
+                 Service Requests
+                 {activeTab === 'requests' && <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-primary" />}
+               </button>
+               <button 
+                 onClick={() => setActiveTab('orders')}
+                 className={`pb-3 text-[10px] font-bold uppercase tracking-widest transition-all relative ${
+                   activeTab === 'orders' ? 'text-brand-primary' : 'text-zinc-500 hover:text-zinc-300'
+                 }`}
+               >
+                 Product Orders
+                 {activeTab === 'orders' && <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-primary" />}
+               </button>
+            </div>
             
             {loading ? (
               <div className="py-8 flex justify-center">
                 <Loader2 className="animate-spin text-brand-primary" size={24} />
               </div>
-            ) : requests.length === 0 ? (
-              <div className="py-8 flex flex-col items-center justify-center text-zinc-500">
-                 <p className="text-sm font-bold text-foreground">No recent requests</p>
-                 <p className="text-xs mt-1">When you book a professional, it will appear here.</p>
-              </div>
+            ) : activeTab === 'requests' ? (
+              requests.length === 0 ? (
+                <div className="py-8 flex flex-col items-center justify-center text-zinc-500">
+                   <p className="text-sm font-bold text-foreground">No recent requests</p>
+                   <p className="text-xs mt-1">When you book a professional, it will appear here.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {requests.slice(0, 5).map((request) => (
+                    <div
+                      key={request.id}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 sm:py-4 sm:px-4 gap-4 glass-panel glass-panel-hover rounded-xl transition-all group"
+                    >
+                      <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                        {/* Photo Thumbnail */}
+                        {request.image_url ? (
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-black/20 overflow-hidden shrink-0 border border-white/10 group-hover:border-brand-primary/30 transition-colors pointer-events-none">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={request.image_url} alt="Uploaded issue" className="w-full h-full object-cover" />
+                          </div>
+                        ) : (
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-white/5 flex items-center justify-center shrink-0 border border-white/10 text-zinc-600 transition-colors">
+                            <ImageIcon size={14} className="sm:size-16" />
+                          </div>
+                        )}
+                        
+                        <div className="space-y-1 overflow-hidden">
+                          <p className="text-xs sm:text-sm font-bold text-foreground group-hover:text-brand-primary transition-colors">
+                            {request.service_type}
+                          </p>
+                          <p className="text-[10px] sm:text-xs font-medium text-zinc-400 truncate max-w-[150px] sm:max-w-xs">{request.description}</p>
+                          <p className="text-[8px] sm:text-[10px] uppercase tracking-widest text-zinc-500">
+                            {new Date(request.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+  
+                        <div className="flex flex-col items-end gap-2">
+                          <span className={`inline-flex shrink-0 h-6 items-center rounded-full border px-3 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest transition-colors ${
+                            !request.status || request.status.toLowerCase() === 'pending' || request.status.toLowerCase() === 'new'
+                              ? 'border-brand-primary/30 bg-brand-primary/10 text-brand-primary'
+                              : request.status.toLowerCase() === 'completed'
+                              ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-500'
+                              : 'border-blue-500/30 bg-blue-500/10 text-blue-500'
+                          }`}>
+                            {request.status === 'in_progress' ? 'Active' : request.status || 'New'}
+                          </span>
+                          
+                          {(request.status?.toLowerCase() === 'in_progress' || request.status?.toLowerCase() === 'active') && (
+                             <div className="flex gap-2">
+                               <button 
+                                 onClick={() => setChatJob(request)}
+                                 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-foreground flex items-center gap-1 bg-white/5 px-3 py-1.5 rounded-full border border-white/10 hover:bg-white/10 transition-all"
+                               >
+                                 <MessageCircle size={10} /> Chat
+                               </button>
+                               <button 
+                                 onClick={() => setTrackingJob(request)}
+                                 className="text-[10px] font-bold uppercase tracking-widest text-brand-primary hover:text-brand-glow flex items-center gap-1 bg-brand-primary/10 px-3 py-1.5 rounded-full border border-brand-primary/20 hover:bg-brand-primary/20 transition-all"
+                               >
+                                 <Navigation size={10} /> Track Pro
+                               </button>
+                             </div>
+                          )}
+                        </div>
+                      </div>
+                  ))}
+                </div>
+              )
             ) : (
-              <div className="space-y-3">
-                {requests.slice(0, 5).map((request) => (
-                  <div
-                    key={request.id}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 sm:py-4 sm:px-4 gap-4 glass-panel glass-panel-hover rounded-xl transition-all group"
-                  >
-                    <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
-                      {/* Photo Thumbnail */}
-                      {request.image_url ? (
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-black/20 overflow-hidden shrink-0 border border-white/10 group-hover:border-brand-primary/30 transition-colors pointer-events-none">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={request.image_url} alt="Uploaded issue" className="w-full h-full object-cover" />
+              orders.length === 0 ? (
+                <div className="py-8 flex flex-col items-center justify-center text-zinc-500">
+                   <p className="text-sm font-bold text-foreground">No orders yet</p>
+                   <p className="text-xs mt-1">Visit the HomeCare Store to browse products.</p>
+                   <Link href="/store" className="mt-4 text-xs font-bold text-brand-primary uppercase tracking-widest hover:underline">Go to Store</Link>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {orders.map((order) => (
+                    <div
+                      key={order.id}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-4 glass-panel glass-panel-hover rounded-xl transition-all"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-lg bg-brand-primary/10 flex items-center justify-center shrink-0 border border-brand-primary/20 text-brand-primary">
+                          <ImageIcon size={20} />
                         </div>
-                      ) : (
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-white/5 flex items-center justify-center shrink-0 border border-white/10 text-zinc-600 transition-colors">
-                          <ImageIcon size={14} className="sm:size-16" />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-bold text-foreground">{order.order_ref}</p>
+                            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded-md">₦{order.total.toLocaleString()}</span>
+                          </div>
+                          <p className="text-xs text-zinc-400 mt-0.5">{order.items.length} item(s) • {new Date(order.created_at).toLocaleDateString()}</p>
                         </div>
-                      )}
+                      </div>
                       
-                      <div className="space-y-1 overflow-hidden">
-                        <p className="text-xs sm:text-sm font-bold text-foreground group-hover:text-brand-primary transition-colors">
-                          {request.service_type}
-                        </p>
-                        <p className="text-[10px] sm:text-xs font-medium text-zinc-400 truncate max-w-[150px] sm:max-w-xs">{request.description}</p>
-                        <p className="text-[8px] sm:text-[10px] uppercase tracking-widest text-zinc-500">
-                          {new Date(request.created_at).toLocaleDateString()}
-                        </p>
+                      <div className="flex items-center gap-4 justify-between sm:justify-end">
+                        <span className={`inline-flex h-6 items-center rounded-full border px-3 text-[9px] font-bold uppercase tracking-widest ${
+                          order.status === 'delivered' 
+                            ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-500' 
+                            : 'border-brand-primary/30 bg-brand-primary/10 text-brand-primary'
+                        }`}>
+                          {order.status.replace('_', ' ')}
+                        </span>
+                        <Link 
+                          href={`/store/track?ref=${order.order_ref}&email=${user?.email}`}
+                          className="h-8 px-4 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-foreground hover:bg-white/10 transition-all"
+                        >
+                          Track Details
+                        </Link>
                       </div>
                     </div>
-
-                    <span className={`inline-flex self-start sm:self-center shrink-0 h-6 items-center rounded-full border px-3 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest transition-colors ${
-                      !request.status || request.status.toLowerCase() === 'pending' || request.status.toLowerCase() === 'new'
-                        ? 'border-brand-primary/30 bg-brand-primary/10 text-brand-primary'
-                        : request.status.toLowerCase() === 'completed'
-                        ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-500'
-                        : 'border-white/10 bg-white/5 text-zinc-400'
-                    }`}>
-                      {request.status || 'New'}
-                    </span>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )
             )}
           </motion.section>
 
@@ -325,6 +466,58 @@ export default function CustomerDashboardPage() {
           </motion.section>
         </motion.main>
       </div>
+
+      {/* Tracking Modal */}
+      <AnimatePresence>
+        {trackingJob && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-xl p-4 sm:p-12" 
+            onClick={() => setTrackingJob(null)}
+          >
+            <button 
+              className="absolute top-6 right-6 sm:top-8 sm:right-8 h-12 w-12 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-brand-primary hover:text-white transition-colors shadow-premium backdrop-blur-md"
+              onClick={() => setTrackingJob(null)}
+            >
+              <X size={20} strokeWidth={2.5} />
+            </button>
+            <motion.div 
+               initial={{ scale: 0.95, opacity: 0, y: 20 }}
+               animate={{ scale: 1, opacity: 1, y: 0 }}
+               exit={{ scale: 0.95, opacity: 0 }}
+               transition={{ type: "spring", stiffness: 300, damping: 25 }}
+               className="relative w-full max-w-4xl rounded-3xl overflow-hidden shadow-[0_0_60px_rgba(249,115,22,0.15)] border border-white/10 bg-background"
+               onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
+                 <div>
+                    <h3 className="text-sm font-bold text-foreground">Live Tracking</h3>
+                    <p className="text-xs text-zinc-400 mt-1">{trackingJob.service_type} • {trackingJob.address}</p>
+                 </div>
+                 <span className="animate-pulse flex h-3 w-3 rounded-full bg-brand-primary"></span>
+              </div>
+              <div className="w-full bg-black">
+                 <LiveMap 
+                    address={trackingJob.address}
+                    trackingJobId={trackingJob.id}
+                    height="60vh"
+                    interactive={false}
+                 />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <ChatModal 
+        isOpen={!!chatJob}
+        onClose={() => setChatJob(null)}
+        requestId={chatJob?.id || ""}
+        title="Message Your Pro"
+        subtitle={chatJob?.service_type}
+      />
     </div>
   );
 }

@@ -185,7 +185,7 @@ export const PRODUCTS: Product[] = [
     name: "Soft-Close Cabinet Hinges (Pair)",
     description: "Heavy-duty stainless steel hinges with hydraulic soft-close. Universal 35mm cup bore.",
     price: 4200,
-    image: "https://images.unsplash.com/photo-1534398079543-deaca5c317d1?auto=format&fit=crop&q=80&w=800", // Hardware/hinge like
+    image: "/products/cabinet-hinges.png", // Premium generated hinge image
     category: "Carpentry",
     serviceLink: ["Carpenter", "Furniture Maker"],
     rating: 4.4,
@@ -197,7 +197,7 @@ export const PRODUCTS: Product[] = [
     name: "Wood Screws Assorted Pack (200pc)",
     description: "High-tensile steel wood screws in assorted sizes. Phillips head, zinc-plated for corrosion resistance.",
     price: 3500,
-    image: "https://images.unsplash.com/photo-1622396181987-a2dbd5aa9b26?auto=format&fit=crop&q=80&w=800", // Screws
+    image: "https://images.unsplash.com/photo-1581147036324-c17ac41dfa6c?auto=format&fit=crop&q=80&w=800", // Screws
     category: "Carpentry",
     serviceLink: ["Carpenter", "Furniture Maker", "General Handyman"],
     rating: 4.6,
@@ -209,7 +209,7 @@ export const PRODUCTS: Product[] = [
     name: "Premium Door Lock Set",
     description: "Mortise door lock with 3 keys. Satin chrome finish. Suitable for wooden and metal doors.",
     price: 15000,
-    image: "https://images.unsplash.com/photo-1509644851169-2acc08aa25b5?auto=format&fit=crop&q=80&w=800", // Door handle/lock
+    image: "https://images.unsplash.com/photo-1555854817-105a308d3312?auto=format&fit=crop&q=80&w=800", // Door handle/lock set
     category: "Carpentry",
     serviceLink: ["Carpenter"],
     rating: 4.8,
@@ -236,7 +236,7 @@ export const PRODUCTS: Product[] = [
     name: "Teflon Tape (Pack of 5)",
     description: "PTFE thread seal tape for leak-proof pipe connections. 12m per roll, professional grade.",
     price: 1500,
-    image: "https://images.unsplash.com/photo-1581783898377-1c85bf937427?auto=format&fit=crop&q=80&w=800", // Tape
+    image: "https://images.unsplash.com/photo-1584622781564-9d9254243547?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", // Plumbing tools
     category: "General",
     serviceLink: ["Plumber", "General Handyman"],
     rating: 4.2,

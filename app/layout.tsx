@@ -2,9 +2,6 @@ import type { Metadata } from "next";
 import Nav from "./components/Nav";
 import MobileBottomNav from "./components/MobileBottomNav";
 import RootWrapper from "./components/RootWrapper";
-import WhatsAppButton from "./components/WhatsAppButton";
-import CartDrawer from "./components/CartDrawer";
-import PromoOverlay from "./components/PromoOverlay";
 import { CartProvider } from "@/lib/cart";
 import "./globals.css";
 import { Toaster } from "sonner";
@@ -75,9 +72,6 @@ export default function RootLayout({
             <div id="content">{children}</div>
           </RootWrapper>
           <MobileBottomNav />
-          <CartDrawer />
-          <PromoOverlay />
-          <WhatsAppButton />
         </CartProvider>
         <Toaster position="top-center" richColors />
         {/* PWA service worker registration */}

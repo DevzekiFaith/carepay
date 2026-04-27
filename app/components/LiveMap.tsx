@@ -3,6 +3,7 @@
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
 import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 import "leaflet/dist/leaflet.css";
 
 // Fix for default marker icons in Leaflet with Next.js
@@ -34,6 +35,7 @@ interface LiveMapProps {
     className?: string;
     initialCenter?: [number, number];
     onSearchStateChange?: (searching: boolean) => void;
+    trackingJobId?: string;
 }
 
 function LocationMarker({ onSelect, onPositionChange, onAddressResolved }: {
@@ -133,26 +135,47 @@ export default function LiveMap({
     height = "400px",
     className = "",
     initialCenter = [6.4584, 7.5464], // Enugu, Nigeria default
-    onSearchStateChange
+    onSearchStateChange,
+    trackingJobId
 }: LiveMapProps) {
     const [mounted] = useState(true);
     const [targetPos, setTargetPos] = useState<L.LatLng | null>(null);
     const [proPos, setProPos] = useState<[number, number] | null>(null);
 
-    // Simulate nearby pro when a target is selected
+    // Handle real-time tracking if trackingJobId is provided, else fallback to mock
     useEffect(() => {
-        if (targetPos) {
-            const timeout = setTimeout(() => {
-                setProPos([
-                    targetPos.lat + (Math.random() - 0.5) * 0.02,
-                    targetPos.lng + (Math.random() - 0.5) * 0.02
-                ]);
-            }, 800);
-            return () => clearTimeout(timeout);
-        } else {
-            setTimeout(() => setProPos(null), 0);
+        if (!trackingJobId) {
+            if (targetPos) {
+                const timeout = setTimeout(() => {
+                    setProPos([
+                        targetPos.lat + (Math.random() - 0.5) * 0.02,
+                        targetPos.lng + (Math.random() - 0.5) * 0.02
+                    ]);
+                }, 800);
+                return () => clearTimeout(timeout);
+            } else {
+                setTimeout(() => setProPos(null), 0);
+            }
+            return;
         }
-    }, [targetPos]);
+
+        // Real-time tracking
+        const supabase = createClient();
+        const channel = supabase.channel(`tracking:${trackingJobId}`)
+            .on(
+                'broadcast',
+                { event: 'location' },
+                (payload: any) => {
+                    const { lat, lng } = payload.payload;
+                    setProPos([lat, lng]);
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [trackingJobId, targetPos]);
 
     if (!mounted) return <div style={{ height }} className={`bg-stone-100 animate-pulse rounded-3xl ${className}`} />;
 

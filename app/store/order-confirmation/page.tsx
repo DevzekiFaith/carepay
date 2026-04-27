@@ -12,16 +12,45 @@ import {
   MessageCircle,
   Loader2,
   Check,
+  Truck,
+  Download,
 } from "lucide-react";
 import { PAYMENT_ACCOUNT } from "@/lib/payment-details";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { createClient } from "@/lib/supabase/client";
+import OrderReceipt from "@/app/components/OrderReceipt";
 
 function OrderConfirmationContent() {
   const searchParams = useSearchParams();
   const orderRef = searchParams.get("ref") || "HC-UNKNOWN";
   const total = parseInt(searchParams.get("total") || "0");
   const [copied, setCopied] = useState(false);
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [orderData, setOrderData] = useState<any>(null);
+  const [fetchingOrder, setFetchingOrder] = useState(true);
+
+  useEffect(() => {
+    const fetchOrder = async () => {
+      setFetchingOrder(true);
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('store_orders')
+        .select('*')
+        .eq('order_ref', orderRef)
+        .maybeSingle();
+      
+      if (error) {
+        console.error("Fetch error:", error);
+      }
+      if (data) {
+        setOrderData(data);
+      }
+      setFetchingOrder(false);
+    };
+    if (orderRef !== "HC-UNKNOWN") fetchOrder();
+    else setFetchingOrder(false);
+  }, [orderRef]);
 
   const handleCopyAccount = () => {
     navigator.clipboard.writeText(PAYMENT_ACCOUNT.accountNumber);
@@ -61,29 +90,48 @@ function OrderConfirmationContent() {
           </p>
         </motion.div>
 
-        {/* Order Reference */}
+        {/* Order Reference & Summary */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 sm:p-8 mb-6"
+          className="rounded-3xl border border-white/10 bg-white/[0.03] overflow-hidden mb-6 shadow-premium"
         >
-          <div className="flex items-center justify-between mb-6">
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-              Order Reference
-            </span>
-            <span className="px-4 py-2 rounded-lg bg-brand-primary/10 border border-brand-primary/30 text-sm font-mono font-extrabold text-brand-primary tracking-wider">
-              {orderRef}
-            </span>
+          <div className="p-6 sm:p-8 bg-white/[0.02] border-b border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-center sm:text-left">
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 block mb-1">
+                Order Reference
+              </span>
+              <span className="text-2xl font-mono font-extrabold text-brand-primary tracking-widest">
+                {orderRef}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+               <button 
+                 onClick={() => {
+                   navigator.clipboard.writeText(orderRef);
+                   toast.success("Order reference copied!");
+                 }}
+                 className="flex items-center gap-2 h-9 px-4 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-brand-primary transition-all"
+               >
+                 <Copy size={12} /> Copy Ref
+               </button>
+            </div>
           </div>
-
-          <div className="flex items-center justify-between p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
-            <span className="text-sm font-bold text-foreground">
-              Amount to Pay
-            </span>
-            <span className="text-2xl font-extrabold text-emerald-500">
-              ₦{total.toLocaleString()}
-            </span>
+ 
+          <div className="p-6 sm:p-8 flex items-center justify-between bg-emerald-500/5">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-500/60 block mb-1">
+                Amount to Pay
+              </span>
+              <span className="text-3xl font-extrabold text-emerald-500">
+                ₦{total.toLocaleString()}
+              </span>
+            </div>
+            <div className="text-right hidden sm:block">
+               <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Payment Status</p>
+               <p className="text-xs font-extrabold text-emerald-500 uppercase mt-1">Pending Transfer</p>
+            </div>
           </div>
         </motion.div>
 
@@ -157,6 +205,30 @@ function OrderConfirmationContent() {
             <MessageCircle size={18} />
             Notify Payment via WhatsApp
           </a>
+          <button
+            onClick={() => {
+              if (fetchingOrder) {
+                toast.loading("Retrieving order details...", { id: "receipt-load" });
+                return;
+              }
+              if (!orderData) {
+                toast.error("Order details not found. Please try again in a moment.", { id: "receipt-load" });
+                return;
+              }
+              setShowReceipt(true);
+            }}
+            className="flex-1 flex items-center justify-center gap-2 h-14 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-[11px] font-bold uppercase tracking-[0.15em] text-zinc-300 transition-all"
+          >
+            <Download size={16} />
+            Download Receipt
+          </button>
+          <Link
+            href={`/store/track?ref=${orderRef}`}
+            className="flex-1 flex items-center justify-center gap-2 h-14 rounded-xl bg-brand-primary text-background text-[11px] font-bold uppercase tracking-[0.15em] hover:bg-brand-glow transition-all shadow-lg"
+          >
+            <Truck size={18} />
+            Track Order Status
+          </Link>
           <Link
             href="/store"
             className="flex-1 flex items-center justify-center gap-2 h-14 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-[11px] font-bold uppercase tracking-[0.15em] text-zinc-300 transition-all"
@@ -165,6 +237,22 @@ function OrderConfirmationContent() {
             Continue Shopping
           </Link>
         </motion.div>
+
+        {/* Receipt Modal */}
+        {showReceipt && orderData && (
+          <OrderReceipt 
+            orderRef={orderData.order_ref}
+            date={orderData.created_at}
+            customerName={orderData.customer_name}
+            customerEmail={orderData.customer_email}
+            address={orderData.delivery_address}
+            items={orderData.items}
+            subtotal={orderData.subtotal}
+            deliveryFee={orderData.delivery_fee}
+            total={orderData.total}
+            onClose={() => setShowReceipt(false)}
+          />
+        )}
 
         <p className="text-center text-[10px] text-zinc-600 mt-8 leading-relaxed">
           Having issues? Contact us via WhatsApp or email at{" "}

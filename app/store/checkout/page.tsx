@@ -267,65 +267,29 @@ export default function CheckoutPage() {
                 </p>
               </div>
 
-              {/* Payment */}
-              <div className="p-6 sm:p-8 rounded-2xl border border-white/10 bg-white/[0.02]">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary">
-                    <CreditCard size={18} />
-                  </div>
-                  <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-                    Payment — Bank Transfer
-                  </h2>
-                </div>
-
-                <div className="rounded-xl bg-background/50 border border-white/10 p-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">
-                        Bank Name
-                      </p>
-                      <p className="text-sm font-bold text-foreground">
-                        {PAYMENT_ACCOUNT.bankName}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">
-                        Account No.
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-extrabold tracking-widest text-brand-primary font-mono">
-                          {PAYMENT_ACCOUNT.accountNumber}
-                        </p>
-                        <button
-                          type="button"
-                          onClick={handleCopyAccount}
-                          className="flex h-7 w-7 items-center justify-center rounded-md border border-white/10 bg-white/5 text-zinc-400 hover:text-brand-primary transition-all"
-                          title="Copy"
-                        >
-                          {copied ? (
-                            <Check size={12} className="text-emerald-500" />
-                          ) : (
-                            <Copy size={12} />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                    <div className="sm:col-span-2 pt-4 border-t border-white/5">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">
-                        Account Name
-                      </p>
-                      <p className="text-sm font-bold text-foreground">
-                        {PAYMENT_ACCOUNT.accountName}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <p className="mt-4 text-[10px] text-zinc-500 leading-relaxed">
-                  Transfer the exact total amount and click "Place Order"
-                  below. We&apos;ll verify your payment and process delivery
-                  within 24 hours.
-                </p>
-              </div>
+               {/* Payment */}
+               <div className="p-6 sm:p-8 rounded-2xl border border-white/10 bg-white/[0.02]">
+                 <div className="flex items-center gap-3 mb-6">
+                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary">
+                     <CreditCard size={18} />
+                   </div>
+                   <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">
+                     Payment Method
+                   </h2>
+                 </div>
+ 
+                 <div className="flex items-center justify-between p-4 rounded-xl bg-brand-primary/5 border border-brand-primary/20">
+                   <div className="flex items-center gap-3">
+                     <div className="w-2 h-2 rounded-full bg-brand-primary animate-pulse" />
+                     <span className="text-sm font-bold text-foreground">Bank Transfer</span>
+                   </div>
+                   <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Selected</span>
+                 </div>
+                 
+                 <p className="mt-4 text-[10px] text-zinc-500 leading-relaxed">
+                   After placing your order, you will be provided with our bank details to complete the transfer.
+                 </p>
+               </div>
             </motion.div>
 
             {/* Right — Order Summary */}

@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { ShoppingCart, Plus, Check, Minus, Star } from "lucide-react";
+import { useState } from "react";
+import { ShoppingCart, Plus, Check, Minus, Star, ShoppingBag } from "lucide-react";
 import { Product } from "@/lib/products";
 import { useCart } from "@/lib/cart";
 
@@ -20,6 +21,8 @@ export default function ProductCard({
     useCart();
   const cartItem = cartItems.find((item) => item.product.id === product.id);
   const quantity = cartItem?.quantity || 0;
+
+  const [imgError, setImgError] = useState(false);
 
   const handleAddToCart = () => {
     addToCart(product, 1);
@@ -46,15 +49,22 @@ export default function ProductCard({
       )}
 
       <div>
-        <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-white/5 shrink-0">
-          <Image
-            src={product.image}
-            alt={product.name}
-            fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-110"
-            unoptimized
-          />
+        <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-white/5 shrink-0 flex items-center justify-center">
+          {!imgError ? (
+            <Image
+              src={product.image}
+              alt={product.name}
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover transition-transform duration-500 group-hover:scale-110"
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center gap-2 text-zinc-700">
+              <ShoppingBag size={48} strokeWidth={1} />
+              <span className="text-[10px] font-bold uppercase tracking-widest opacity-50">Image Pending</span>
+            </div>
+          )}
           <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-[8px] font-bold uppercase tracking-widest text-zinc-300">
             {product.category}
           </div>

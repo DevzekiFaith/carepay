@@ -1,11 +1,14 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { X, ExternalLink, AlertCircle, CheckCircle2, Navigation, ClipboardList, Check } from "lucide-react";
+import { X, ExternalLink, AlertCircle, CheckCircle2, Navigation, ClipboardList, Check, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import Logo from "@/app/components/Logo";
+import dynamic from "next/dynamic";
+
+const ChatModal = dynamic(() => import("@/app/components/ChatModal"), { ssr: false });
 
 // Types
 interface ServiceRequest {
@@ -40,12 +43,35 @@ export default function WorkerDashboardPage() {
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'radar' | 'my-jobs'>('radar');
   const [user, setUser] = useState<any>(null);
+  const [balance, setBalance] = useState<number>(0);
+  const [trackingJobId, setTrackingJobId] = useState<string | null>(null);
+  const [chatJob, setChatJob] = useState<ServiceRequest | null>(null);
+  const watchIdRef = useRef<number | null>(null);
 
     const fetchRequests = async () => {
       try {
         const supabase = createClient();
         const { data: userData } = await supabase.auth.getUser();
         setUser(userData.user);
+
+        if (userData.user) {
+          let { data: wallet } = await supabase
+            .from('wallets')
+            .select('balance')
+            .eq('user_id', userData.user.id)
+            .maybeSingle();
+            
+          if (wallet) {
+             setBalance(Number(wallet.balance));
+          } else {
+             const { data: newWallet } = await supabase
+               .from('wallets')
+               .insert({ user_id: userData.user.id, balance: 0 })
+               .select('balance')
+               .single();
+             if (newWallet) setBalance(Number(newWallet.balance));
+          }
+        }
 
       const { data, error: fetchError } = await supabase
         .from("service_requests")
@@ -94,6 +120,27 @@ export default function WorkerDashboardPage() {
           } else if (payload.eventType === 'DELETE') {
             const deletedId = payload.old.id;
             setRequests((prev) => prev.filter((job) => job.id !== deletedId));
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'wallets',
+        },
+        async (payload: any) => {
+          const updatedWallet = payload.new;
+          const { data } = await supabase.auth.getUser();
+          if (data.user && updatedWallet.user_id === data.user.id) {
+             setBalance(Number(updatedWallet.balance));
+             if (payload.old && Number(updatedWallet.balance) > Number(payload.old.balance)) {
+                 toast.success("Earnings Updated!", {
+                   description: `Your balance is now ₦${Number(updatedWallet.balance).toLocaleString()}`,
+                   icon: <CheckCircle2 className="text-emerald-500" />
+                 });
+             }
           }
         }
       )
@@ -147,6 +194,55 @@ export default function WorkerDashboardPage() {
      }
   };
 
+  const toggleTracking = (jobId: string) => {
+    if (trackingJobId === jobId) {
+      // Stop tracking
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+      }
+      setTrackingJobId(null);
+      toast.info("GPS Tracking Stopped");
+    } else {
+      // Start tracking
+      if (!navigator.geolocation) {
+        toast.error("Geolocation is not supported by your browser");
+        return;
+      }
+      setTrackingJobId(jobId);
+      toast.success("GPS Tracking Started", { description: "Broadcasting location to customer" });
+      
+      const supabase = createClient();
+      const channel = supabase.channel(`tracking:${jobId}`);
+      
+      watchIdRef.current = navigator.geolocation.watchPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          channel.send({
+            type: 'broadcast',
+            event: 'location',
+            payload: { lat: latitude, lng: longitude }
+          });
+        },
+        (err) => {
+          console.error("GPS Error:", err);
+          toast.error("Failed to get GPS location");
+          setTrackingJobId(null);
+        },
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
+      );
+    }
+  };
+
+  // Cleanup GPS on unmount
+  useEffect(() => {
+    return () => {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+      }
+    };
+  }, []);
+
   const radarJobs = requests.filter(r => r.status === 'pending' || r.status === 'new' || !r.assigned_worker_id);
   const myActiveJobs = requests.filter(r => r.assigned_worker_id === user?.id && r.status === 'in_progress');
   const displayJobs = activeTab === 'radar' ? radarJobs : myActiveJobs;
@@ -188,8 +284,8 @@ export default function WorkerDashboardPage() {
           <div className="grid gap-4 sm:grid-cols-3">
              {/* ... same stats as before ... */}
             <motion.div variants={itemVariants} className="glass-panel p-6 shadow-premium border-brand-primary/20">
-              <p className="text-[10px] uppercase tracking-widest font-bold text-brand-primary">This week</p>
-              <p className="mt-2 text-3xl font-heading font-extrabold text-foreground">₦45,000</p>
+              <p className="text-[10px] uppercase tracking-widest font-bold text-brand-primary">Wallet Balance</p>
+              <p className="mt-2 text-3xl font-heading font-extrabold text-foreground">₦{balance.toLocaleString()}</p>
             </motion.div>
             <motion.div variants={itemVariants} className="glass-panel p-6 shadow-premium">
               <p className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">Jobs completed</p>
@@ -334,12 +430,31 @@ export default function WorkerDashboardPage() {
                                   Accept Job
                                 </button>
                             ) : (
+                              <div className="flex flex-wrap items-center justify-end gap-2">
                                 <button 
                                   onClick={() => handleCompleteJob(job.id)}
                                   className="flex items-center gap-2 h-9 px-6 bg-emerald-500 text-white rounded-full text-[10px] font-bold uppercase tracking-[0.15em] shadow-premium hover:bg-emerald-600 transition-all"
                                 >
-                                  <Check size={14} /> Mark Complete
+                                  <Check size={14} /> Complete
                                 </button>
+                                <button 
+                                  onClick={() => setChatJob(job)}
+                                  className="flex items-center gap-2 h-9 px-6 bg-white/5 text-zinc-400 rounded-full text-[10px] font-bold uppercase tracking-[0.15em] border border-white/10 hover:bg-white/10 transition-all"
+                                >
+                                  <MessageCircle size={14} /> Chat
+                                </button>
+                                <button
+                                  onClick={() => toggleTracking(job.id)}
+                                  className={`flex items-center gap-2 h-9 px-6 rounded-full text-[10px] font-bold uppercase tracking-[0.15em] shadow-premium transition-all ${
+                                    trackingJobId === job.id 
+                                      ? 'bg-red-500/10 border border-red-500/30 text-red-500 hover:bg-red-500/20' 
+                                      : 'bg-blue-500/10 border border-blue-500/30 text-blue-500 hover:bg-blue-500/20'
+                                  }`}
+                                >
+                                  <Navigation size={14} className={trackingJobId === job.id ? 'animate-pulse' : ''} /> 
+                                  {trackingJobId === job.id ? 'Stop GPS' : 'Share GPS'}
+                                </button>
+                              </div>
                             )}
                         </div>
                       </div>
@@ -386,6 +501,14 @@ export default function WorkerDashboardPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <ChatModal 
+        isOpen={!!chatJob}
+        onClose={() => setChatJob(null)}
+        requestId={chatJob?.id || ""}
+        title="Chat with Customer"
+        subtitle={chatJob?.service_type}
+      />
     </div>
   );
 }
