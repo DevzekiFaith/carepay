@@ -9,6 +9,7 @@ interface ModernDatePickerProps {
   selectedDate?: Date | null;
   selectedTime?: string;
   onTimeSelect?: (time: string) => void;
+  className?: string;
 }
 
 const TIME_SLOTS = ["08:00", "10:00", "12:00", "14:00", "16:00", "18:00"];
@@ -17,7 +18,8 @@ export default function ModernDatePicker({
   onSelect, 
   selectedDate,
   selectedTime,
-  onTimeSelect 
+  onTimeSelect,
+  className = ""
 }: ModernDatePickerProps) {
   const [viewMode, setViewMode] = useState<'strip' | 'grid'>('strip');
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -77,14 +79,14 @@ export default function ModernDatePicker({
   const formatDate = (date: Date) => date.getDate();
 
   return (
-    <div className="space-y-8 glass-panel p-6 sm:p-8 relative overflow-hidden group">
+    <div className={`space-y-6 sm:space-y-8 p-4 sm:p-6 bg-white/[0.02] rounded-3xl border border-white/5 relative overflow-hidden group ${className}`}>
       {/* Decorative Ambience */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-brand-primary/10 blur-[60px] -mr-16 -mt-16 pointer-events-none group-hover:bg-brand-primary/20 transition-colors" />
       
-      <div className="flex items-center justify-between gap-4 mb-2 relative z-10">
-        <label className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500 flex items-center gap-2.5">
-          <CalendarIcon size={12} className="text-brand-primary" strokeWidth={3} />
-          {viewMode === 'strip' ? "Select Appointment" : `${currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}`}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2 relative z-10">
+        <label className="text-[10px] font-bold uppercase tracking-wider sm:tracking-[0.25em] text-zinc-500 flex items-center gap-2.5">
+          <CalendarIcon size={12} className="text-brand-primary shrink-0" strokeWidth={3} />
+          <span className="truncate">{viewMode === 'strip' ? "Select Appointment" : `${currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}`}</span>
         </label>
         
         <div className="flex items-center gap-1.5 p-1 bg-white/5 rounded-full border border-white/10 backdrop-blur-md">
@@ -112,7 +114,7 @@ export default function ModernDatePicker({
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 10 }}
-            className="relative"
+            className="relative min-w-0 w-full"
           >
             <div className="flex items-center justify-between mb-4">
                  <p className="text-[11px] font-bold text-zinc-400">Next 3 weeks</p>
@@ -217,12 +219,12 @@ export default function ModernDatePicker({
       </AnimatePresence>
 
       {/* Integrated Time Picker */}
-      <div className="mt-8 pt-8 border-t border-white/5 relative z-10">
-        <label className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500 flex items-center gap-2.5 mb-6">
+      <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-white/5 relative z-10">
+        <label className="text-[10px] font-bold uppercase tracking-wider sm:tracking-[0.25em] text-zinc-500 flex items-center gap-2.5 mb-4 sm:mb-6">
           <Clock size={12} className="text-brand-primary" strokeWidth={3} />
           Available Slots
         </label>
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 min-[400px]:grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3">
           {TIME_SLOTS.map((time) => {
             const isSelected = selectedTime === time;
             return (

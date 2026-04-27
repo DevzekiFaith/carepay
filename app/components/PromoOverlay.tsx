@@ -81,7 +81,7 @@ export default function PromoOverlay() {
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className="fixed inset-0 z-[100] flex items-center justify-center px-4"
           >
-            <div className="relative w-full max-w-lg rounded-3xl border border-white/10 bg-background overflow-hidden shadow-[0_0_60px_rgba(249,115,22,0.15)]">
+            <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto scrollbar-hide rounded-3xl border border-white/10 bg-background shadow-[0_0_60px_rgba(249,115,22,0.15)]">
               {/* Close Button */}
               <button
                 onClick={handleDismiss}
@@ -106,7 +106,7 @@ export default function PromoOverlay() {
               {/* Content */}
               <div className="flex flex-col sm:flex-row gap-0">
                 {/* Image */}
-                <div className="relative w-full sm:w-1/2 aspect-square sm:aspect-auto sm:min-h-[280px] bg-white/5">
+                <div className="relative w-full sm:w-1/2 aspect-video sm:aspect-auto sm:min-h-[280px] bg-white/5 shrink-0">
                   <Image
                     src={product.image}
                     alt={product.name}

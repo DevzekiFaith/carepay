@@ -40,7 +40,7 @@ export default function PropertyInspectionPage() {
       {/* Ambience */}
       <div className="absolute inset-x-0 -top-[20%] -z-10 h-[60%] w-full rounded-full bg-brand-primary/10 blur-[120px] mix-blend-screen pointer-events-none" />
 
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:py-12 lg:py-24 relative z-10 grid gap-10 lg:gap-12 lg:grid-cols-2 lg:items-start">
+      <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:py-12 lg:py-24 relative z-10 grid gap-10 lg:gap-12 lg:grid-cols-2 lg:items-start">
         
         {/* Left: Copy & Value Prop */}
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
@@ -53,7 +53,7 @@ export default function PropertyInspectionPage() {
             <span>HomeCare Elite Service</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl font-heading font-extrabold tracking-tight text-white leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-extrabold tracking-tight text-white leading-tight">
             Comprehensive <br/>
             <span className="text-gradient-primary">Property Inspection</span>
           </h1>
@@ -93,9 +93,9 @@ export default function PropertyInspectionPage() {
         </motion.div>
 
         {/* Right: Intake Form */}
-        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
-          <div className="glass-panel p-6 sm:p-10 shadow-premium relative">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/5 blur-[50px] -mr-32 -mt-32 pointer-events-none" />
+        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} className="w-full min-w-0">
+          <div className="glass-panel p-5 sm:p-10 shadow-premium relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/5 blur-[50px] -mt-32 pointer-events-none" />
 
             {submitted ? (
               <div className="text-center py-12">
@@ -113,7 +113,7 @@ export default function PropertyInspectionPage() {
                 <h3 className="text-lg font-bold text-foreground mb-6">Book an Inspection</h3>
                 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 pl-1">Property Full Address</label>
+                  <label className="text-[10px] font-bold uppercase tracking-wider sm:tracking-widest text-zinc-400 pl-1 block mb-2 leading-relaxed">Property Full Address</label>
                   <div className="relative">
                     <MapPin size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
                     <input required type="text" placeholder="e.g. 15 Admiralty Way, Lekki" className="w-full rounded-2xl border border-white/10 bg-white/5 pl-11 pr-4 py-3.5 text-sm font-medium text-foreground outline-none transition-all focus:border-brand-primary/50 focus:bg-brand-primary/5" />
@@ -121,7 +121,7 @@ export default function PropertyInspectionPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 pl-1">Property Type</label>
+                  <label className="text-[10px] font-bold uppercase tracking-wider sm:tracking-widest text-zinc-400 pl-1 block mb-2 leading-relaxed">Property Type</label>
                   <div className="relative">
                     <Home size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
                     <select 
@@ -149,15 +149,15 @@ export default function PropertyInspectionPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 pl-1">Landlord / Agent Details (Optional)</label>
+                  <label className="text-[10px] font-bold uppercase tracking-wider sm:tracking-widest text-zinc-400 pl-1 block mb-2 leading-relaxed">Landlord / Agent Details (Optional)</label>
                   <div className="relative">
                     <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
                     <input type="text" placeholder="Name & Phone Number" className="w-full rounded-2xl border border-white/10 bg-white/5 pl-11 pr-4 py-3.5 text-sm font-medium text-foreground outline-none transition-all focus:border-brand-primary/50 focus:bg-brand-primary/5" />
                   </div>
                 </div>
 
-                <button type="submit" className="btn-minimal mt-8 w-full rounded-full px-6 py-4 text-xs font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2 shadow-premium hover:shadow-[0_0_20px_rgba(249,115,22,0.4)] transition-all">
-                  <ClipboardCheck size={16} /> Secure Your Inspection
+                <button type="submit" className="btn-minimal mt-8 w-full rounded-full px-4 sm:px-6 py-4 text-[10px] sm:text-xs font-bold uppercase tracking-wider sm:tracking-[0.2em] flex items-center justify-center gap-2 shadow-premium hover:shadow-[0_0_20px_rgba(249,115,22,0.4)] transition-all">
+                  <ClipboardCheck size={16} className="shrink-0" /> <span className="truncate">Secure Your Inspection</span>
                 </button>
               </form>
             )}
