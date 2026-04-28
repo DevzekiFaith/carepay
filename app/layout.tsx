@@ -5,7 +5,20 @@ import RootWrapper from "./components/RootWrapper";
 import { CartProvider } from "@/lib/cart";
 import "./globals.css";
 import { Toaster } from "sonner";
+import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import * as SiteConfig from "@/lib/site";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-plus-jakarta-sans",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   metadataBase: SiteConfig.getSiteUrl(),
@@ -52,7 +65,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className="min-w-0 overflow-x-hidden font-sans antialiased"
+        className={`${inter.variable} ${plusJakartaSans.variable} min-w-0 overflow-x-hidden font-sans antialiased`}
       >
         <a
           href="#content"

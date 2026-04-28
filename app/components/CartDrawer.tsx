@@ -128,7 +128,7 @@ export default function CartDrawer() {
                           <p className="text-[10px] text-zinc-500 uppercase tracking-widest mt-0.5">
                             {item.product.category}
                           </p>
-                          <p className="text-sm font-extrabold text-foreground mt-auto">
+                          <p suppressHydrationWarning className="text-sm font-extrabold text-foreground mt-auto">
                             <span className="text-brand-primary text-[10px] mr-0.5">
                               ₦
                             </span>
@@ -199,7 +199,7 @@ export default function CartDrawer() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-zinc-400">Subtotal</span>
-                    <span className="font-bold text-foreground">
+                    <span suppressHydrationWarning className="font-bold text-foreground">
                       ₦{cartTotal.toLocaleString()}
                     </span>
                   </div>
@@ -214,7 +214,7 @@ export default function CartDrawer() {
                     <span className="text-sm font-bold text-foreground">
                       Total
                     </span>
-                    <span className="text-lg font-extrabold text-brand-primary">
+                    <span suppressHydrationWarning className="text-lg font-extrabold text-brand-primary">
                       ₦{(cartTotal + DELIVERY_FEE).toLocaleString()}
                     </span>
                   </div>

@@ -10,12 +10,14 @@ interface ProductCardProps {
   product: Product;
   onAddStep?: (product: Product) => void;
   isAdded?: boolean;
+  priority?: boolean;
 }
 
 export default function ProductCard({
   product,
   onAddStep,
   isAdded,
+  priority = false,
 }: ProductCardProps) {
   const { cartItems, addToCart, updateQuantity, removeFromCart, setIsCartOpen } =
     useCart();
@@ -55,6 +57,7 @@ export default function ProductCard({
               src={product.image}
               alt={product.name}
               fill
+              priority={priority}
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               className="object-cover transition-transform duration-500 group-hover:scale-110"
               onError={() => setImgError(true)}
@@ -111,7 +114,7 @@ export default function ProductCard({
 
       {/* Price and Actions pinned to bottom */}
       <div className="mt-4 pt-3 border-t border-white/5">
-        <p className="text-sm font-extrabold text-foreground mb-3">
+        <p suppressHydrationWarning className="text-sm font-extrabold text-foreground mb-3">
           <span className="text-brand-primary text-[10px] mr-0.5 font-bold">
             ₦
           </span>

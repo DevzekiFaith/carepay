@@ -179,7 +179,7 @@ export default function HomeClient() {
             >
               <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none" />
               <p className="text-center text-xs font-bold text-white/80 relative z-10">
-                <span className="text-4xl font-heading font-extrabold text-white drop-shadow-md">
+                <span suppressHydrationWarning className="text-4xl font-heading font-extrabold text-white drop-shadow-md">
                   {JOBS_COMPLETED.toLocaleString()}+
                 </span>
                 <br />

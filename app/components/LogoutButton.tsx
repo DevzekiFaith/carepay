@@ -9,9 +9,14 @@ export default function LogoutButton() {
   const supabase = createClient();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/');
-    router.refresh();
+    try {
+      await supabase.auth.signOut();
+      // Force a full page reload to clear all states and redirect
+      window.location.href = '/';
+    } catch (err) {
+      console.error("Logout failed:", err);
+      window.location.href = '/';
+    }
   };
 
   return (

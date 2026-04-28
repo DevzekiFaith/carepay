@@ -341,12 +341,13 @@ function RequestContent() {
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
-                    {PRODUCTS.filter(p => p.serviceLink.includes(selectedService)).map((product) => {
+                    {PRODUCTS.filter(p => p.serviceLink.includes(selectedService)).map((product, idx) => {
                       const isSelected = selectedParts.find(p => p.id === product.id);
                       return (
                         <ProductCard
                           key={product.id}
                           product={product}
+                          priority={idx < 2}
                           isAdded={!!isSelected}
                           onAddStep={(p) => {
                             if (isSelected) {
@@ -618,6 +619,7 @@ function RequestContent() {
                   src={REQUEST_HERO_IMAGE}
                   alt="Expert Professional"
                   fill
+                  priority
                   className="object-cover scale-[1.05] transition-transform duration-[10s] hover:scale-[1.1]"
                   sizes="(max-width: 1024px) 100vw, 400px"
                 />

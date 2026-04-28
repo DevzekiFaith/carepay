@@ -22,18 +22,27 @@ export default function Nav() {
     console.log("Nav: Supabase client initialized");
     
     const fetchUserAndRole = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .maybeSingle();
-        if (profile) setRole(profile.role);
+      try {
+        // Add a 5s timeout to the auth check
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 5000));
+        const getUser = supabase.auth.getUser();
+        
+        const { data: { user } } = (await Promise.race([getUser, timeout])) as any;
+        setUser(user);
+        
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .maybeSingle();
+          if (profile) setRole(profile.role);
+        }
+      } catch (err) {
+        console.error("Nav auth check timed out or failed:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchUserAndRole();

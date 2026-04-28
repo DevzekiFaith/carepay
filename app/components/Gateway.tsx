@@ -1,15 +1,20 @@
 "use client";
 
+import dynamic from 'next/dynamic';
 import HeroSection from "./landing/HeroSection";
-import ServiceCategorySection from "./landing/ServiceCategorySection";
-import InteractiveMapSection from "./landing/InteractiveMapSection";
-import FeaturesSection from "./landing/FeaturesSection";
-import WalletEscrowSection from "./landing/WalletEscrowSection";
-import HowItWorksSection from "./landing/HowItWorksSection";
-import EducationalResourcesSection from "./landing/EducationalResourcesSection";
-import TestimonialsSection from "./landing/TestimonialsSection";
-import FAQSection from "./landing/FAQSection";
-import FooterSection from "./landing/FooterSection";
+
+// Critically above-the-fold
+const ServiceCategorySection = dynamic(() => import("./landing/ServiceCategorySection"));
+const InteractiveMapSection = dynamic(() => import("./landing/InteractiveMapSection"));
+
+// Below-the-fold / Heavy sections
+const FeaturesSection = dynamic(() => import("./landing/FeaturesSection"));
+const WalletEscrowSection = dynamic(() => import("./landing/WalletEscrowSection"));
+const HowItWorksSection = dynamic(() => import("./landing/HowItWorksSection"));
+const EducationalResourcesSection = dynamic(() => import("./landing/EducationalResourcesSection"));
+const TestimonialsSection = dynamic(() => import("./landing/TestimonialsSection"));
+const FAQSection = dynamic(() => import("./landing/FAQSection"));
+const FooterSection = dynamic(() => import("./landing/FooterSection"));
 
 export default function Gateway() {
   return (

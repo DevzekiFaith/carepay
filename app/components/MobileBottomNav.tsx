@@ -30,9 +30,12 @@ export default function MobileBottomNav() {
   }, [supabase]);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/');
-    router.refresh();
+    try {
+      await supabase.auth.signOut();
+      window.location.href = '/';
+    } catch (err) {
+      window.location.href = '/';
+    }
   };
 
   // Base nav items visible to everyone
