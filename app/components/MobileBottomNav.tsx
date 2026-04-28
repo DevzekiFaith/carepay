@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
 import { useCart } from "@/lib/cart";
+import { toast } from "sonner";
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
@@ -31,7 +32,13 @@ export default function MobileBottomNav() {
 
   const handleLogout = async () => {
     try {
+      const toastId = toast.loading("Logging out...");
       await supabase.auth.signOut();
+      toast.success("Logged out", { id: toastId });
+      if (typeof window !== 'undefined') {
+        localStorage.clear();
+        sessionStorage.clear();
+      }
       window.location.href = '/';
     } catch (err) {
       window.location.href = '/';

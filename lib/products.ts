@@ -209,7 +209,7 @@ export const PRODUCTS: Product[] = [
     name: "Premium Door Lock Set",
     description: "Mortise door lock with 3 keys. Satin chrome finish. Suitable for wooden and metal doors.",
     price: 15000,
-    image: "https://images.unsplash.com/photo-1555854817-105a308d3312?auto=format&fit=crop&q=80&w=800", // Door handle/lock set
+    image: "https://images.unsplash.com/photo-1510127034890-ba27508e9f1c?auto=format&fit=crop&q=80&w=800", // Door handle/lock set
     category: "Carpentry",
     serviceLink: ["Carpenter"],
     rating: 4.8,

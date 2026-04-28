@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
+import { toast } from "sonner";
 
 export default function LogoutButton() {
   const router = useRouter();
@@ -10,7 +11,14 @@ export default function LogoutButton() {
 
   const handleLogout = async () => {
     try {
+      const toastId = toast.loading("Logging out...");
       await supabase.auth.signOut();
+      toast.success("Logged out successfully", { id: toastId });
+      // Clear local storage as a safety measure
+      if (typeof window !== 'undefined') {
+        localStorage.clear();
+        sessionStorage.clear();
+      }
       // Force a full page reload to clear all states and redirect
       window.location.href = '/';
     } catch (err) {
