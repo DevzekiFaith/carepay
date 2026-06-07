@@ -7,6 +7,7 @@
   
   /* Vibrant Orange Palette */
   --brand-primary: #f97316; /* orange-500 */
+  --brand-primary-rgb: 249, 115, 22;
   --brand-primary-hover: #ea580c; /* orange-600 */
   --brand-glow: rgba(249, 115, 22, 0.4);
   --brand-glow-strong: rgba(249, 115, 22, 0.6);
@@ -31,6 +32,7 @@
     --accent: #e4e4e7;
     
     --brand-primary: #f97316; /* orange-500 */
+    --brand-primary-rgb: 249, 115, 22;
     --brand-primary-hover: #fb923c; /* orange-400 */
     --brand-glow: rgba(249, 115, 22, 0.3);
     --brand-glow-strong: rgba(249, 115, 22, 0.5);

@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 import SurgeBadge from "@/app/components/SurgeBadge";
 import type { SurgeResult } from "@/lib/surge";
 
-import { Wrench, Zap, Hammer, Armchair, Snowflake, Paintbrush, PenTool, Camera, X, Loader2, Calendar, Clock, ShoppingBag } from "lucide-react";
+import { Wrench, Zap, Hammer, Armchair, Snowflake, Paintbrush, PenTool, Camera, X, Loader2, Calendar, Clock, ShoppingBag, Copy, Check, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import ErrorAlert from "@/app/components/ErrorAlert";
 import ModernDatePicker from "@/app/components/ModernDatePicker";
@@ -40,6 +40,8 @@ function RequestContent() {
   const [surgeLoading, setSurgeLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [paymentDetails, setPaymentDetails] = useState({ amount: 0, email: "", phone: "", name: "", txRef: "" });
+  const [paymentCompleted, setPaymentCompleted] = useState(false);
   
   const [appointmentDate, setAppointmentDate] = useState<Date | null>(new Date());
   const [appointmentTime, setAppointmentTime] = useState("09:00");
@@ -70,6 +72,8 @@ function RequestContent() {
     };
     checkUser();
   }, []);
+
+  const [copied, setCopied] = useState(false);
 
   const handleServiceSelect = async (label: string) => {
     const isActive = selectedService === label;
@@ -226,12 +230,18 @@ function RequestContent() {
       description: "A professional will be assigned to you shortly."
     });
 
+    const calculatedAmount = selectedParts.reduce((acc, p) => acc + p.price, 0) || 2000;
+    setPaymentDetails({
+      amount: calculatedAmount,
+      email: email || user?.email || "",
+      phone: phone || user?.user_metadata?.phone || "",
+      name: fullName || user?.user_metadata?.full_name || "",
+      txRef: `REQ-${Date.now().toString(36).toUpperCase()}`
+    });
+
     setSubmitting(false);
     setSubmitted(true);
-    form.reset();
-    setSelectedService(null);
-    setImageFile(null);
-    setImagePreview(null);
+    // Don't reset form yet so the user can pay
   };
 
   return (
@@ -570,37 +580,75 @@ function RequestContent() {
                     className="mt-8 rounded-2xl border border-brand-primary/30 bg-brand-primary/5 p-8 shadow-[0_0_30px_rgba(249,115,22,0.1)] relative overflow-hidden"
                   >
                     <div className="absolute top-0 right-0 w-32 h-32 bg-brand-primary/20 blur-[50px] -mr-16 -mt-16 pointer-events-none" />
-                    <h3 className="text-2xl font-heading font-extrabold text-foreground tracking-tight">Request Confirmed!</h3>
-                    <p className="mt-2 text-sm text-zinc-400 font-medium">We've received your request and are matching you with a professional now.</p>
+                    
+                    {!paymentCompleted ? (
+                      <>
+                        <h3 className="text-2xl font-heading font-extrabold text-foreground tracking-tight">Booking Received!</h3>
+                        <p className="mt-2 text-sm text-zinc-400 font-medium">To finalize your request, please make a bank transfer of <span className="text-brand-primary font-bold">₦{paymentDetails.amount.toLocaleString()}</span> to the account below.</p>
 
-                    <div className="mt-6 rounded-xl bg-background/50 border border-white/10 p-6 backdrop-blur-md">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-brand-primary mb-4 flex items-center gap-2">
-                        Preferred Payment Details
-                      </p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Bank Name</p>
-                          <p className="text-sm font-bold text-foreground">{PAYMENT_ACCOUNT.bankName}</p>
+                        <div className="mt-8 rounded-2xl bg-background/40 border border-white/10 p-6 backdrop-blur-md">
+                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                              <div>
+                                 <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Bank Name</p>
+                                 <p className="text-sm font-bold text-foreground">{PAYMENT_ACCOUNT.bankName}</p>
+                              </div>
+                              <div>
+                                 <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Account Number</p>
+                                 <div className="flex items-center gap-3">
+                                    <p className="text-lg font-mono font-black text-brand-primary tracking-widest">{PAYMENT_ACCOUNT.accountNumber}</p>
+                                    <button 
+                                      type="button"
+                                      onClick={() => {
+                                        navigator.clipboard.writeText(PAYMENT_ACCOUNT.accountNumber);
+                                        setCopied(true);
+                                        toast.success("Account number copied!");
+                                        setTimeout(() => setCopied(false), 2000);
+                                      }}
+                                      className="h-8 w-8 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-zinc-400 hover:text-brand-primary transition-all"
+                                    >
+                                      {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                                    </button>
+                                 </div>
+                              </div>
+                              <div className="sm:col-span-2 pt-4 border-t border-white/5">
+                                 <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Account Name</p>
+                                 <p className="text-sm font-bold text-foreground">{PAYMENT_ACCOUNT.accountName}</p>
+                              </div>
+                           </div>
                         </div>
-                        <div>
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Account No.</p>
-                          <p className="text-sm font-extrabold tracking-widest text-brand-primary font-mono">{PAYMENT_ACCOUNT.accountNumber}</p>
-                        </div>
-                        <div className="sm:col-span-2 pt-4 border-t border-white/5">
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Account Name</p>
-                          <p className="text-sm font-bold text-foreground">{PAYMENT_ACCOUNT.accountName}</p>
-                        </div>
-                      </div>
-                    </div>
 
-                    <div className="mt-8 flex flex-col sm:flex-row gap-4">
-                      <Link
-                        href="/customer/dashboard"
-                        className="btn-minimal h-12 rounded-xl px-8 flex items-center justify-center text-[11px] font-bold uppercase tracking-[0.2em] w-full sm:w-auto"
-                      >
-                        Track Status
-                      </Link>
-                    </div>
+                        <div className="mt-8 flex flex-col sm:flex-row gap-4">
+                           <a
+                             href={`https://wa.me/2349060002990?text=${encodeURIComponent(`Hi, I just booked a ${selectedService} service (Ref: ${paymentDetails.txRef}).\n\nTotal: ₦${paymentDetails.amount.toLocaleString()}\n\nI've made the transfer. Please confirm.`)}`}
+                             target="_blank"
+                             rel="noopener noreferrer"
+                             className="btn-minimal h-12 rounded-full px-8 flex-1 flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-widest shadow-premium"
+                           >
+                             <MessageCircle size={16} /> Notify via WhatsApp
+                           </a>
+                           <Link
+                             href="/customer/dashboard"
+                             className="h-12 rounded-full px-8 border border-white/10 bg-white/5 flex-1 flex items-center justify-center text-[11px] font-bold uppercase tracking-widest text-zinc-400 hover:text-white transition-all"
+                           >
+                             View Dashboard
+                           </Link>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <h3 className="text-2xl font-heading font-extrabold text-foreground tracking-tight">Booking Confirmed!</h3>
+                        <p className="mt-2 text-sm text-zinc-400 font-medium">Your request has been successfully recorded and is being processed.</p>
+                        
+                        <div className="mt-8 flex flex-col sm:flex-row gap-4">
+                          <Link
+                            href="/customer/dashboard"
+                            className="btn-minimal h-12 rounded-xl px-8 flex items-center justify-center text-[11px] font-bold uppercase tracking-[0.2em] w-full sm:w-auto"
+                          >
+                            Track Status
+                          </Link>
+                        </div>
+                      </>
+                    )}
                   </motion.div>
                 )}
               </form>

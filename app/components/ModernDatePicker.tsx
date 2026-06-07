@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useMemo } from "react";
 import { Calendar as CalendarIcon, ChevronRight, ChevronLeft, LayoutGrid, ListFilter, Clock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -23,31 +23,26 @@ export default function ModernDatePicker({
 }: ModernDatePickerProps) {
   const [viewMode, setViewMode] = useState<'strip' | 'grid'>('strip');
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [dates, setDates] = useState<Date[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Generate next 21 days for the strip
+  const [dates] = useState<Date[]>(() => {
     const nextDates = [];
     for (let i = 0; i < 21; i++) {
       const d = new Date();
       d.setDate(d.getDate() + i);
       nextDates.push(d);
     }
-    setDates(nextDates);
-  }, []);
-
-  const daysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
-  const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
+    return nextDates;
+  });
 
   const monthGridDates = useMemo(() => {
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
-    const totalDays = daysInMonth(year, month);
+    const totalDays = new Date(year, month + 1, 0).getDate();
+    const firstDay = new Date(year, month, 1).getDay();
     const grid = [];
     
     // Empty slots before the first day
-    for (let i = 0; i < firstDayOfMonth; i++) {
+    for (let i = 0; i < firstDay; i++) {
       grid.push(null);
     }
     

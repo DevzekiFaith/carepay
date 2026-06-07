@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent, useEffect } from "react";
+import { useState, FormEvent, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -17,132 +17,109 @@ import {
 } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { createClient } from "@/lib/supabase/client";
-import { PAYMENT_ACCOUNT } from "@/lib/payment-details";
 import { toast } from "sonner";
 
 const DELIVERY_FEE = 2500;
 
 export default function CheckoutPage() {
-  const { cartItems, cartTotal, cartCount, clearCart } = useCart();
+  const { cartItems, cartTotal, cartCount, clearCart, mounted } = useCart();
   const router = useRouter();
   const supabase = createClient();
   const [user, setUser] = useState<any>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const orderPlacedRef = useRef(false);
+  
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    address: "",
+    notes: "",
+  });
 
   useEffect(() => {
     const checkUser = async () => {
       const { data } = await supabase.auth.getUser();
       setUser(data.user);
+      if (data.user) {
+        setFormData(prev => ({
+          ...prev,
+          fullName: data.user.user_metadata?.full_name || "",
+          email: data.user.email || "",
+          phone: data.user.user_metadata?.phone || "",
+        }));
+      }
     };
     checkUser();
   }, [supabase]);
 
-  // Redirect if cart is empty
+  // Redirect if cart is empty after hydration/mounted (but not after a successful order)
   useEffect(() => {
-    if (typeof window !== "undefined" && cartCount === 0) {
-      // Small delay to allow cart to load from localStorage
-      const t = setTimeout(() => {
-        if (cartCount === 0) {
-          router.push("/store");
-        }
-      }, 1000);
-      return () => clearTimeout(t);
+    if (mounted && cartCount === 0 && !orderPlacedRef.current) {
+      router.push("/store");
     }
-  }, [cartCount, router]);
+  }, [mounted, cartCount, router]);
 
-  const handleCopyAccount = () => {
-    navigator.clipboard.writeText(PAYMENT_ACCOUNT.accountNumber);
-    setCopied(true);
-    toast.success("Account number copied!");
-    setTimeout(() => setCopied(false), 2000);
+  const grandTotal = cartTotal + DELIVERY_FEE;
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
+
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmitting(true);
 
-    const form = e.target as HTMLFormElement;
-    const formData = new FormData(form);
-
-    const fullName = ((formData.get("fullName") as string) || "").trim();
-    const email = ((formData.get("email") as string) || "").trim();
-    const phone = ((formData.get("phone") as string) || "").trim();
-    const address = ((formData.get("address") as string) || "").trim();
-    const notes = ((formData.get("notes") as string) || "").trim();
-
-    if (!fullName || !email || !phone || !address) {
+    if (!formData.fullName || !formData.email || !formData.phone || !formData.address) {
       toast.error("Please fill all required fields.");
       setSubmitting(false);
       return;
     }
 
-    // Generate order reference
-    const orderRef = `HC-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+    const orderRef = `HC-${Date.now().toString(36).toUpperCase()}`;
 
     try {
-      // Save order to Supabase with a promise timeout
-      const saveOrder = async () => {
-        const { error } = await supabase.from("store_orders").insert({
-          order_ref: orderRef,
-          customer_name: fullName,
-          customer_email: email,
-          customer_phone: phone,
-          delivery_address: address,
-          notes: notes || null,
-          items: cartItems.map((item) => ({
-            id: item.product.id,
-            name: item.product.name,
-            price: item.product.price,
-            quantity: item.quantity,
-            image: item.product.image,
-          })),
-          subtotal: cartTotal,
-          delivery_fee: DELIVERY_FEE,
-          total: cartTotal + DELIVERY_FEE,
-          status: "pending_payment",
-          user_id: user?.id || null,
-        });
-        return error;
-      };
+      console.log("Starting order submission...", { orderRef, cartItems: cartItems.length });
+      
+      const { data, error } = await supabase.from("store_orders").insert({
+        order_ref: orderRef,
+        customer_name: formData.fullName,
+        customer_email: formData.email,
+        customer_phone: formData.phone,
+        delivery_address: formData.address,
+        notes: formData.notes || null,
+        items: cartItems.map((item) => ({
+          id: item.product.id,
+          name: item.product.name,
+          price: item.product.price,
+          quantity: item.quantity,
+          image: item.product.image,
+        })),
+        subtotal: cartTotal,
+        delivery_fee: DELIVERY_FEE,
+        total: grandTotal,
+        status: "pending_payment",
+        user_id: user?.id || null,
+      }).select();
 
-      // Create a timeout promise
-      const timeout = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Timeout")), 8000)
-      );
+      console.log("Order submission result:", { data, error });
 
-      // Race the save against the timeout
-      try {
-        const error = await Promise.race([saveOrder(), timeout]);
-        if (error) {
-          console.warn("Order save error:", (error as any).message);
-        }
-      } catch (timeoutErr) {
-        console.warn("Order save timed out, proceeding anyway.");
-      }
+      if (error) throw error;
 
-      // Clear cart and redirect immediately
+      orderPlacedRef.current = true;
       clearCart();
-      router.push(
-        `/store/order-confirmation?ref=${orderRef}&total=${cartTotal + DELIVERY_FEE}`
-      );
-    } catch (err) {
+      router.push(`/store/order-confirmation?ref=${orderRef}&total=${grandTotal}`);
+    } catch (err: any) {
       console.error("Checkout error:", err);
-      // Still proceed even if DB save fails
-      clearCart();
-      router.push(
-        `/store/order-confirmation?ref=${orderRef}&total=${cartTotal + DELIVERY_FEE}`
-      );
+      toast.error(err.message || "Failed to place order. Please try again.");
     } finally {
-      // Don't set submitting false here because we are navigating away
-      // If we stay on page, we want it false
-      setTimeout(() => setSubmitting(false), 2000);
+      setSubmitting(false);
     }
   };
 
-  const grandTotal = cartTotal + DELIVERY_FEE;
-
-  if (cartCount === 0) {
+  if (!mounted || (cartCount === 0 && !orderPlacedRef.current)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="animate-spin text-brand-primary" size={32} />
@@ -204,7 +181,8 @@ export default function CheckoutPage() {
                     <input
                       required
                       name="fullName"
-                      defaultValue={user?.user_metadata?.full_name || ""}
+                      value={formData.fullName}
+                      onChange={handleInputChange}
                       placeholder="John Doe"
                       className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-foreground outline-none focus:border-brand-primary transition-all"
                     />
@@ -217,7 +195,8 @@ export default function CheckoutPage() {
                       required
                       type="email"
                       name="email"
-                      defaultValue={user?.email || ""}
+                      value={formData.email}
+                      onChange={handleInputChange}
                       placeholder="you@example.com"
                       className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-foreground outline-none focus:border-brand-primary transition-all"
                     />
@@ -230,7 +209,8 @@ export default function CheckoutPage() {
                       required
                       type="tel"
                       name="phone"
-                      defaultValue={user?.user_metadata?.phone || ""}
+                      value={formData.phone}
+                      onChange={handleInputChange}
                       placeholder="+234..."
                       className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-foreground outline-none focus:border-brand-primary transition-all"
                     />
@@ -242,6 +222,8 @@ export default function CheckoutPage() {
                     <input
                       required
                       name="address"
+                      value={formData.address}
+                      onChange={handleInputChange}
                       placeholder="House number, street, area"
                       className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-foreground outline-none focus:border-brand-primary transition-all"
                     />
@@ -254,6 +236,8 @@ export default function CheckoutPage() {
                   </label>
                   <textarea
                     name="notes"
+                    value={formData.notes}
+                    onChange={handleInputChange}
                     rows={3}
                     placeholder="Any special instructions for delivery..."
                     className="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-foreground outline-none focus:border-brand-primary transition-all"
@@ -282,7 +266,7 @@ export default function CheckoutPage() {
               </div>
 
                {/* Payment */}
-               <div className="p-6 sm:p-8 rounded-2xl border border-white/10 bg-white/[0.02]">
+                <div className="p-6 sm:p-8 rounded-2xl border border-white/10 bg-white/[0.02]">
                  <div className="flex items-center gap-3 mb-6">
                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary">
                      <CreditCard size={18} />
@@ -295,13 +279,13 @@ export default function CheckoutPage() {
                  <div className="flex items-center justify-between p-4 rounded-xl bg-brand-primary/5 border border-brand-primary/20">
                    <div className="flex items-center gap-3">
                      <div className="w-2 h-2 rounded-full bg-brand-primary animate-pulse" />
-                     <span className="text-sm font-bold text-foreground">Bank Transfer</span>
+                     <span className="text-sm font-bold text-foreground">Bank Transfer (Globus Bank)</span>
                    </div>
-                   <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Selected</span>
+                   <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Manual</span>
                  </div>
                  
                  <p className="mt-4 text-[10px] text-zinc-500 leading-relaxed">
-                   After placing your order, you will be provided with our bank details to complete the transfer.
+                   You will receive bank details on the next page to complete your transfer.
                  </p>
                </div>
             </motion.div>
@@ -397,8 +381,7 @@ export default function CheckoutPage() {
                     )}
                   </button>
                   <p className="text-[9px] text-zinc-600 text-center mt-3">
-                    By placing your order, you agree to our terms. Payment is
-                    via bank transfer.
+                    By placing your order, you agree to our terms. Manual bank transfer required.
                   </p>
                 </div>
               </div>

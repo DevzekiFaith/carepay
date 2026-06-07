@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Check, ClipboardCheck, ArrowLeft, Home, User, MapPin, Clock } from "lucide-react";
+import { Check, ClipboardCheck, ArrowLeft, Home, User, MapPin } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -58,7 +58,7 @@ export default function PropertyInspectionPage() {
             <span className="text-gradient-primary">Property Inspection</span>
           </h1>
           <p className="mt-4 text-base sm:text-lg text-zinc-400 font-medium max-w-lg">
-            Don't sign that lease or transfer payment until our verified engineers inspect the plumbing, electrical lines, and roofing. Save millions in hidden repair costs.
+            Don&apos;t sign that lease or transfer payment until our verified engineers inspect the plumbing, electrical lines, and roofing. Save millions in hidden repair costs.
           </p>
 
           <div className="mt-8 space-y-4">

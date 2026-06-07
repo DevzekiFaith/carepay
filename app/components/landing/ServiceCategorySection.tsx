@@ -27,7 +27,7 @@ export default function ServiceCategorySection() {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Over 20+ Service Categories</h2>
-            <p className="text-zinc-400 max-w-xl text-sm md:text-base">We've expanded our platform. From quick home fixes to heavy lifting and personal grooming, find any expert you need.</p>
+            <p className="text-zinc-400 max-w-xl text-sm md:text-base">We&apos;ve expanded our platform. From quick home fixes to heavy lifting and personal grooming, find any expert you need.</p>
           </div>
           <button className="h-12 px-6 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 transition-colors text-xs font-bold uppercase tracking-widest text-white whitespace-nowrap">
             View All Services

@@ -1,8 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
-    let supabaseResponse = NextResponse.next({
+export async function proxy(request: NextRequest) {
+    const supabaseResponse = NextResponse.next({
         request,
     })
 
@@ -12,7 +12,7 @@ export async function middleware(request: NextRequest) {
     // Safety check: If environment variables are missing, skip auth logic
     // and return the response to avoid 500 Internal Server Error in production.
     if (!supabaseUrl || !supabaseAnonKey) {
-        console.warn('Middleware: Missing Supabase environment variables. Skipping auth check.')
+        console.warn('Proxy: Missing Supabase environment variables. Skipping auth check.')
         return supabaseResponse
     }
 
@@ -40,11 +40,17 @@ export async function middleware(request: NextRequest) {
     )
 
     // IMPORTANT: Avoid throwing errors here to prevent 500s.
-    // getUser() is safe but we wrap it just in case.
     try {
-        await supabase.auth.getUser()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user && request.cookies.has('sb-auth')) {
+            // User session is invalid or logged out, clear server-side cookies
+            supabaseResponse.cookies.delete('sb-auth')
+        }
     } catch (error) {
-        console.error('Middleware: Auth check failed', error)
+        console.error('Proxy: Auth check failed', error)
+        if (request.cookies.has('sb-auth')) {
+            supabaseResponse.cookies.delete('sb-auth')
+        }
     }
 
     return supabaseResponse

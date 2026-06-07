@@ -23,6 +23,7 @@ interface OrderReceiptProps {
   subtotal: number;
   deliveryFee: number;
   total: number;
+  status?: string;
   onClose?: () => void;
 }
 
@@ -36,6 +37,7 @@ export default function OrderReceipt({
   subtotal,
   deliveryFee,
   total,
+  status,
   onClose
 }: OrderReceiptProps) {
   const [downloading, setDownloading] = useState(false);
@@ -208,8 +210,12 @@ export default function OrderReceipt({
 
           <div className="mt-16 pt-8 border-t border-dashed text-center" style={{ borderColor: '#e4e4e7' }}>
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] mb-2" style={{ color: '#a1a1aa' }}>Payment Status</p>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest border" style={{ backgroundColor: '#ecfdf5', color: '#059669', borderColor: '#d1fae5' }}>
-              Paid via Bank Transfer
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest border" style={{ 
+              backgroundColor: status === 'paid' ? '#ecfdf5' : '#fff7ed', 
+              color: status === 'paid' ? '#059669' : '#c2410c', 
+              borderColor: status === 'paid' ? '#d1fae5' : '#ffedd5' 
+            }}>
+              {status === 'paid' ? 'Payment Confirmed' : 'Pending Payment'}
             </div>
             <p className="mt-8 text-[10px]" style={{ color: '#a1a1aa' }}>
               Thank you for choosing HomeCare. This is an official receipt for your records.

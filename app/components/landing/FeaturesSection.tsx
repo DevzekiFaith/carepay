@@ -31,8 +31,8 @@ export default function FeaturesSection() {
     <section className="py-16 sm:py-24 px-6 bg-zinc-950/50 border-y border-white/5 relative z-10">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-10 sm:mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 px-2">You can't go <span className="text-rose-500">wrong</span> with HomeCare</h2>
-          <p className="text-zinc-400 max-w-xl mx-auto text-sm md:text-base leading-relaxed">We've built a secure ecosystem to ensure every repair is handled with utmost professionalism.</p>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 px-2">You can&apos;t go <span className="text-rose-500">wrong</span> with HomeCare</h2>
+          <p className="text-zinc-400 max-w-xl mx-auto text-sm md:text-base leading-relaxed">We&apos;ve built a secure ecosystem to ensure every repair is handled with utmost professionalism.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">

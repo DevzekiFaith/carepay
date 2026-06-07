@@ -7,7 +7,6 @@ import Hero from "./Hero";
 import ServiceGrid from "./ServiceGrid";
 import QuickRequestForm from "./QuickRequestForm";
 import { PAYMENT_ACCOUNT } from "@/lib/payment-details";
-import { motion } from "framer-motion";
 import { Wrench, Zap, Hammer, Armchair, Snowflake, Paintbrush, PenTool } from "lucide-react";
 
 const PRO_IMAGES = [
@@ -46,26 +45,13 @@ export default function HomeClient() {
         
         <div className="container mx-auto px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-16 relative z-10">
           <div className="space-y-16">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6 }}
-            >
-              <QuickRequestForm
-                selectedService={selectedService}
-                onServiceChange={setSelectedService}
-                services={SERVICES}
-              />
-            </motion.div>
+            <QuickRequestForm
+              selectedService={selectedService}
+              onServiceChange={setSelectedService}
+              services={SERVICES}
+            />
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="glass-panel glass-panel-hover rounded-3xl p-8 sm:p-10 border-orange-500/20 shadow-[0_8px_32px_-4px_rgba(249,115,22,0.15)] bg-gradient-to-br from-orange-500/10 to-transparent"
-            >
+            <div className="glass-panel glass-panel-hover rounded-3xl p-8 sm:p-10 border-orange-500/20 shadow-[0_8px_32px_-4px_rgba(249,115,22,0.15)] bg-gradient-to-br from-orange-500/10 to-transparent">
               <h2 className="text-2xl font-heading font-bold text-foreground mb-4">Refer & Get ₦500</h2>
               <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-6 max-w-md">
                 Share HomeCare with your community safely, and both you and your friend get <span className="text-brand-primary font-bold">₦500 credit</span> on your next booking.
@@ -86,12 +72,9 @@ export default function HomeClient() {
               >
                 Share Link
               </button>
-            </motion.div>
+            </div>
 
-            <motion.div 
-               initial={{ opacity: 0, y: 20 }}
-               whileInView={{ opacity: 1, y: 0 }}
-               viewport={{ once: true }}
+            <div 
                id="faq" 
                className="space-y-8 glass-panel p-8 sm:p-10 rounded-3xl"
             >
@@ -110,41 +93,26 @@ export default function HomeClient() {
                   <p className="text-sm text-zinc-500 leading-relaxed">Yes. All workers register with their NIN for tracking and verification.</p>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
 
           <aside className="space-y-12 relative pt-12 lg:pt-0">
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="glass-panel p-6 sm:p-8 rounded-3xl"
-            >
+            <div className="glass-panel p-6 sm:p-8 rounded-3xl">
               <h2 className="text-xs font-bold uppercase tracking-widest text-brand-primary mb-6">Pros at work</h2>
               <div className="grid grid-cols-3 gap-3">
-                {PRO_IMAGES.map(({ src, alt }, idx) => (
-                  <motion.div 
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.1 * idx }}
+                {PRO_IMAGES.map(({ src, alt }) => (
+                  <div 
                     key={src} 
                     className="relative aspect-square overflow-hidden rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 group"
                   >
                     <div className="absolute inset-0 bg-brand-primary/20 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none mix-blend-color" />
-                    <Image src={src} alt={alt} fill className="object-cover transition-transform duration-700 group-hover:scale-110" sizes="120px" />
-                  </motion.div>
+                    <Image src={src} alt={alt} fill className="object-cover transition-transform duration-700 group-hover:scale-110" sizes="120px" loading="lazy" quality={75} />
+                  </div>
                 ))}
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="rounded-3xl glass-panel glass-panel-hover p-8 sm:p-10"
-            >
+            <div className="rounded-3xl glass-panel glass-panel-hover p-8 sm:p-10">
               <h2 className="text-xs font-bold uppercase tracking-widest text-brand-primary mb-6">How it works</h2>
               <ol className="space-y-8">
                 <li className="flex gap-4 group">
@@ -169,14 +137,9 @@ export default function HomeClient() {
                   </div>
                 </li>
               </ol>
-            </motion.div>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              className="rounded-3xl glass-panel bg-gradient-to-tr from-brand-primary to-rose-500 p-8 shadow-[0_12px_40px_-8px_rgba(249,115,22,0.6)] text-white relative overflow-hidden"
-            >
+            <div className="rounded-3xl glass-panel bg-gradient-to-tr from-brand-primary to-rose-500 p-8 shadow-[0_12px_40px_-8px_rgba(249,115,22,0.6)] text-white relative overflow-hidden">
               <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none" />
               <p className="text-center text-xs font-bold text-white/80 relative z-10">
                 <span suppressHydrationWarning className="text-4xl font-heading font-extrabold text-white drop-shadow-md">
@@ -185,7 +148,7 @@ export default function HomeClient() {
                 <br />
                 <span className="text-[10px] uppercase tracking-widest mt-2 block opacity-90">Jobs completed monthly</span>
               </p>
-            </motion.div>
+            </div>
           </aside>
         </div>
       </section>

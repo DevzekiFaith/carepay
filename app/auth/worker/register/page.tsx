@@ -183,7 +183,7 @@ export default function WorkerRegisterPage() {
               Pro Verification
             </h1>
             <p className="mt-2 text-sm text-zinc-400 font-medium max-w-xl leading-relaxed">
-              Customer safety is our absolute priority. Please provide your true identity and professional details to be vetted and approved. Let's make home repairs secure.
+              Customer safety is our absolute priority. Please provide your true identity and professional details to be vetted and approved. Let&apos;s make home repairs secure.
             </p>
           </div>
 
@@ -205,7 +205,7 @@ export default function WorkerRegisterPage() {
                     name="fullName"
                     value={lockedName || undefined}
                     readOnly={!!lockedName}
-                    onChange={(e) => !lockedName && (e.target as any).value}
+                    onChange={(e) => !lockedName && ((e.target as HTMLInputElement).value)}
                     placeholder="Matches your NIN"
                     className={`w-full rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3 text-sm text-foreground outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary ${lockedName ? 'opacity-70 cursor-not-allowed border-emerald-500/30' : ''}`}
                   />

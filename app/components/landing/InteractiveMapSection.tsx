@@ -42,7 +42,7 @@ export default function InteractiveMapSection() {
             transition={{ delay: 0.2 }}
             className="text-zinc-400 text-base leading-relaxed mb-8"
           >
-            Don't guess when help will arrive. Our interactive map connects you to the closest verified professionals. Watch them arrive in real-time right from your screen.
+            Don&apos;t guess when help will arrive. Our interactive map connects you to the closest verified professionals. Watch them arrive in real-time right from your screen.
           </motion.p>
 
           <motion.ul 

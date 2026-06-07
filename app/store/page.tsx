@@ -7,7 +7,6 @@ import {
   Search,
   ShoppingCart,
   ArrowLeft,
-  SlidersHorizontal,
   ArrowUpDown,
   Package,
 } from "lucide-react";
@@ -96,7 +95,11 @@ export default function StorePage() {
                 className="relative flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-primary text-background text-[10px] font-bold uppercase tracking-widest hover:bg-brand-primary/90 transition-all shadow-lg shadow-brand-primary/20"
               >
                 <ShoppingCart size={16} />
-                Cart
+                {cartCount > 0 ? (
+                  <span>Cart · ₦{cartTotal.toLocaleString()}</span>
+                ) : (
+                  <span>Cart</span>
+                )}
                 {cartCount > 0 && (
                   <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-background text-[9px] font-extrabold ring-2 ring-background">
                     {cartCount}
@@ -184,11 +187,11 @@ export default function StorePage() {
           <motion.div
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="fixed bottom-20 left-4 right-4 z-[55] md:hidden"
+            className="fixed bottom-24 left-4 right-4 z-[55] md:hidden"
           >
             <button
               onClick={() => setIsCartOpen(true)}
-              className="w-full flex items-center justify-between px-6 py-4 rounded-2xl bg-brand-primary text-background shadow-[0_0_30px_rgba(249,115,22,0.3)]"
+              className="w-full flex items-center justify-between px-6 py-4 rounded-2xl bg-brand-primary text-background shadow-[0_0_30px_rgba(249,115,22,0.4)] active:scale-[0.98] transition-transform"
             >
               <div className="flex items-center gap-3">
                 <ShoppingCart size={18} />
@@ -196,9 +199,10 @@ export default function StorePage() {
                   {cartCount} item{cartCount !== 1 ? "s" : ""} in cart
                 </span>
               </div>
-              <span className="text-sm font-extrabold">
-                ₦{cartTotal.toLocaleString()}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-extrabold">₦{cartTotal.toLocaleString()}</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest opacity-70">Checkout →</span>
+              </div>
             </button>
           </motion.div>
         )}

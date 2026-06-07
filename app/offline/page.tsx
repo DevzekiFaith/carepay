@@ -27,7 +27,7 @@ export default function OfflinePage() {
           </svg>
         </div>
         <h1 className="text-xl font-heading font-bold tracking-tight text-foreground mb-2">
-          You're offline
+          You&apos;re offline
         </h1>
         <p className="text-sm text-zinc-500 leading-relaxed mb-8">
           HomeCare needs an internet connection to book services and match professionals. Please check your connection and try again.

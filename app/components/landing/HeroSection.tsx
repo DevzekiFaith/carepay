@@ -2,8 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, ShieldCheck, Zap, Star } from "lucide-react";
-import Logo from "../Logo";
+import { ArrowRight, Zap } from "lucide-react";
 
 export default function HeroSection() {
   const containerVariants = {

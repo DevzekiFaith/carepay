@@ -18,29 +18,56 @@ export default function MobileBottomNav() {
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      setUser(data.user);
+      try {
+        const { data } = await supabase.auth.getUser();
+        setUser(data.user);
+      } catch (err) {
+        console.error("Mobile nav auth check failed:", err);
+      }
     };
     checkUser();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
-      setUser(session?.user ?? null);
-    });
+    let subscription: { unsubscribe: () => void } | null = null;
+    try {
+      const { data: { subscription: sub } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+        try {
+          setUser(session?.user ?? null);
+        } catch (err) {
+          console.error("Mobile nav auth state change error:", err);
+        }
+      });
+      subscription = sub;
+    } catch (err) {
+      console.error("Mobile nav failed to subscribe to auth changes:", err);
+    }
 
-    return () => subscription?.unsubscribe?.();
+    return () => {
+      try {
+        subscription?.unsubscribe?.();
+      } catch (err) {
+        console.error("Mobile nav failed to unsubscribe:", err);
+      }
+    };
   }, [supabase]);
 
   const handleLogout = async () => {
     try {
       const toastId = toast.loading("Logging out...");
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+
       toast.success("Logged out", { id: toastId });
+      
+      // Clear storage
       if (typeof window !== 'undefined') {
         localStorage.clear();
         sessionStorage.clear();
       }
-      window.location.href = '/';
+
+      // Hard redirect is the most reliable way to clear all React state and caches
+      window.location.href = "/";
     } catch (err) {
+      console.error("Mobile logout failed:", err);
       window.location.href = '/';
     }
   };
@@ -63,7 +90,7 @@ export default function MobileBottomNav() {
   if (!user && pathname === '/') return null;
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-[60] bg-background/80 backdrop-blur-xl border-t border-white/5 px-4 pb-safe-area-inset-bottom">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-[60] bg-white/90 dark:bg-zinc-950/90 backdrop-blur-xl border-t border-zinc-200 dark:border-zinc-800 px-4 pb-safe-area-inset-bottom">
       <div className="flex items-center justify-between h-16">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
@@ -92,7 +119,7 @@ export default function MobileBottomNav() {
         >
           <ShoppingCart size={20} />
           {cartCount > 0 && (
-            <span className="absolute -top-1 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-brand-primary text-background text-[8px] font-extrabold">
+            <span suppressHydrationWarning className="absolute -top-1 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-brand-primary text-background text-[8px] font-extrabold">
               {cartCount > 9 ? "9+" : cartCount}
             </span>
           )}

@@ -1,22 +1,18 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { 
   LayoutDashboard, 
   ShoppingBag, 
   Wrench, 
-  Users, 
   TrendingUp, 
   Clock, 
   CheckCircle2, 
-  Truck,
   Search,
   MoreVertical,
-  ArrowUpRight,
   Loader2,
   Package,
-  Calendar,
   ChevronRight,
   Filter
 } from "lucide-react";
@@ -30,7 +26,7 @@ interface Order {
   total: number;
   status: string;
   created_at: string;
-  items: any[];
+  items: { product_id: string; quantity: number; price: number }[];
 }
 
 interface ServiceRequest {
@@ -49,11 +45,7 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const supabase = useMemo(() => createClient(), []);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       // 1. Fetch Orders
@@ -75,7 +67,11 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const updateOrderStatus = async (id: string, newStatus: string) => {
     const { error } = await supabase
@@ -120,7 +116,7 @@ export default function AdminDashboard() {
           ].map((item) => (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id as any)}
+              onClick={() => setActiveTab(item.id as 'overview' | 'orders' | 'requests')}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
                 activeTab === item.id 
                   ? 'bg-brand-primary/10 text-brand-primary border border-brand-primary/20 shadow-[0_0_20px_rgba(249,115,22,0.1)]' 

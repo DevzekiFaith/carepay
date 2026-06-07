@@ -12,12 +12,13 @@ export function createClient() {
         }
 
         // Infinite Proxy: Any access returns a function that returns the same proxy
+        /* eslint-disable @typescript-eslint/no-explicit-any */
         const createSafeProxy = (): any => {
             const proxy: any = new Proxy(() => proxy, {
                 get: (target, prop) => {
                     if (prop === 'then') {
                         // Return a function that behaves like a promise that resolves with a helpful error
-                        return (resolve: any) => resolve({ 
+                        return (resolve: (val: any) => void) => resolve({ 
                             data: { user: null, session: null }, 
                             error: { message: 'Supabase configuration missing' } 
                         });
@@ -34,6 +35,7 @@ export function createClient() {
             });
             return proxy;
         };
+        /* eslint-enable @typescript-eslint/no-explicit-any */
         
         return createSafeProxy();
     }

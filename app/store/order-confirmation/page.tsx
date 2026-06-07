@@ -85,8 +85,9 @@ function OrderConfirmationContent() {
             Order Placed!
           </h1>
           <p className="text-sm text-zinc-400 max-w-md mx-auto leading-relaxed">
-            Your order has been recorded. Complete the bank transfer below and
-            we&apos;ll process your delivery within 24 hours.
+            {orderData?.status === 'paid' 
+              ? "Your payment was successful! We've received your order and we're processing your delivery within 24 hours."
+              : "Your order has been recorded. Please complete the payment to process your delivery."}
           </p>
         </motion.div>
 
@@ -130,64 +131,82 @@ function OrderConfirmationContent() {
             </div>
             <div className="text-right hidden sm:block">
                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Payment Status</p>
-               <p className="text-xs font-extrabold text-emerald-500 uppercase mt-1">Pending Transfer</p>
+               <p className={`text-xs font-extrabold uppercase mt-1 ${orderData?.status === 'paid' ? 'text-emerald-500' : 'text-amber-500'}`}>
+                 {orderData?.status === 'paid' ? 'Payment Successful' : 'Pending Payment'}
+               </p>
             </div>
           </div>
         </motion.div>
 
-        {/* Bank Transfer Details */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="rounded-2xl border border-brand-primary/20 bg-brand-primary/5 p-6 sm:p-8 mb-6 relative overflow-hidden"
-        >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-brand-primary/10 blur-[50px] -mr-16 -mt-16 pointer-events-none" />
+        {/* Payment Details */}
+        {orderData?.status !== 'paid' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="rounded-2xl border border-brand-primary/20 bg-brand-primary/5 p-6 sm:p-8 mb-6 relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-brand-primary/10 blur-[50px] -mr-16 -mt-16 pointer-events-none" />
 
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-primary mb-6 flex items-center gap-2">
-            Transfer to this account
-          </h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-primary mb-6 flex items-center gap-2">
+              Transfer to this account
+            </h3>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">
-                Bank Name
-              </p>
-              <p className="text-base font-bold text-foreground">
-                {PAYMENT_ACCOUNT.bankName}
-              </p>
-            </div>
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">
-                Account No.
-              </p>
-              <div className="flex items-center gap-2">
-                <p className="text-base font-extrabold tracking-widest text-brand-primary font-mono">
-                  {PAYMENT_ACCOUNT.accountNumber}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">
+                  Bank Name
                 </p>
-                <button
-                  onClick={handleCopyAccount}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-400 hover:text-brand-primary hover:border-brand-primary/30 transition-all"
-                  title="Copy account number"
-                >
-                  {copied ? (
-                    <Check size={14} className="text-emerald-500" />
-                  ) : (
-                    <Copy size={14} />
-                  )}
-                </button>
+                <p className="text-base font-bold text-foreground">
+                  {PAYMENT_ACCOUNT.bankName}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">
+                  Account No.
+                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-base font-extrabold tracking-widest text-brand-primary font-mono">
+                    {PAYMENT_ACCOUNT.accountNumber}
+                  </p>
+                  <button
+                    onClick={handleCopyAccount}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-400 hover:text-brand-primary hover:border-brand-primary/30 transition-all"
+                    title="Copy account number"
+                  >
+                    {copied ? (
+                      <Check size={14} className="text-emerald-500" />
+                    ) : (
+                      <Copy size={14} />
+                    )}
+                  </button>
+                </div>
+              </div>
+              <div className="sm:col-span-2 pt-4 border-t border-white/5">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">
+                  Account Name
+                </p>
+                <p className="text-base font-bold text-foreground">
+                  {PAYMENT_ACCOUNT.accountName}
+                </p>
               </div>
             </div>
-            <div className="sm:col-span-2 pt-4 border-t border-white/5">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">
-                Account Name
-              </p>
-              <p className="text-base font-bold text-foreground">
-                {PAYMENT_ACCOUNT.accountName}
-              </p>
-            </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        )}
+
+        {orderData?.status === 'paid' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-6 sm:p-8 mb-6 relative overflow-hidden text-center"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-[50px] -mr-16 -mt-16 pointer-events-none" />
+            <CheckCircle2 size={32} className="text-emerald-500 mx-auto mb-4" />
+            <h3 className="text-sm font-bold uppercase tracking-widest text-emerald-500 mb-2">Payment Confirmed</h3>
+            <p className="text-xs text-zinc-400">Thank you! Your payment has been verified.</p>
+          </motion.div>
+        )}
 
         {/* Actions */}
         <motion.div
@@ -200,10 +219,16 @@ function OrderConfirmationContent() {
             href={`https://wa.me/2349060002990?text=${whatsappMessage}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 flex items-center justify-center gap-2 h-14 rounded-xl bg-emerald-600 text-white text-[11px] font-bold uppercase tracking-[0.15em] hover:bg-emerald-700 transition-all shadow-lg"
+            className={`flex-1 flex items-center justify-center gap-2 h-14 rounded-xl text-white text-[11px] font-bold uppercase tracking-[0.15em] transition-all shadow-lg ${orderData?.status === 'paid' ? 'bg-zinc-800 hover:bg-zinc-900 opacity-50 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700'}`}
+            onClick={(e) => {
+              if (orderData?.status === 'paid') {
+                e.preventDefault();
+                toast.info("Order is already paid.");
+              }
+            }}
           >
             <MessageCircle size={18} />
-            Notify Payment via WhatsApp
+            {orderData?.status === 'paid' ? 'Payment Notified' : 'Notify Payment via WhatsApp'}
           </a>
           <button
             onClick={() => {
@@ -250,6 +275,7 @@ function OrderConfirmationContent() {
             subtotal={orderData.subtotal}
             deliveryFee={orderData.delivery_fee}
             total={orderData.total}
+            status={orderData.status}
             onClose={() => setShowReceipt(false)}
           />
         )}

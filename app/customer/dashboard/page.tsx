@@ -4,7 +4,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Image as ImageIcon, Loader2, Shield, Star, Zap, CheckCircle2 } from "lucide-react";
+import { Image as ImageIcon, Loader2, Shield, Zap, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import Logo from "@/app/components/Logo";
 import dynamic from "next/dynamic";
@@ -27,7 +27,7 @@ interface Request {
 interface Order {
   id: string;
   order_ref: string;
-  items: any[];
+  items: { product_id: string; quantity: number; price: number }[];
   total: number;
   status: string;
   created_at: string;
@@ -40,7 +40,7 @@ const itemVariants = { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0, 
 export default function CustomerDashboardPage() {
   const [requests, setRequests] = useState<Request[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<any>(null); // Keeping any for now as Auth User type is complex to import correctly here
   const [balance, setBalance] = useState(0);
   const [tier, setTier] = useState<'basic' | 'pro' | 'elite'>('basic');
   const [loading, setLoading] = useState(true);
@@ -64,7 +64,7 @@ export default function CustomerDashboardPage() {
       const { data: reqData } = await supabase
         .from('service_requests')
         .select('*')
-        .eq('customer_id', user.id)
+        .eq('customer_id', currentUser.id)
         .order('created_at', { ascending: false });
       
       setRequests(reqData || []);
@@ -73,7 +73,7 @@ export default function CustomerDashboardPage() {
       const { data: orderData } = await supabase
         .from('store_orders')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', currentUser.id)
         .order('created_at', { ascending: false });
       
       setOrders(orderData || []);
@@ -82,14 +82,14 @@ export default function CustomerDashboardPage() {
       let { data: wallet } = await supabase
         .from('wallets')
         .select('balance')
-        .eq('user_id', user.id)
+        .eq('user_id', currentUser.id)
         .maybeSingle();
       
       if (!wallet) {
         // Create only if missing
         const { data: newWallet } = await supabase
           .from('wallets')
-          .insert({ user_id: user.id, balance: 0 })
+          .insert({ user_id: currentUser.id, balance: 0 })
           .select('balance')
           .single();
         wallet = newWallet;
@@ -101,7 +101,7 @@ export default function CustomerDashboardPage() {
       const { data: profile } = await supabase
         .from('profiles')
         .select('subscription_tier')
-        .eq('id', user.id)
+        .eq('id', currentUser.id)
         .maybeSingle();
       
       if (profile) setTier(profile.subscription_tier || 'basic');

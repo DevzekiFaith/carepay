@@ -23,11 +23,19 @@ export default function Nav() {
     
     const fetchUserAndRole = async () => {
       try {
-        // Add a 5s timeout to the auth check
-        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 5000));
+        // Add a 5s timeout to the auth check (resolve instead of reject to prevent uncaught runtime errors)
+        const timeout = new Promise((resolve) => setTimeout(() => resolve({ timeout: true }), 5000));
         const getUser = supabase.auth.getUser();
+        const response = (await Promise.race([getUser, timeout])) as any;
         
-        const { data: { user } } = (await Promise.race([getUser, timeout])) as any;
+        if (response && 'timeout' in response) {
+          console.warn("Nav: Authentication check timed out. Proceeding as guest.");
+          setUser(null);
+          setRole(null);
+          return;
+        }
+
+        const user = response?.data?.user ?? null;
         setUser(user);
         
         if (user) {
@@ -39,7 +47,7 @@ export default function Nav() {
           if (profile) setRole(profile.role);
         }
       } catch (err) {
-        console.error("Nav auth check timed out or failed:", err);
+        console.error("Nav auth check failed:", err);
       } finally {
         setLoading(false);
       }
@@ -47,23 +55,41 @@ export default function Nav() {
 
     fetchUserAndRole();
 
-    // Subscribe to auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event: AuthChangeEvent, session: Session | null) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', session.user.id)
-          .maybeSingle();
-        if (profile) setRole(profile.role);
-      } else {
-        setRole(null);
-      }
+    // Subscribe to auth state changes with error handling
+    let subscription: { unsubscribe: () => void } | null = null;
+    try {
+      const { data: { subscription: sub } } = supabase.auth.onAuthStateChange(async (_event: AuthChangeEvent, session: Session | null) => {
+        try {
+          setUser(session?.user ?? null);
+          if (session?.user) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('role')
+              .eq('id', session.user.id)
+              .maybeSingle();
+            if (profile) setRole(profile.role);
+          } else {
+            setRole(null);
+          }
+          setLoading(false);
+        } catch (err) {
+          console.error("Auth state change error:", err);
+          setLoading(false);
+        }
+      });
+      subscription = sub;
+    } catch (err) {
+      console.error("Failed to subscribe to auth changes:", err);
       setLoading(false);
-    });
+    }
 
-    return () => subscription?.unsubscribe?.();
+    return () => {
+      try {
+        subscription?.unsubscribe?.();
+      } catch (err) {
+        console.error("Failed to unsubscribe:", err);
+      }
+    };
   }, []);
 
   return (
@@ -144,7 +170,7 @@ export default function Nav() {
           >
             <ShoppingCart size={16} />
             {cartCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-brand-primary text-background text-[9px] font-extrabold ring-2 ring-background animate-in zoom-in duration-200">
+              <span suppressHydrationWarning className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-brand-primary text-background text-[9px] font-extrabold ring-2 ring-background animate-in zoom-in duration-200">
                 {cartCount > 9 ? "9+" : cartCount}
               </span>
             )}

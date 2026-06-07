@@ -33,7 +33,7 @@ export default function HowItWorksSection() {
                 <div className="w-10 h-10 shrink-0 rounded-full bg-white/10 flex items-center justify-center text-brand-primary font-bold text-sm">1</div>
                 <div>
                   <h4 className="text-base font-bold text-foreground mb-1 flex items-center gap-2"><Search size={16} /> Search for Service</h4>
-                  <p className="text-sm text-zinc-400 leading-relaxed">Search for any domestic service, and we'll instantly find registered providers closest to your location.</p>
+                  <p className="text-sm text-zinc-400 leading-relaxed">Search for any domestic service, and we&apos;ll instantly find registered providers closest to your location.</p>
                 </div>
               </div>
               <div className="flex gap-4">

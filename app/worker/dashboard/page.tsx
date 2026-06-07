@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { X, ExternalLink, AlertCircle, CheckCircle2, Navigation, ClipboardList, Check, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -47,31 +47,31 @@ export default function WorkerDashboardPage() {
   const [trackingJobId, setTrackingJobId] = useState<string | null>(null);
   const [chatJob, setChatJob] = useState<ServiceRequest | null>(null);
   const watchIdRef = useRef<number | null>(null);
+  const supabase = useMemo(() => createClient(), []);
 
-    const fetchRequests = async () => {
-      try {
-        const supabase = createClient();
-        const { data: userData } = await supabase.auth.getUser();
-        setUser(userData.user);
+  const fetchRequests = useCallback(async () => {
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      setUser(userData.user);
 
-        if (userData.user) {
-          let { data: wallet } = await supabase
-            .from('wallets')
-            .select('balance')
-            .eq('user_id', userData.user.id)
-            .maybeSingle();
-            
-          if (wallet) {
-             setBalance(Number(wallet.balance));
-          } else {
-             const { data: newWallet } = await supabase
-               .from('wallets')
-               .insert({ user_id: userData.user.id, balance: 0 })
-               .select('balance')
-               .single();
-             if (newWallet) setBalance(Number(newWallet.balance));
-          }
+      if (userData.user) {
+        let { data: wallet } = await supabase
+          .from('wallets')
+          .select('balance')
+          .eq('user_id', userData.user.id)
+          .maybeSingle();
+          
+        if (wallet) {
+           setBalance(Number(wallet.balance));
+        } else {
+           const { data: newWallet } = await supabase
+             .from('wallets')
+             .insert({ user_id: userData.user.id, balance: 0 })
+             .select('balance')
+             .single();
+           if (newWallet) setBalance(Number(newWallet.balance));
         }
+      }
 
       const { data, error: fetchError } = await supabase
         .from("service_requests")
@@ -85,13 +85,12 @@ export default function WorkerDashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase]);
 
   useEffect(() => {
     fetchRequests();
 
     // Set up Realtime Subscription
-    const supabase = createClient();
     const channel = supabase
       .channel('worker-radar')
       .on(
@@ -147,14 +146,13 @@ export default function WorkerDashboardPage() {
       .subscribe();
 
     return () => {
-      if (channel) supabase.removeChannel(channel);
+      supabase.removeChannel(channel);
     };
-  }, []);
+  }, [fetchRequests, supabase]);
 
   const handleAcceptJob = async (jobId: string) => {
     if (!user) return;
     try {
-      const supabase = createClient();
       const { error: updateError } = await supabase
         .from("service_requests")
         .update({ 
@@ -177,7 +175,6 @@ export default function WorkerDashboardPage() {
 
   const handleCompleteJob = async (jobId: string) => {
      try {
-       const supabase = createClient();
        const { error: updateError } = await supabase
          .from("service_requests")
          .update({ status: 'completed' })
@@ -212,7 +209,6 @@ export default function WorkerDashboardPage() {
       setTrackingJobId(jobId);
       toast.success("GPS Tracking Started", { description: "Broadcasting location to customer" });
       
-      const supabase = createClient();
       const channel = supabase.channel(`tracking:${jobId}`);
       
       watchIdRef.current = navigator.geolocation.watchPosition(

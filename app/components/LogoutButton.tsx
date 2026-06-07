@@ -12,18 +12,21 @@ export default function LogoutButton() {
   const handleLogout = async () => {
     try {
       const toastId = toast.loading("Logging out...");
-      await supabase.auth.signOut();
-      toast.success("Logged out successfully", { id: toastId });
-      // Clear local storage as a safety measure
-      if (typeof window !== 'undefined') {
-        localStorage.clear();
-        sessionStorage.clear();
-      }
-      // Force a full page reload to clear all states and redirect
-      window.location.href = '/';
+      
+      // Perform signOut via Supabase
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+
+      toast.success("Logged out", { id: toastId });
+
+      // Using window.location.href is the most reliable way to 
+      // ensure all client-side state, caches, and memory are cleared.
+      window.location.href = "/";
+      
     } catch (err) {
-      console.error("Logout failed:", err);
-      window.location.href = '/';
+      console.error("Logout error:", err);
+      // Fallback: force redirect to home anyway
+      window.location.href = "/";
     }
   };
 

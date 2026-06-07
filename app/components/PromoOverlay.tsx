@@ -10,7 +10,6 @@ import { useCart } from "@/lib/cart";
 
 const PROMO_DELAY_MS = 4000; // First popup after 4 seconds
 const PROMO_INTERVAL_MS = 60000; // Show a new product every 60 seconds
-const DISMISS_KEY = "homecare-promo-session";
 
 // Get a pool of featured products (prioritize badged items, then all)
 function getPromoPool() {
@@ -20,23 +19,25 @@ function getPromoPool() {
 
 export default function PromoOverlay() {
   const [isVisible, setIsVisible] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(() => {
+    const pool = getPromoPool();
+    return Math.floor(Math.random() * pool.length);
+  });
   const { addToCart, setIsCartOpen } = useCart();
 
   const pool = getPromoPool();
   const product = pool[currentIndex % pool.length];
 
-  // Show the first promo after initial delay, then rotate at intervals
+  // Show the first promo after initial delay — DISABLED for now to prevent "stiff" UI
+  /*
   useEffect(() => {
-    // Pick a random starting point so it's not always the same product
-    setCurrentIndex(Math.floor(Math.random() * pool.length));
-
     const firstTimer = setTimeout(() => {
       setIsVisible(true);
     }, PROMO_DELAY_MS);
 
     return () => clearTimeout(firstTimer);
   }, [pool.length]);
+  */
 
   // Set up the rotation interval — after dismiss, show next product after interval
   useEffect(() => {
@@ -161,7 +162,7 @@ export default function PromoOverlay() {
 
                   {/* Price */}
                   <div className="flex items-baseline gap-2 mb-6">
-                    <span className="text-2xl font-extrabold text-foreground">
+                    <span suppressHydrationWarning className="text-2xl font-extrabold text-foreground">
                       <span className="text-brand-primary text-base mr-0.5">
                         ₦
                       </span>

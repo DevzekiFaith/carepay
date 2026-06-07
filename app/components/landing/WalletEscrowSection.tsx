@@ -76,7 +76,7 @@ export default function WalletEscrowSection() {
             transition={{ delay: 0.1 }}
             className="text-3xl md:text-5xl font-bold text-foreground mb-6 leading-tight"
           >
-            Your money is safe <br />until you're satisfied.
+            Your money is safe <br />until you&apos;re satisfied.
           </motion.h2>
 
           <motion.p 

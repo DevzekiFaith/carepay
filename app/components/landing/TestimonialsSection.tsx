@@ -55,7 +55,7 @@ export default function TestimonialsSection() {
                 ))}
               </div>
               
-              <p className="text-zinc-300 text-lg md:text-xl leading-relaxed mb-8 relative z-10">"{t.text}"</p>
+              <p className="text-zinc-300 text-lg md:text-xl leading-relaxed mb-8 relative z-10">&quot;{t.text}&quot;</p>
               
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-lg border border-white/10">
