@@ -78,7 +78,8 @@ export default function CheckoutPage() {
       return;
     }
 
-    const orderRef = `HC-${Date.now().toString(36).toUpperCase()}`;
+    // Generate order reference only on client side to avoid hydration mismatch
+    const orderRef = `HC-${typeof window !== 'undefined' ? Date.now().toString(36).toUpperCase() : 'PENDING'}`;
 
     try {
       console.log("Starting order submission...", { orderRef, cartItems: cartItems.length });

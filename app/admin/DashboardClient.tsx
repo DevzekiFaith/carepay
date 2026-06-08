@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ClipboardList, Users, MapPin, TrendingUp } from "lucide-react";
+import { ClipboardList, Users, MapPin, TrendingUp, ShoppingBag } from "lucide-react";
 import { CITIES } from "@/lib/cities";
 
 interface DashboardClientProps {
@@ -10,6 +10,9 @@ interface DashboardClientProps {
     pendingJobs: number;
     totalWorkers: number;
     verifiedWorkers: number;
+    totalStoreOrders: number;
+    pendingStoreOrders: number;
+    totalStoreRevenue: number;
   };
   activeCitiesCount: number;
   upcomingCitiesCount: number;
@@ -53,12 +56,12 @@ export default function DashboardClient({ stats, activeCitiesCount, upcomingCiti
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Total Jobs" value={stats.totalJobs} sub="All time" icon={ClipboardList} delay={0} />
         <StatCard label="Pending Jobs" value={stats.pendingJobs} sub="Awaiting match" icon={TrendingUp} delay={0.05} />
-        <StatCard label="Registered Workers" value={stats.totalWorkers} sub="All cities" icon={Users} delay={0.1} />
+        <StatCard label="Store Orders" value={stats.totalStoreOrders} sub={`${stats.pendingStoreOrders} pending`} icon={ShoppingBag} delay={0.1} />
         <StatCard 
-          label="Verified Workers" 
-          value={stats.verifiedWorkers} 
-          sub={`${stats.totalWorkers > 0 ? Math.round((stats.verifiedWorkers / stats.totalWorkers) * 100) : 0}% approval rate`} 
-          icon={Users} 
+          label="Store Revenue" 
+          value={`₦${stats.totalStoreRevenue.toLocaleString()}`} 
+          sub="Total sales" 
+          icon={ShoppingBag} 
           delay={0.15} 
         />
       </div>

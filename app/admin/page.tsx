@@ -5,19 +5,24 @@ import DashboardClient from "./DashboardClient";
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
   
-  const [jobsRes, workersRes] = await Promise.all([
+  const [jobsRes, workersRes, ordersRes] = await Promise.all([
     supabase.from("service_requests").select("id, status"),
     supabase.from("professionals").select("id, is_verified"),
+    supabase.from("store_orders").select("id, status, total"),
   ]);
 
   const jobs = jobsRes.data ?? [];
   const workers = workersRes.data ?? [];
+  const orders = ordersRes.data ?? [];
 
   const stats = {
     totalJobs: jobs.length,
     pendingJobs: jobs.filter((j: any) => !j.status || j.status === "pending").length,
     totalWorkers: workers.length,
     verifiedWorkers: workers.filter((w: any) => w.is_verified).length,
+    totalStoreOrders: orders.length,
+    pendingStoreOrders: orders.filter((o: any) => o.status === "pending_payment").length,
+    totalStoreRevenue: orders.reduce((sum: number, o: any) => sum + (o.total || 0), 0),
   };
 
   const activeCitiesCount = CITIES.filter((c) => c.active).length;

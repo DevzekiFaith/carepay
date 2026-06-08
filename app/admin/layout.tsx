@@ -9,6 +9,7 @@ import {
   MapPin,
   TrendingUp,
   ArrowLeft,
+  ShoppingBag,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -16,6 +17,7 @@ const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/jobs", label: "Jobs", icon: ClipboardList },
   { href: "/admin/workers", label: "Workers", icon: Users },
+  { href: "/admin/store-orders", label: "Store Orders", icon: ShoppingBag },
   { href: "/admin/cities", label: "Cities", icon: MapPin },
   { href: "/admin/surge", label: "Surge Pricing", icon: TrendingUp },
 ];

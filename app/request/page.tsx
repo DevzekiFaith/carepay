@@ -186,7 +186,7 @@ function RequestContent() {
     let imageUrl = null;
     if (imageFile) {
       const fileExt = imageFile.name.split('.').pop() || 'jpg';
-      const fileName = `${currentUserId}-${Date.now()}.${fileExt}`;
+      const fileName = `${currentUserId}-${typeof window !== 'undefined' ? Date.now() : 'upload'}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('job-photos')
@@ -236,7 +236,7 @@ function RequestContent() {
       email: email || user?.email || "",
       phone: phone || user?.user_metadata?.phone || "",
       name: fullName || user?.user_metadata?.full_name || "",
-      txRef: `REQ-${Date.now().toString(36).toUpperCase()}`
+      txRef: `REQ-${typeof window !== 'undefined' ? Date.now().toString(36).toUpperCase() : 'PENDING'}`
     });
 
     setSubmitting(false);

@@ -175,7 +175,7 @@ export default function CustomerWalletPage() {
 
       // 1. Upload Receipt to Storage
       const fileExt = receiptFile.name.split('.').pop();
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const fileName = `${user.id}-${typeof window !== 'undefined' ? Date.now() : 'receipt'}.${fileExt}`;
       const filePath = `receipts/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
