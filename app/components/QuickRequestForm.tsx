@@ -55,52 +55,32 @@ export default function QuickRequestForm({ selectedService, onServiceChange, ser
         const details = (formData.get("details") as string)?.trim() ?? "";
         const pin = (formData.get("pin") as string)?.trim() ?? "";
 
-        // Timeout helper function
-        const withTimeout = <T,>(promise: Promise<T>, timeoutMs: number, errorMessage: string): Promise<T> => {
-            return Promise.race([
-                promise,
-                new Promise<T>((_, reject) => 
-                    setTimeout(() => reject(new Error(errorMessage)), timeoutMs)
-                )
-            ]);
-        };
-
         try {
             const supabase = createClient();
             let userId = null;
 
-            // 1. Authenticate User with timeout
+            // 1. Authenticate User
             toast.loading("Authenticating...", { id: "booking-step" });
-            const { data: { user: existingUser } } = await withTimeout(
-                supabase.auth.getUser(),
-                10000,
-                "Authentication timeout. Please try again."
-            );
+            const { data: { user: existingUser } } = await supabase.auth.getUser();
             
             if (existingUser) {
                 userId = existingUser.id;
             } else {
-                const { data: signUpData, error: signUpError } = await withTimeout(
-                    supabase.auth.signUp({ email, password: pin }),
-                    10000,
-                    "Sign up timeout. Please try again."
-                );
+                const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email, password: pin });
 
                 if (signUpError && (signUpError.message.toLowerCase().includes("already") || signUpError.status === 400)) {
-                    const { data: signInData, error: signInError } = await withTimeout(
-                        supabase.auth.signInWithPassword({ email, password: pin }),
-                        10000,
-                        "Sign in timeout. Please try again."
-                    );
+                    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password: pin });
                     if (signInError) {
                         toast.error("Incorrect PIN", { id: "booking-step", description: "Use the main login page if you forgot your PIN." });
                         setErrorMsg("Incorrect PIN for this account.");
+                        setSubmitting(false);
                         return;
                     }
                     userId = signInData.user?.id;
                 } else if (signUpError) {
                     toast.error("Auth Error", { id: "booking-step", description: signUpError.message });
                     setErrorMsg(`Auth Error: ${signUpError.message}`);
+                    setSubmitting(false);
                     return;
                 } else {
                     userId = signUpData.user?.id;
@@ -110,48 +90,44 @@ export default function QuickRequestForm({ selectedService, onServiceChange, ser
             if (!userId) {
                 toast.error("Auth Failed", { id: "booking-step" });
                 setErrorMsg("Failed to authenticate.");
+                setSubmitting(false);
                 return;
             }
 
-            // 2. Ensure Profile Exists (Upsert) with timeout
+            // 2. Ensure Profile Exists (Upsert)
             toast.loading("Preparing profile...", { id: "booking-step" });
-            const { error: profileError } = await withTimeout(
-                supabase.from('profiles').upsert({
-                    id: userId, 
-                    full_name: fullName, 
-                    phone, 
-                    address
-                }, { onConflict: 'id' }),
-                10000,
-                "Profile update timeout. Please try again."
-            );
+            const { error: profileError } = await supabase.from('profiles').upsert({
+                id: userId, 
+                full_name: fullName, 
+                phone, 
+                address
+            }, { onConflict: 'id' });
 
             if (profileError) {
                 toast.error("Profile Error", { id: "booking-step", description: profileError.message });
                 setErrorMsg(`Profile Error: ${profileError.message}`);
+                setSubmitting(false);
                 return;
             }
 
-            // 3. Create Service Request with timeout
+            // 3. Create Service Request
             toast.loading("Submitting request...", { id: "booking-step" });
-            const { error: requestError } = await withTimeout(
-                supabase.from('service_requests').insert({
-                    customer_id: userId,
-                    service_type: service,
-                    description: details,
-                    address: address
-                }),
-                10000,
-                "Request submission timeout. Please try again."
-            );
+            const { error: requestError } = await supabase.from('service_requests').insert({
+                customer_id: userId,
+                service_type: service,
+                description: details,
+                address: address
+            });
 
             if (requestError) {
                 toast.error("Submission Error", { id: "booking-step", description: requestError.message });
                 setErrorMsg(`Failed to submit request: ${requestError.message}`);
+                setSubmitting(false);
                 return;
             }
 
             toast.success("Request Submitted!", { id: "booking-step" });
+            setSubmitting(false);
             setSubmitted(true);
             (e.target as HTMLFormElement).reset();
             onServiceChange(null);
@@ -159,7 +135,6 @@ export default function QuickRequestForm({ selectedService, onServiceChange, ser
             console.error("Booking error:", err);
             toast.error(err.message || "Failed to submit request. Please try again.", { id: "booking-step" });
             setErrorMsg(err.message || "Failed to submit request. Please try again.");
-        } finally {
             setSubmitting(false);
         }
     };

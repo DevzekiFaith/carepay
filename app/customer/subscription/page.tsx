@@ -10,10 +10,12 @@ import ErrorAlert from "@/app/components/ErrorAlert";
 import { toast } from "sonner";
 
 export default function SubscriptionPage() {
-  const [currentTier, setCurrentTier] = useState<'basic' | 'pro' | 'elite'>('basic');
+  const [currentTier, setCurrentTier] = useState<'plus' | 'pro' | 'elite'>('plus');
   const [loading, setLoading] = useState(true);
   const [upgrading, setUpgrading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [selectedState, setSelectedState] = useState<'lagos' | 'abuja' | 'ph' | 'enugu' | 'ogun'>('lagos');
+  const [paymentPeriod, setPaymentPeriod] = useState<'monthly' | 'quarterly' | 'annual'>('monthly');
 
   const supabase = createClient();
 
@@ -44,7 +46,7 @@ export default function SubscriptionPage() {
     fetchProfile();
   }, [fetchProfile]);
 
-  const handleUpgrade = async (tier: 'pro' | 'elite') => {
+  const handleUpgrade = async (tier: 'plus' | 'pro' | 'elite') => {
     try {
       setUpgrading(tier);
       setError(null);
@@ -80,7 +82,7 @@ export default function SubscriptionPage() {
 
       setCurrentTier(tier);
       toast.success(`Welcome to HomeCare ${tier.toUpperCase()}! Your benefits are now active.`, {
-        description: "Zero convenience fees have been applied to your profile."
+        description: "Your subscription has been activated successfully."
       });
     } catch (err: any) {
       setError(`Upgrade failed: ${err.message}`);
@@ -92,6 +94,54 @@ export default function SubscriptionPage() {
 
   const containerVariants = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.1 } } };
   const itemVariants = { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 300 } } };
+
+  // State-specific pricing configuration
+  const statePricing = {
+    lagos: { plus: 25000, pro: 45000, elite: 200000 },
+    abuja: { plus: 22000, pro: 40000, elite: 180000 },
+    ph: { plus: 20000, pro: 38000, elite: 175000 },
+    enugu: { plus: 18000, pro: 35000, elite: 150000 },
+    ogun: { plus: 18000, pro: 35000, elite: 150000 },
+  };
+
+  const stateNames = {
+    lagos: 'Lagos State',
+    abuja: 'FCT Abuja',
+    ph: 'Rivers State (PH)',
+    enugu: 'Enugu State',
+    ogun: 'Ogun State',
+  };
+
+  const currentPricing = statePricing[selectedState];
+
+  // Calculate pricing based on payment period
+  const getDiscountedPrice = (basePrice: number) => {
+    switch (paymentPeriod) {
+      case 'quarterly':
+        return Math.round(basePrice * 3 * 0.9); // 10% discount for quarterly
+      case 'annual':
+        return Math.round(basePrice * 12 * 0.8); // 20% discount for annual
+      default:
+        return basePrice;
+    }
+  };
+
+  const getPeriodLabel = () => {
+    switch (paymentPeriod) {
+      case 'quarterly':
+        return 'quarterly';
+      case 'annual':
+        return 'annually';
+      default:
+        return 'monthly';
+    }
+  };
+
+  const adjustedPricing = {
+    plus: getDiscountedPrice(currentPricing.plus),
+    pro: getDiscountedPrice(currentPricing.pro),
+    elite: getDiscountedPrice(currentPricing.elite),
+  };
 
   if (loading && !upgrading) {
     return (
@@ -116,8 +166,51 @@ export default function SubscriptionPage() {
               HomeCare Tiers
             </h1>
             <p className="mt-2 text-[11px] sm:text-sm text-zinc-400 font-medium max-w-md mx-auto leading-relaxed">
-              Upgrade your account to unlock zero surge fees, priority matching, and dedicated facility managers.
+              Choose your location for state-specific pricing and unlock premium benefits.
             </p>
+          </div>
+          
+          {/* State Selector */}
+          <div className="mt-6 flex flex-wrap justify-center gap-2">
+            {Object.entries(stateNames).map(([key, name]) => (
+              <button
+                key={key}
+                onClick={() => setSelectedState(key as any)}
+                className={`px-4 py-2 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all ${
+                  selectedState === key
+                    ? 'bg-brand-primary text-background shadow-premium'
+                    : 'bg-white/5 border border-white/10 text-zinc-400 hover:text-foreground hover:border-white/20'
+                }`}
+              >
+                {name}
+              </button>
+            ))}
+          </div>
+
+          {/* Payment Period Selector */}
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            {[
+              { value: 'monthly' as const, label: 'Monthly', discount: '' },
+              { value: 'quarterly' as const, label: 'Quarterly', discount: 'Save 10%' },
+              { value: 'annual' as const, label: 'Annual', discount: 'Save 20%' },
+            ].map((period) => (
+              <button
+                key={period.value}
+                onClick={() => setPaymentPeriod(period.value)}
+                className={`px-4 py-2 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all ${
+                  paymentPeriod === period.value
+                    ? 'bg-brand-primary text-background shadow-premium'
+                    : 'bg-white/5 border border-white/10 text-zinc-400 hover:text-foreground hover:border-white/20'
+                }`}
+              >
+                {period.label}
+                {period.discount && (
+                  <span className="ml-1 text-[8px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">
+                    {period.discount}
+                  </span>
+                )}
+              </button>
+            ))}
           </div>
         </header>
 
@@ -129,20 +222,21 @@ export default function SubscriptionPage() {
 
         <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid gap-8 md:grid-cols-3 max-w-5xl mx-auto mt-8 sm:mt-12">
           
-          {/* Base Tier */}
-          <motion.div variants={itemVariants} className={`glass-panel p-6 sm:p-8 shadow-premium flex flex-col relative ${currentTier === 'basic' ? 'border-brand-primary/20 bg-brand-primary/5' : ''}`}>
-            <h3 className="text-base sm:text-lg font-bold text-foreground">Pay-As-You-Go</h3>
-            <p className="text-xs sm:text-sm text-zinc-400 mt-1">For occasional fixes</p>
+          {/* Plus Tier */}
+          <motion.div variants={itemVariants} className={`glass-panel p-6 sm:p-8 shadow-premium flex flex-col relative ${currentTier === 'plus' ? 'border-brand-primary/20 bg-brand-primary/5' : ''}`}>
+            <h3 className="text-base sm:text-lg font-bold text-foreground">HomeCare Plus</h3>
+            <p className="text-xs sm:text-sm text-zinc-400 mt-1">Essential coverage</p>
             <div className="my-6">
-              <span className="text-3xl sm:text-4xl font-heading font-extrabold text-foreground tracking-tight">Free</span>
-              <span className="text-zinc-500 text-[10px] sm:text-xs">/ forever</span>
+              <span className="text-3xl sm:text-4xl font-heading font-extrabold text-foreground tracking-tight">₦{(adjustedPricing.plus / 1000).toFixed(0)}k</span>
+              <span className="text-zinc-500 text-[10px] sm:text-xs">/ {getPeriodLabel()}</span>
             </div>
             <ul className="space-y-4 flex-1 mb-8">
               {[
+                "Reduced 7.5% convenience fee",
+                "1 Free Routine Call-Out /mo",
                 "Standard matching speed",
-                "Standard pricing applies",
-                "Surge fees up to 2.5x during peak times",
-                "Pay 15% platform convenience fee",
+                "Surge pricing capped at 2x",
+                "Priority support",
               ].map((feature, i) => (
                 <li key={i} className="flex gap-3 text-sm text-zinc-400 items-start">
                   <Check size={16} className="text-zinc-600 shrink-0 mt-0.5" />
@@ -150,8 +244,12 @@ export default function SubscriptionPage() {
                 </li>
               ))}
             </ul>
-            <button disabled className="w-full rounded-full border border-white/10 bg-white/5 px-6 h-12 text-xs font-bold uppercase tracking-widest text-zinc-400 disabled:opacity-50">
-              {currentTier === 'basic' ? "Current Plan" : "Included"}
+            <button 
+              onClick={() => handleUpgrade('plus')}
+              disabled={currentTier === 'plus' || !!upgrading}
+              className={`w-full rounded-full border border-white/10 bg-white/5 hover:bg-white/10 px-6 h-12 text-xs font-bold uppercase tracking-widest text-foreground transition-colors disabled:opacity-50 flex items-center justify-center`}
+            >
+              {upgrading === 'plus' ? <Loader2 className="animate-spin" size={16} /> : currentTier === 'plus' ? "Current Plan" : "Select Plus"}
             </button>
           </motion.div>
 
@@ -167,8 +265,8 @@ export default function SubscriptionPage() {
             <h3 className="text-base sm:text-lg font-bold text-brand-primary relative z-10">HomeCare Pro</h3>
             <p className="text-xs sm:text-sm text-zinc-300 mt-1 relative z-10">For busy professionals</p>
             <div className="my-6 relative z-10">
-              <span className="text-3xl sm:text-4xl font-heading font-extrabold text-foreground tracking-tight">₦35k</span>
-              <span className="text-zinc-400 text-[10px] sm:text-xs">/ month</span>
+              <span className="text-3xl sm:text-4xl font-heading font-extrabold text-foreground tracking-tight">₦{(adjustedPricing.pro / 1000).toFixed(0)}k</span>
+              <span className="text-zinc-400 text-[10px] sm:text-xs">/ {getPeriodLabel()}</span>
             </div>
             <ul className="space-y-4 flex-1 mb-8 relative z-10">
               {[
@@ -176,6 +274,7 @@ export default function SubscriptionPage() {
                 { text: "2 Free Routine Call-Outs /mo", icon: Star },
                 { text: "Priority matching (3x faster)", icon: Zap },
                 { text: "Surge pricing capped at 1.5x", icon: Zap },
+                { text: "Same-day guarantee for urgent requests", icon: Zap },
               ].map((feature, i) => (
                 <li key={i} className="flex gap-3 text-xs sm:text-sm text-zinc-200 items-start">
                   <feature.icon size={14} className="text-brand-primary shrink-0 mt-0.5 sm:mt-1 sm:size-4" />
@@ -197,8 +296,8 @@ export default function SubscriptionPage() {
             <h3 className="text-base sm:text-lg font-bold text-foreground">HomeCare Elite</h3>
             <p className="text-xs sm:text-sm text-zinc-400 mt-1">Facility management level</p>
             <div className="my-6">
-              <span className="text-3xl sm:text-4xl font-heading font-extrabold text-foreground tracking-tight">₦150k</span>
-              <span className="text-zinc-500 text-[10px] sm:text-xs">/ month</span>
+              <span className="text-3xl sm:text-4xl font-heading font-extrabold text-foreground tracking-tight">₦{(adjustedPricing.elite / 1000).toFixed(0)}k</span>
+              <span className="text-zinc-500 text-[10px] sm:text-xs">/ {getPeriodLabel()}</span>
             </div>
             <ul className="space-y-4 flex-1 mb-8">
               {[
@@ -206,6 +305,8 @@ export default function SubscriptionPage() {
                 { text: "Dedicated 24/7 Account Manager", icon: Shield },
                 { text: "Matched with top 5% Artisans only", icon: Star },
                 { text: "4 Free routine sweeps /mo", icon: Shield },
+                { text: "Unlimited emergency calls", icon: Zap },
+                { text: "Preferred vendor pricing", icon: Star },
               ].map((feature, i) => (
                 <li key={i} className="flex gap-3 text-xs sm:text-sm text-zinc-400 items-start">
                   <feature.icon size={14} className="text-zinc-200 shrink-0 mt-0.5 sm:mt-1 sm:size-4" />
