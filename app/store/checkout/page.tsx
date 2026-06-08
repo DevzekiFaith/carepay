@@ -110,12 +110,12 @@ export default function CheckoutPage() {
       if (error) throw error;
 
       orderPlacedRef.current = true;
+      setSubmitting(false);
       clearCart();
       router.push(`/store/order-confirmation?ref=${orderRef}&total=${grandTotal}`);
     } catch (err: any) {
       console.error("Checkout error:", err);
       toast.error(err.message || "Failed to place order. Please try again.");
-    } finally {
       setSubmitting(false);
     }
   };
