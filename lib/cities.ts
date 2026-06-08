@@ -35,8 +35,8 @@ export const CITIES: CityConfig[] = [
     id: 'abuja',
     name: 'Abuja',
     state: 'FCT',
-    active: false,
-    launchSoon: true,
+    active: true,
+    launchSoon: false,
     areas: ['Wuse', 'Maitama', 'Garki', 'Asokoro', 'Gwarinpa', 'Kubwa'],
   },
   {
@@ -59,8 +59,8 @@ export const CITIES: CityConfig[] = [
     id: 'portharcourt',
     name: 'Port Harcourt',
     state: 'Rivers State',
-    active: false,
-    launchSoon: true,
+    active: true,
+    launchSoon: false,
     areas: ['GRA Phase 1', 'GRA Phase 2', 'Old GRA', 'Rumuola', 'Diobu'],
   },
 ];
