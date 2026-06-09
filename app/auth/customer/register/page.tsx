@@ -56,6 +56,7 @@ export default function CustomerRegisterPage() {
         description: err.message
       });
       setError(err.message || "Failed to create account. Please try again.");
+    } finally {
       setSubmitting(false);
     }
   };

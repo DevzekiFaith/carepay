@@ -48,6 +48,7 @@ export default function CustomerLoginPage() {
         description: err.message
       });
       setError(err.message || "Invalid login credentials.");
+    } finally {
       setSubmitting(false);
     }
   };

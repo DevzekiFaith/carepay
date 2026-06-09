@@ -25,21 +25,24 @@ export default function WorkerLoginPage() {
 
     const supabase = createClient();
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password: pin,
-    });
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password: pin,
+      });
 
-    if (error) {
-      setMessage(`Login failed: Invalid phone number or PIN.`);
+      if (error) {
+        setMessage(`Login failed: Invalid phone number or PIN.`);
+        return;
+      }
+
+      setMessage("Logged in securely. Redirecting...");
+      setTimeout(() => {
+        window.location.href = "/"; // We will build a true pro dashboard soon
+      }, 1000);
+    } finally {
       setSubmitting(false);
-      return;
     }
-
-    setMessage("Logged in securely. Redirecting...");
-    setTimeout(() => {
-      window.location.href = "/"; // We will build a true pro dashboard soon
-    }, 1000);
   };
 
   return (

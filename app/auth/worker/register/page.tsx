@@ -67,57 +67,57 @@ export default function WorkerRegisterPage() {
 
     if (nin.length !== NIN_LENGTH || !/^\d+$/.test(nin)) {
       setNinError(`NIN must be exactly ${NIN_LENGTH} digits.`);
-      setSubmitting(false);
       return;
     }
 
     const supabase = createClient();
 
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password: pin,
-      options: {
-        data: {
-          full_name: fullName,
-          role: 'worker'
+    try {
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password: pin,
+        options: {
+          data: {
+            full_name: fullName,
+            role: 'worker'
+          }
         }
+      });
+
+      if (authError || !authData?.user) {
+        setMessage(`Registration failed: ${authError?.message || "Unknown error"}`);
+        return;
       }
-    });
 
-    if (authError || !authData?.user) {
-      setMessage(`Registration failed: ${authError?.message || "Unknown error"}`);
+      // Insert into professionals table
+      const { error: dbError } = await supabase.from('professionals').insert({
+        id: authData.user.id,
+        full_name: fullName,
+        phone: phone,
+        nin: nin,
+        primary_skill: primarySkill,
+        experience_years: experience,
+        areas: areas,
+        bio: bio,
+        is_verified: false,
+        ai_verified: aiVerified,
+        ai_verification_reason: aiVerifyReason,
+      });
+
+      if (dbError) {
+        setMessage(`Profile creation failed: ${dbError.message}`);
+        return;
+      }
+
+      setMessage(
+        "Profile successfully submitted! We will securely verify your identity before activating your account to ensure total safety."
+      );
+      form.reset();
+      setCertFile(null);
+      setPhotoFile(null);
+    } finally {
       setSubmitting(false);
-      return;
     }
-
-    // Insert into professionals table
-    const { error: dbError } = await supabase.from('professionals').insert({
-      id: authData.user.id,
-      full_name: fullName,
-      phone: phone,
-      nin: nin,
-      primary_skill: primarySkill,
-      experience_years: experience,
-      areas: areas,
-      bio: bio,
-      is_verified: false,
-      ai_verified: aiVerified,
-      ai_verification_reason: aiVerifyReason,
-    });
-
-    if (dbError) {
-      setMessage(`Profile creation failed: ${dbError.message}`);
-      setSubmitting(false);
-      return;
-    }
-
-    setSubmitting(false);
-    setMessage(
-      "Profile successfully submitted! We will securely verify your identity before activating your account to ensure total safety."
-    );
-    form.reset();
-    setCertFile(null);
-    setPhotoFile(null);
   };
 
   const handleVerifyNin = async (nin: string) => {

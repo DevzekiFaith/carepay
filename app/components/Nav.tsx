@@ -150,7 +150,14 @@ export default function Nav() {
                     <LogoutButton />
                   </div>
                 </>
-              ) : null}
+              ) : (
+                <Link
+                  href="/auth/customer/login"
+                  className="hidden md:flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] uppercase tracking-widest font-bold text-zinc-500 hover:text-brand-primary hover:bg-brand-primary/10 transition-colors"
+                >
+                  <span>Login</span>
+                </Link>
+              )}
             </>
           )}
 

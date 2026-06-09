@@ -13,9 +13,13 @@ export default function LogoutButton() {
     try {
       const toastId = toast.loading("Logging out...");
       
-      // Perform signOut via Supabase
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      // Perform signOut via Supabase with timeout
+      const signOutPromise = supabase.auth.signOut();
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Logout timeout")), 5000)
+      );
+      
+      await Promise.race([signOutPromise, timeoutPromise]);
 
       toast.success("Logged out", { id: toastId });
 

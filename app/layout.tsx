@@ -27,6 +27,9 @@ export const metadata: Metadata = {
     template: `%s | ${SiteConfig.SITE_NAME}`,
   },
   description: `Plumbers, electricians, carpenters & more in ${SiteConfig.DEFAULT_CITY}. Book in 2 mins. Vetted pros across ${SiteConfig.DEFAULT_STATE}, ${SiteConfig.DEFAULT_COUNTRY}.`,
+  icons: {
+    icon: "/hclogo.png",
+  },
   alternates: {
     canonical: "/",
   },

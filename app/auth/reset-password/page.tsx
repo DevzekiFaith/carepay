@@ -66,6 +66,7 @@ export default function ResetPasswordPage() {
         description: err.message
       });
       setError(err.message || "Failed to update password. Please try again.");
+    } finally {
       setSubmitting(false);
     }
   };
