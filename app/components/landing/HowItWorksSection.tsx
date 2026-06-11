@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Search, UserCheck, Wrench, FileText, Send, DollarSign } from "lucide-react";
+import { Search, UserCheck, Wrench, FileText, Send, DollarSign, ShieldCheck } from "lucide-react";
 
 export default function HowItWorksSection() {
   return (
@@ -41,6 +41,10 @@ export default function HowItWorksSection() {
                 <div>
                   <h4 className="text-base font-bold text-foreground mb-1 flex items-center gap-2"><UserCheck size={16} /> Pick a Provider</h4>
                   <p className="text-sm text-zinc-400 leading-relaxed">Select from the listed professionals. Once accepted, contact them directly to discuss the specifics.</p>
+                  <div className="flex items-center gap-1.5 mt-2">
+                    <ShieldCheck size={12} className="text-emerald-500" />
+                    <span className="text-[10px] font-semibold text-emerald-500 uppercase tracking-wider">All providers verified</span>
+                  </div>
                 </div>
               </div>
               <div className="flex gap-4">

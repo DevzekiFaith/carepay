@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Search, MapPin, Clock } from "lucide-react";
+import { Search, MapPin, Clock, ShieldCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Service {
@@ -99,6 +99,10 @@ export default function ServiceGrid({ services, selectedService, onSelectService
                                         <div className="flex items-center gap-2">
                                             <MapPin size={14} className={selectedService === service.label ? "text-white/70" : "text-zinc-400"} />
                                             <span className={`text-xs font-semibold ${selectedService === service.label ? "text-white/90" : "text-zinc-600 dark:text-zinc-400"}`}>Local Pros</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <ShieldCheck size={14} className={selectedService === service.label ? "text-white/70" : "text-emerald-500"} />
+                                            <span className={`text-xs font-semibold ${selectedService === service.label ? "text-white/90" : "text-emerald-600 dark:text-emerald-500"}`}>Verified</span>
                                         </div>
                                     </div>
                                 </motion.button>

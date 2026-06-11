@@ -36,20 +36,29 @@ export default function CustomerRegisterPage() {
           data: {
             full_name: fullName,
             phone: phone,
-          }
+          },
+          emailRedirectTo: `${window.location.origin}/auth/callback`
         }
       });
 
       if (signUpError) throw signUpError;
 
       if (data.user) {
-        toast.success("Account created successfully", {
-          description: "Welcome to HomeCare! Redirecting..."
-        });
-        setTimeout(() => {
-          router.push('/');
-          router.refresh();
-        }, 1000);
+        // Check if email confirmation is required
+        if (data.user.identities?.length === 0) {
+          toast.success("Account created", {
+            description: "Please check your email to confirm your account before logging in."
+          });
+          setError("Please check your email to confirm your account. You'll need to click the confirmation link before you can log in.");
+        } else {
+          toast.success("Account created successfully", {
+            description: "Welcome to HomeCare! Redirecting..."
+          });
+          setTimeout(() => {
+            router.push('/');
+            router.refresh();
+          }, 1000);
+        }
       }
     } catch (err: any) {
       toast.error("Registration failed", {

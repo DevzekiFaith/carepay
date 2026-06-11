@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Zap } from "lucide-react";
+import { ArrowRight, Zap, ShieldCheck } from "lucide-react";
 
 export default function HeroSection() {
   const containerVariants = {
@@ -45,18 +45,23 @@ export default function HeroSection() {
         </motion.p>
 
         <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
-          <Link 
-            href="/auth/customer/register" 
+          <Link
+            href="/auth/customer/register"
             className="w-full sm:w-auto h-14 px-8 rounded-full bg-brand-primary text-foreground flex items-center justify-center gap-3 text-sm font-bold uppercase tracking-[0.2em] shadow-[0_0_30px_rgba(249,115,22,0.3)] hover:shadow-[0_0_50px_rgba(249,115,22,0.5)] transition-all hover:scale-105"
           >
             Get Started <ArrowRight size={18} />
           </Link>
-          <Link 
-            href="/auth/worker/login" 
+          <Link
+            href="/auth/worker/login"
             className="w-full sm:w-auto h-14 px-8 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 flex items-center justify-center text-sm font-bold uppercase tracking-[0.2em] text-zinc-300 transition-colors"
           >
             Provide Help
           </Link>
+        </motion.div>
+
+        <motion.div variants={itemVariants} className="flex items-center gap-2 mt-6">
+          <ShieldCheck size={16} className="text-emerald-500" />
+          <span className="text-xs font-semibold text-emerald-500 uppercase tracking-wider">All providers physically verified</span>
         </motion.div>
 
         <motion.div variants={itemVariants} className="mt-16 text-zinc-500 text-[11px] font-bold uppercase tracking-widest flex items-center gap-4">

@@ -236,7 +236,7 @@ export const PRODUCTS: Product[] = [
     name: "Teflon Tape (Pack of 5)",
     description: "PTFE thread seal tape for leak-proof pipe connections. 12m per roll, professional grade.",
     price: 1500,
-    image: "/teflon-tape.jpg", // Local image
+    image: "/su12.jpg", // Using existing image as placeholder
     category: "General",
     serviceLink: ["Plumber", "General Handyman"],
     rating: 4.2,

@@ -32,7 +32,10 @@ export default function CustomerLoginPage() {
         password,
       });
 
-      if (signInError) throw signInError;
+      if (signInError) {
+        console.error("Supabase login error:", signInError);
+        throw signInError;
+      }
 
       if (data.user) {
         toast.success("Login successful", {
@@ -42,12 +45,26 @@ export default function CustomerLoginPage() {
           router.push('/');
           router.refresh();
         }, 1000);
+      } else {
+        throw new Error("No user data returned from login");
       }
     } catch (err: any) {
+      console.error("Login error details:", err);
       toast.error("Login failed", {
-        description: err.message
+        description: err.message || "Invalid login credentials"
       });
-      setError(err.message || "Invalid login credentials.");
+
+      // Provide more specific error messages
+      let errorMessage = "Invalid login credentials.";
+      if (err.message?.includes("Email not confirmed")) {
+        errorMessage = "Please confirm your email address before logging in. Check your inbox for the confirmation link.";
+      } else if (err.message?.includes("Invalid login credentials")) {
+        errorMessage = "Invalid email or password. Please check your credentials and try again.";
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
+      setError(errorMessage);
     } finally {
       setSubmitting(false);
     }
