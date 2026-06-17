@@ -19,6 +19,12 @@ export default function CustomerLoginPage() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    // Prevent multiple simultaneous submissions
+    if (submitting) {
+      return;
+    }
+    
     setError(null);
     setSubmitting(true);
 
@@ -38,6 +44,7 @@ export default function CustomerLoginPage() {
       }
 
       if (data.user) {
+        setSubmitting(false);
         toast.success("Login successful", {
           description: "Welcome back! Redirecting..."
         });
@@ -50,6 +57,17 @@ export default function CustomerLoginPage() {
       }
     } catch (err: any) {
       console.error("Login error details:", err);
+      
+      // Handle AbortError specifically (concurrent auth requests)
+      if (err.name === 'AbortError' || err.message?.includes('Lock broken')) {
+        toast.error("Please wait", {
+          description: "Another login request is in progress. Please wait a moment and try again."
+        });
+        setError("Please wait a moment before trying again.");
+        setSubmitting(false);
+        return;
+      }
+      
       toast.error("Login failed", {
         description: err.message || "Invalid login credentials"
       });

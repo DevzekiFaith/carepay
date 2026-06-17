@@ -15,6 +15,12 @@ export default function WorkerLoginPage() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    // Prevent multiple simultaneous submissions
+    if (submitting) {
+      return;
+    }
+    
     setMessage(null);
     setSubmitting(true);
 
@@ -32,14 +38,29 @@ export default function WorkerLoginPage() {
       });
 
       if (error) {
+        // Handle AbortError specifically
+        if (error.name === 'AbortError' || error.message?.includes('Lock broken')) {
+          setMessage("Please wait a moment before trying again.");
+          setSubmitting(false);
+          return;
+        }
         setMessage(`Login failed: Invalid phone number or PIN.`);
         return;
       }
 
+      setSubmitting(false);
       setMessage("Logged in securely. Redirecting...");
       setTimeout(() => {
         window.location.href = "/"; // We will build a true pro dashboard soon
       }, 1000);
+    } catch (err: any) {
+      // Handle AbortError specifically
+      if (err.name === 'AbortError' || err.message?.includes('Lock broken')) {
+        setMessage("Please wait a moment before trying again.");
+        setSubmitting(false);
+        return;
+      }
+      setMessage(`Login failed: ${err.message}`);
     } finally {
       setSubmitting(false);
     }

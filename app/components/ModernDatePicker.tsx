@@ -180,8 +180,8 @@ export default function ModernDatePicker({
             </div>
 
             <div className="grid grid-cols-7 gap-1 sm:gap-2">
-                {["S", "M", "T", "W", "T", "F", "S"].map(d => (
-                    <div key={d} className="h-8 flex items-center justify-center text-[9px] font-black text-zinc-600 uppercase tracking-widest">{d}</div>
+                {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
+                    <div key={`day-${i}`} className="h-8 flex items-center justify-center text-[9px] font-black text-zinc-600 uppercase tracking-widest">{d}</div>
                 ))}
                 {monthGridDates.map((date, i) => {
                     if (!date) return <div key={`empty-${i}`} />;

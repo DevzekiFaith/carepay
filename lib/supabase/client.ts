@@ -1,5 +1,8 @@
 import { createBrowserClient } from '@supabase/ssr'
 
+// Singleton instance to prevent multiple client instances causing concurrent auth conflicts
+let supabaseClient: ReturnType<typeof createBrowserClient> | null = null
+
 export function createClient() {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -40,7 +43,13 @@ export function createClient() {
         return createSafeProxy();
     }
 
-    return createBrowserClient(
+    // Return existing singleton instance if available
+    if (supabaseClient) {
+        return supabaseClient
+    }
+
+    // Create new singleton instance
+    supabaseClient = createBrowserClient(
         supabaseUrl,
         supabaseAnonKey,
         {
@@ -55,7 +64,14 @@ export function createClient() {
                 domain: '',
                 path: '/',
                 sameSite: 'lax'
+            },
+            global: {
+                headers: {
+                    'X-Client-Info': 'homecare-web'
+                }
             }
         }
     )
+
+    return supabaseClient
 }

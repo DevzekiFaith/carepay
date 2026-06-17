@@ -72,18 +72,17 @@ export default function CheckoutPage() {
     e.preventDefault();
     setSubmitting(true);
 
-    if (!formData.fullName || !formData.email || !formData.phone || !formData.address) {
-      toast.error("Please fill all required fields.");
-      setSubmitting(false);
-      return;
-    }
-
-    // Generate order reference only on client side to avoid hydration mismatch
-    const orderRef = `HC-${typeof window !== 'undefined' ? Date.now().toString(36).toUpperCase() : 'PENDING'}`;
-
     try {
+      if (!formData.fullName || !formData.email || !formData.phone || !formData.address) {
+        toast.error("Please fill all required fields.");
+        return;
+      }
+
+      // Generate order reference only on client side to avoid hydration mismatch
+      const orderRef = `HC-${typeof window !== 'undefined' ? Date.now().toString(36).toUpperCase() : 'PENDING'}`;
+
       console.log("Starting order submission...", { orderRef, cartItems: cartItems.length });
-      
+
       const { data, error } = await supabase.from("store_orders").insert({
         order_ref: orderRef,
         customer_name: formData.fullName,
@@ -110,12 +109,12 @@ export default function CheckoutPage() {
       if (error) throw error;
 
       orderPlacedRef.current = true;
-      setSubmitting(false);
       clearCart();
       router.push(`/store/order-confirmation?ref=${orderRef}&total=${grandTotal}`);
     } catch (err: any) {
       console.error("Checkout error:", err);
       toast.error(err.message || "Failed to place order. Please try again.");
+    } finally {
       setSubmitting(false);
     }
   };

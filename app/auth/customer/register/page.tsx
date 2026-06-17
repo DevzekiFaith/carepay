@@ -19,6 +19,12 @@ export default function CustomerRegisterPage() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    // Prevent multiple simultaneous submissions
+    if (submitting) {
+      return;
+    }
+    
     setError(null);
     setSubmitting(true);
 
@@ -46,11 +52,13 @@ export default function CustomerRegisterPage() {
       if (data.user) {
         // Check if email confirmation is required
         if (data.user.identities?.length === 0) {
+          setSubmitting(false);
           toast.success("Account created", {
             description: "Please check your email to confirm your account before logging in."
           });
           setError("Please check your email to confirm your account. You'll need to click the confirmation link before you can log in.");
         } else {
+          setSubmitting(false);
           toast.success("Account created successfully", {
             description: "Welcome to HomeCare! Redirecting..."
           });
@@ -61,6 +69,16 @@ export default function CustomerRegisterPage() {
         }
       }
     } catch (err: any) {
+      // Handle AbortError specifically
+      if (err.name === 'AbortError' || err.message?.includes('Lock broken')) {
+        toast.error("Please wait", {
+          description: "Another request is in progress. Please wait a moment and try again."
+        });
+        setError("Please wait a moment before trying again.");
+        setSubmitting(false);
+        return;
+      }
+      
       toast.error("Registration failed", {
         description: err.message
       });

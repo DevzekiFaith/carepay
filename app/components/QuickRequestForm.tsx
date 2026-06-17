@@ -47,22 +47,22 @@ export default function QuickRequestForm({ selectedService, onServiceChange, ser
         setErrorMsg(null);
         setSubmitting(true);
 
-        const fullName = (formData.get("fullName") as string)?.trim() ?? "";
-        const email = (formData.get("email") as string)?.trim() ?? "";
-        const phone = (formData.get("phone") as string)?.trim() ?? "";
-        const address = (formData.get("address") as string)?.trim() ?? "";
-        const service = (formData.get("service") as string)?.trim() ?? "";
-        const details = (formData.get("details") as string)?.trim() ?? "";
-        const pin = (formData.get("pin") as string)?.trim() ?? "";
-
         try {
+            const fullName = (formData.get("fullName") as string)?.trim() ?? "";
+            const email = (formData.get("email") as string)?.trim() ?? "";
+            const phone = (formData.get("phone") as string)?.trim() ?? "";
+            const address = (formData.get("address") as string)?.trim() ?? "";
+            const service = (formData.get("service") as string)?.trim() ?? "";
+            const details = (formData.get("details") as string)?.trim() ?? "";
+            const pin = (formData.get("pin") as string)?.trim() ?? "";
+
             const supabase = createClient();
             let userId = null;
 
             // 1. Authenticate User
             toast.loading("Authenticating...", { id: "booking-step" });
             const { data: { user: existingUser } } = await supabase.auth.getUser();
-            
+
             if (existingUser) {
                 userId = existingUser.id;
             } else {
@@ -73,14 +73,12 @@ export default function QuickRequestForm({ selectedService, onServiceChange, ser
                     if (signInError) {
                         toast.error("Incorrect PIN", { id: "booking-step", description: "Use the main login page if you forgot your PIN." });
                         setErrorMsg("Incorrect PIN for this account.");
-                        setSubmitting(false);
                         return;
                     }
                     userId = signInData.user?.id;
                 } else if (signUpError) {
                     toast.error("Auth Error", { id: "booking-step", description: signUpError.message });
                     setErrorMsg(`Auth Error: ${signUpError.message}`);
-                    setSubmitting(false);
                     return;
                 } else {
                     userId = signUpData.user?.id;
@@ -90,23 +88,21 @@ export default function QuickRequestForm({ selectedService, onServiceChange, ser
             if (!userId) {
                 toast.error("Auth Failed", { id: "booking-step" });
                 setErrorMsg("Failed to authenticate.");
-                setSubmitting(false);
                 return;
             }
 
             // 2. Ensure Profile Exists (Upsert)
             toast.loading("Preparing profile...", { id: "booking-step" });
             const { error: profileError } = await supabase.from('profiles').upsert({
-                id: userId, 
-                full_name: fullName, 
-                phone, 
+                id: userId,
+                full_name: fullName,
+                phone,
                 address
             }, { onConflict: 'id' });
 
             if (profileError) {
                 toast.error("Profile Error", { id: "booking-step", description: profileError.message });
                 setErrorMsg(`Profile Error: ${profileError.message}`);
-                setSubmitting(false);
                 return;
             }
 
@@ -122,12 +118,10 @@ export default function QuickRequestForm({ selectedService, onServiceChange, ser
             if (requestError) {
                 toast.error("Submission Error", { id: "booking-step", description: requestError.message });
                 setErrorMsg(`Failed to submit request: ${requestError.message}`);
-                setSubmitting(false);
                 return;
             }
 
             toast.success("Request Submitted!", { id: "booking-step" });
-            setSubmitting(false);
             setSubmitted(true);
             (e.target as HTMLFormElement).reset();
             onServiceChange(null);
@@ -135,6 +129,7 @@ export default function QuickRequestForm({ selectedService, onServiceChange, ser
             console.error("Booking error:", err);
             toast.error(err.message || "Failed to submit request. Please try again.", { id: "booking-step" });
             setErrorMsg(err.message || "Failed to submit request. Please try again.");
+        } finally {
             setSubmitting(false);
         }
     };

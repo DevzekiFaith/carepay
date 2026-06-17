@@ -85,17 +85,18 @@ export default async function AdminStoreOrdersPage() {
                     <td className="px-6 py-4">
                       <form action={updateOrderStatus} className="flex gap-2">
                         <input type="hidden" name="orderId" value={order.id} />
-                        <select 
-                          name="status" 
+                        <select
+                          name="status"
+                          value={order.status}
                           className="text-xs bg-white/5 border border-white/10 rounded px-2 py-1 text-foreground outline-none focus:border-brand-primary"
                         >
-                          <option value="pending_payment" selected={order.status === 'pending_payment'}>Pending Payment</option>
-                          <option value="paid" selected={order.status === 'paid'}>Paid</option>
-                          <option value="shipped" selected={order.status === 'shipped'}>Shipped</option>
-                          <option value="delivered" selected={order.status === 'delivered'}>Delivered</option>
-                          <option value="cancelled" selected={order.status === 'cancelled'}>Cancelled</option>
+                          <option value="pending_payment">Pending Payment</option>
+                          <option value="paid">Paid</option>
+                          <option value="shipped">Shipped</option>
+                          <option value="delivered">Delivered</option>
+                          <option value="cancelled">Cancelled</option>
                         </select>
-                        <button 
+                        <button
                           type="submit"
                           className="text-xs bg-brand-primary text-background px-3 py-1 rounded font-bold hover:bg-brand-primary/90 transition-colors"
                         >

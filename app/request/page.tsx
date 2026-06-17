@@ -99,149 +99,144 @@ function RequestContent() {
     setErrorMsg(null);
     setSubmitting(true);
 
-    const form = e.target as HTMLFormElement;
-    const formData = new FormData(form);
+    try {
+      const form = e.target as HTMLFormElement;
+      const formData = new FormData(form);
 
-    const email = ((formData.get("email") as string) || "").trim();
-    const phone = ((formData.get("phone") as string) || "").trim();
-    const pin = ((formData.get("pin") as string) || "").trim();
-    const fullName = ((formData.get("fullName") as string) || "").trim();
-    const address = ((formData.get("address") as string) || "").trim();
-    const serviceType = selectedService || "";
-    const details = ((formData.get("details") as string) || "").trim();
+      const email = ((formData.get("email") as string) || "").trim();
+      const phone = ((formData.get("phone") as string) || "").trim();
+      const pin = ((formData.get("pin") as string) || "").trim();
+      const fullName = ((formData.get("fullName") as string) || "").trim();
+      const address = ((formData.get("address") as string) || "").trim();
+      const serviceType = selectedService || "";
+      const details = ((formData.get("details") as string) || "").trim();
 
-    if (!serviceType) {
-      toast.error("Service required", {
-        description: "Please select a service above."
-      });
-      setErrorMsg("Please select a service above.");
-      setSubmitting(false);
-      return;
-    }
-
-    const supabase = createClient();
-    let currentUserId = user?.id;
-
-    // If NOT logged in, perform "Seamless Auth" (Signup/Signin)
-    if (!currentUserId) {
-      if (!email || !pin) {
-        setErrorMsg("Email and PIN are required for new bookings.");
-        setSubmitting(false);
+      if (!serviceType) {
+        toast.error("Service required", {
+          description: "Please select a service above."
+        });
+        setErrorMsg("Please select a service above.");
         return;
       }
 
-      if (pin.length !== 6) {
-        setErrorMsg("PIN must be exactly 6 digits.");
-        setSubmitting(false);
-        return;
-      }
+      const supabase = createClient();
+      let currentUserId = user?.id;
 
-      // Try initial signup first
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password: pin,
-      });
+      // If NOT logged in, perform "Seamless Auth" (Signup/Signin)
+      if (!currentUserId) {
+        if (!email || !pin) {
+          setErrorMsg("Email and PIN are required for new bookings.");
+          return;
+        }
 
-      if (signUpError && signUpError.message.includes("already registered")) {
-        // User exists, try signing in instead
-        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        if (pin.length !== 6) {
+          setErrorMsg("PIN must be exactly 6 digits.");
+          return;
+        }
+
+        // Try initial signup first
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
           password: pin,
         });
 
-        if (signInError) {
-          setErrorMsg("Incorrect PIN. If you've forgotten it, please visit the login page.");
-          setSubmitting(false);
+        if (signUpError && signUpError.message.includes("already registered")) {
+          // User exists, try signing in instead
+          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+            email,
+            password: pin,
+          });
+
+          if (signInError) {
+            setErrorMsg("Incorrect PIN. If you've forgotten it, please visit the login page.");
+            return;
+          }
+          currentUserId = signInData.user?.id;
+          toast.info("Welcome back!", { description: "Resuming booking with your saved details." });
+        } else if (signUpError) {
+          setErrorMsg(`Authentication Error: ${signUpError.message}`);
+          return;
+        } else {
+          currentUserId = signUpData.user?.id;
+          toast.success("Account created!", { description: "We've saved your progress for next time." });
+        }
+      }
+
+      if (!currentUserId) {
+        setErrorMsg("Failed to authenticate user.");
+        return;
+      }
+
+      // ENSURE PROFILE EXISTS (This prevents the FK violation if user was created but profile was not)
+      await supabase.from('profiles').upsert({
+        id: currentUserId,
+        full_name: fullName || user?.user_metadata?.full_name || 'Customer',
+        phone: phone || user?.user_metadata?.phone || '',
+        address: address || ''
+      });
+
+      const preferredTime = appointmentDate ? new Date(new Date(appointmentDate).setHours(parseInt(appointmentTime.split(':')[0]), parseInt(appointmentTime.split(':')[1]))).toISOString() : null;
+
+      // Handle Image Upload First
+      let imageUrl = null;
+      if (imageFile) {
+        const fileExt = imageFile.name.split('.').pop() || 'jpg';
+        const fileName = `${currentUserId}-${typeof window !== 'undefined' ? Date.now() : 'upload'}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('job-photos')
+          .upload(fileName, imageFile, { upsert: true });
+
+        if (uploadError) {
+          setErrorMsg(`Failed to upload photo: ${uploadError.message}`);
           return;
         }
-        currentUserId = signInData.user?.id;
-        toast.info("Welcome back!", { description: "Resuming booking with your saved details." });
-      } else if (signUpError) {
-        setErrorMsg(`Authentication Error: ${signUpError.message}`);
-        setSubmitting(false);
-        return;
-      } else {
-        currentUserId = signUpData.user?.id;
-        toast.success("Account created!", { description: "We've saved your progress for next time." });
-      }
-    }
 
-    if (!currentUserId) {
-      setErrorMsg("Failed to authenticate user.");
-      setSubmitting(false);
-      return;
-    }
+        const { data: publicUrlData } = supabase.storage
+          .from('job-photos')
+          .getPublicUrl(fileName);
 
-    // ENSURE PROFILE EXISTS (This prevents the FK violation if user was created but profile was not)
-    await supabase.from('profiles').upsert({
-      id: currentUserId,
-      full_name: fullName || user?.user_metadata?.full_name || 'Customer',
-      phone: phone || user?.user_metadata?.phone || '',
-      address: address || ''
-    });
-
-    const preferredTime = appointmentDate ? new Date(new Date(appointmentDate).setHours(parseInt(appointmentTime.split(':')[0]), parseInt(appointmentTime.split(':')[1]))).toISOString() : null;
-
-    // Handle Image Upload First
-    let imageUrl = null;
-    if (imageFile) {
-      const fileExt = imageFile.name.split('.').pop() || 'jpg';
-      const fileName = `${currentUserId}-${typeof window !== 'undefined' ? Date.now() : 'upload'}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('job-photos')
-        .upload(fileName, imageFile, { upsert: true });
-
-      if (uploadError) {
-        setErrorMsg(`Failed to upload photo: ${uploadError.message}`);
-        setSubmitting(false);
-        return;
+        imageUrl = publicUrlData.publicUrl;
       }
 
-      const { data: publicUrlData } = supabase.storage
-        .from('job-photos')
-        .getPublicUrl(fileName);
-        
-      imageUrl = publicUrlData.publicUrl;
-    }
-
-    // Insert Request
-    const { error: requestError } = await supabase.from('service_requests').insert({
-      customer_id: currentUserId,
-      service_type: serviceType,
-      description: selectedParts.length > 0 
-        ? `${details}\n\n[SELECTED PARTS FROM STORE]\n${selectedParts.map(p => `- ${p.name} (₦${p.price})`).join('\n')}`
-        : details,
-      address: address,
-      preferred_time: preferredTime,
-      image_url: imageUrl
-    });
-
-    if (requestError) {
-      toast.error("Submission failed", {
-        description: requestError.message
+      // Insert Request
+      const { error: requestError } = await supabase.from('service_requests').insert({
+        customer_id: currentUserId,
+        service_type: serviceType,
+        description: selectedParts.length > 0
+          ? `${details}\n\n[SELECTED PARTS FROM STORE]\n${selectedParts.map(p => `- ${p.name} (₦${p.price})`).join('\n')}`
+          : details,
+        address: address,
+        preferred_time: preferredTime,
+        image_url: imageUrl
       });
-      setErrorMsg(`Failed to submit request: ${requestError.message}`);
+
+      if (requestError) {
+        toast.error("Submission failed", {
+          description: requestError.message
+        });
+        setErrorMsg(`Failed to submit request: ${requestError.message}`);
+        return;
+      }
+
+      toast.success("Booking confirmed!", {
+        description: "A professional will be assigned to you shortly."
+      });
+
+      const calculatedAmount = selectedParts.reduce((acc, p) => acc + p.price, 0) || 2000;
+      setPaymentDetails({
+        amount: calculatedAmount,
+        email: email || user?.email || "",
+        phone: phone || user?.user_metadata?.phone || "",
+        name: fullName || user?.user_metadata?.full_name || "",
+        txRef: `REQ-${typeof window !== 'undefined' ? Date.now().toString(36).toUpperCase() : 'PENDING'}`
+      });
+
+      setSubmitted(true);
+      // Don't reset form yet so the user can pay
+    } finally {
       setSubmitting(false);
-      return;
     }
-
-    toast.success("Booking confirmed!", {
-      description: "A professional will be assigned to you shortly."
-    });
-
-    const calculatedAmount = selectedParts.reduce((acc, p) => acc + p.price, 0) || 2000;
-    setPaymentDetails({
-      amount: calculatedAmount,
-      email: email || user?.email || "",
-      phone: phone || user?.user_metadata?.phone || "",
-      name: fullName || user?.user_metadata?.full_name || "",
-      txRef: `REQ-${typeof window !== 'undefined' ? Date.now().toString(36).toUpperCase() : 'PENDING'}`
-    });
-
-    setSubmitting(false);
-    setSubmitted(true);
-    // Don't reset form yet so the user can pay
   };
 
   return (
