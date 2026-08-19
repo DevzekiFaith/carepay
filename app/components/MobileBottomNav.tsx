@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LayoutDashboard, Wallet, LogOut, ShoppingBag, ShoppingCart, LogIn } from "lucide-react";
+import { Home, LayoutDashboard, Wallet, LogOut, ShoppingBag, ShoppingCart, LogIn, Shield } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import type { User, Session, AuthChangeEvent } from "@supabase/supabase-js";
@@ -81,6 +81,7 @@ export default function MobileBottomNav() {
   const navItems = [
     { label: "Home", href: "/", icon: Home },
     { label: "Store", href: "/store", icon: ShoppingBag },
+    { label: "Admin", href: "/admin", icon: Shield },
   ];
 
   // Add logged-in or guest items
