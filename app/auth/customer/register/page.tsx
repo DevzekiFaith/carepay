@@ -68,9 +68,10 @@ export default function CustomerRegisterPage() {
           }, 1000);
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorObj = err as { name?: string; message?: string };
       // Handle AbortError specifically
-      if (err.name === 'AbortError' || err.message?.includes('Lock broken')) {
+      if (errorObj?.name === 'AbortError' || errorObj?.message?.includes('Lock broken')) {
         toast.error("Please wait", {
           description: "Another request is in progress. Please wait a moment and try again."
         });
@@ -80,9 +81,9 @@ export default function CustomerRegisterPage() {
       }
       
       toast.error("Registration failed", {
-        description: err.message
+        description: errorObj?.message || "Failed to create account"
       });
-      setError(err.message || "Failed to create account. Please try again.");
+      setError(errorObj?.message || "Failed to create account. Please try again.");
     } finally {
       setSubmitting(false);
     }

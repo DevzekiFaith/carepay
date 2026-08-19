@@ -6,7 +6,6 @@ import { getSurgeResult, getSurgePrice, BASE_PRICES } from "@/lib/surge";
 import { TrendingUp, Clock, CheckCircle2 } from "lucide-react";
 
 const SERVICES = Object.keys(BASE_PRICES);
-const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
 function hourLabel(h: number) {
   if (h === 0) return "12 AM";

@@ -1,12 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useState } from "react";
 import Hero from "./Hero";
 import ServiceGrid from "./ServiceGrid";
 import QuickRequestForm from "./QuickRequestForm";
-import { PAYMENT_ACCOUNT } from "@/lib/payment-details";
 import { Wrench, Zap, Hammer, Armchair, Snowflake, Paintbrush, PenTool } from "lucide-react";
 
 const PRO_IMAGES = [

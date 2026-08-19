@@ -63,6 +63,7 @@ export default function NinVerificationCard({ status, details, reason }: NinVeri
         <div className="p-5 flex gap-5 items-center">
           {details.photo ? (
             <div className="shrink-0 h-16 w-16 rounded-xl border border-emerald-500/20 overflow-hidden bg-white/5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={details.photo} alt="Identity" className="h-full w-full object-cover" />
             </div>
           ) : (

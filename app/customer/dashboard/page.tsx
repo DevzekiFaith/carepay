@@ -9,19 +9,22 @@ import { toast } from "sonner";
 import Logo from "@/app/components/Logo";
 import dynamic from "next/dynamic";
 import { X, MessageCircle, Navigation } from "lucide-react";
+import type { User } from "@supabase/supabase-js";
 
 const LiveMap = dynamic(() => import("@/app/components/LiveMap"), { ssr: false });
 const ChatModal = dynamic(() => import("@/app/components/ChatModal"), { ssr: false });
 
 interface Request {
   id: string;
-  customer_id: string;
   service_type: string;
   description: string;
+  address: string;
+  preferred_time: string | null;
   status: string;
   created_at: string;
-  image_url: string | null;
-  address: string;
+  image_url?: string | null;
+  customer_id?: string;
+  assigned_worker_id?: string;
 }
 
 interface Order {
@@ -40,7 +43,7 @@ const itemVariants = { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0, 
 export default function CustomerDashboardPage() {
   const [requests, setRequests] = useState<Request[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [user, setUser] = useState<any>(null); // Keeping any for now as Auth User type is complex to import correctly here
+  const [user, setUser] = useState<User | null>(null);
   const [balance, setBalance] = useState(0);
   const [tier, setTier] = useState<'basic' | 'pro' | 'elite'>('basic');
   const [loading, setLoading] = useState(true);
@@ -127,25 +130,26 @@ export default function CustomerDashboardPage() {
           schema: 'public',
           table: 'service_requests',
         },
-        async (payload: any) => {
-          const updatedReq = payload.new as Request;
+        (payload: { new: Record<string, unknown>; old: Record<string, unknown> }) => {
+          const updatedReq = payload.new as unknown as Request;
           // Check if this update is for the current customer (safety check)
-          const { data } = await supabase.auth.getUser();
-      const user = data.user;
-          if (user && updatedReq.customer_id === user.id) {
-             // Show contextual toasts
-             if (payload.old.status !== 'in_progress' && updatedReq.status === 'in_progress') {
-                toast.success("Pro matched!", {
-                  description: `A professional has accepted your ${updatedReq.service_type} request.`
-                });
-             } else if (payload.old.status !== 'completed' && updatedReq.status === 'completed') {
-                toast.success("Job Completed!", {
-                  description: `Your ${updatedReq.service_type} request is marked as finished.`,
-                  icon: <CheckCircle2 className="text-emerald-500" />
-                });
-             }
-             fetchData(true);
-          }
+          supabase.auth.getUser().then((res: { data: { user: User | null } }) => {
+            const authUser = res.data.user;
+            if (authUser && updatedReq.customer_id === authUser.id) {
+               // Show contextual toasts
+               if (payload.old.status !== 'in_progress' && updatedReq.status === 'in_progress') {
+                  toast.success("Pro matched!", {
+                    description: `A professional has accepted your ${updatedReq.service_type} request.`
+                  });
+               } else if (payload.old.status !== 'completed' && updatedReq.status === 'completed') {
+                  toast.success("Job Completed!", {
+                    description: `Your ${updatedReq.service_type} request is marked as finished.`,
+                    icon: <CheckCircle2 className="text-emerald-500" />
+                  });
+               }
+               fetchData(true);
+            }
+          });
         }
       )
       .on(
@@ -155,7 +159,7 @@ export default function CustomerDashboardPage() {
           schema: 'public',
           table: 'wallets',
         },
-        async (payload: any) => {
+        async (payload: { new: { user_id: string; balance: number }; old: { balance: number } }) => {
           const updatedWallet = payload.new;
           const { data } = await supabase.auth.getUser();
           if (data.user && updatedWallet.user_id === data.user.id) {

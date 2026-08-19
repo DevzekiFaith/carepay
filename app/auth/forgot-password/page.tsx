@@ -34,11 +34,12 @@ export default function ForgotPasswordPage() {
       toast.success("Reset link sent", {
         description: "Please check your email for the password reset link."
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to send reset link.";
       toast.error("Request failed", {
-        description: err.message
+        description: msg
       });
-      setError(err.message || "Failed to send reset link. Please try again.");
+      setError(msg);
     } finally {
       setSubmitting(false);
     }

@@ -1,7 +1,6 @@
 "use client";
 
 import { Printer, Download, X, Loader2, Zap, Truck } from "lucide-react";
-import Logo from "./Logo";
 import { useState } from "react";
 import { toast } from "sonner";
 import html2canvas from "html2canvas";
@@ -41,6 +40,7 @@ export default function OrderReceipt({
   onClose
 }: OrderReceiptProps) {
   const [downloading, setDownloading] = useState(false);
+  const isPaid = status && status !== 'pending_payment' && status !== 'cancelled';
 
   const handlePrint = () => {
     window.print();
@@ -83,9 +83,10 @@ export default function OrderReceipt({
       pdf.save(`HomeCare-Receipt-${orderRef}.pdf`);
       
       toast.success("Receipt downloaded!", { id: loadId });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("PDF generation failed:", error);
-      toast.error(`Failed to generate PDF: ${error.message || 'Unknown error'}`, { id: loadId });
+      const msg = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(`Failed to generate PDF: ${msg}`, { id: loadId });
     } finally {
       setDownloading(false);
     }
@@ -208,14 +209,14 @@ export default function OrderReceipt({
             </div>
           </div>
 
-          <div className="mt-16 pt-8 border-t border-dashed text-center" style={{ borderColor: '#e4e4e7' }}>
+          <div className="mt-16 pt-8 border-t border-dashed text-center" style={{ borderColor: '#e4e7eb' }}>
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] mb-2" style={{ color: '#a1a1aa' }}>Payment Status</p>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest border" style={{ 
-              backgroundColor: status === 'paid' ? '#ecfdf5' : '#fff7ed', 
-              color: status === 'paid' ? '#059669' : '#c2410c', 
-              borderColor: status === 'paid' ? '#d1fae5' : '#ffedd5' 
+              backgroundColor: isPaid ? '#ecfdf5' : '#fff7ed', 
+              color: isPaid ? '#059669' : '#c2410c', 
+              borderColor: isPaid ? '#d1fae5' : '#ffedd5' 
             }}>
-              {status === 'paid' ? 'Payment Confirmed' : 'Pending Payment'}
+              {isPaid ? 'Payment Confirmed' : 'Pending Payment'}
             </div>
             <p className="mt-8 text-[10px]" style={{ color: '#a1a1aa' }}>
               Thank you for choosing HomeCare. This is an official receipt for your records.

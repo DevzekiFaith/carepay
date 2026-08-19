@@ -39,7 +39,7 @@ export default async function AdminStoreOrdersPage() {
       <div>
         <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Store Management</p>
         <h1 className="text-2xl font-heading font-bold tracking-tight text-foreground">Store Orders</h1>
-        <p className="mt-1 text-sm text-zinc-500">Manage all store orders and payments. Orders start as "Pending Payment" until you verify bank transfer.</p>
+        <p className="mt-1 text-sm text-zinc-500">Manage all store orders and payments. Orders start as &ldquo;Pending Payment&rdquo; until you verify bank transfer.</p>
       </div>
 
       <div className="rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden">
@@ -64,20 +64,22 @@ export default async function AdminStoreOrdersPage() {
             </thead>
             <tbody className="divide-y divide-white/5">
               {orders && orders.length > 0 ? (
-                orders.map((order: any) => (
+                orders.map((order) => (
                   <tr key={order.id} className="hover:bg-white/[0.02] transition-colors">
                     <td className="px-6 py-4 text-sm font-bold text-foreground">{order.order_ref}</td>
                     <td className="px-6 py-4 text-sm text-zinc-400">{order.customer_name}</td>
                     <td className="px-6 py-4 text-sm font-bold text-brand-primary">₦{order.total?.toLocaleString()}</td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest ${
-                        order.status === 'paid' 
+                        order.status === 'processing' || order.status === 'paid'
                           ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/30'
                           : order.status === 'shipped'
                           ? 'bg-blue-500/10 text-blue-500 border border-blue-500/30'
                           : order.status === 'delivered'
                           ? 'bg-purple-500/10 text-purple-500 border border-purple-500/30'
-                          : 'bg-orange-500/10 text-orange-500 border border-orange-500/30'
+                          : order.status === 'cancelled'
+                          ? 'bg-red-500/10 text-red-500 border border-red-500/30'
+                          : 'bg-amber-500/10 text-amber-500 border border-amber-500/30'
                       }`}>
                         {order.status?.replace('_', ' ') || 'pending'}
                       </span>
@@ -87,11 +89,11 @@ export default async function AdminStoreOrdersPage() {
                         <input type="hidden" name="orderId" value={order.id} />
                         <select
                           name="status"
-                          value={order.status}
-                          className="text-xs bg-white/5 border border-white/10 rounded px-2 py-1 text-foreground outline-none focus:border-brand-primary"
+                          defaultValue={order.status}
+                          className="text-xs bg-white/5 border border-white/10 rounded px-2 py-1 text-foreground outline-none focus:border-brand-primary cursor-pointer"
                         >
                           <option value="pending_payment">Pending Payment</option>
-                          <option value="paid">Paid</option>
+                          <option value="processing">Processing (Paid)</option>
                           <option value="shipped">Shipped</option>
                           <option value="delivered">Delivered</option>
                           <option value="cancelled">Cancelled</option>

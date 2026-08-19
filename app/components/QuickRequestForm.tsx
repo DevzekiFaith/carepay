@@ -125,10 +125,11 @@ export default function QuickRequestForm({ selectedService, onServiceChange, ser
             setSubmitted(true);
             (e.target as HTMLFormElement).reset();
             onServiceChange(null);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Booking error:", err);
-            toast.error(err.message || "Failed to submit request. Please try again.", { id: "booking-step" });
-            setErrorMsg(err.message || "Failed to submit request. Please try again.");
+            const msg = err instanceof Error ? err.message : "Failed to submit request. Please try again.";
+            toast.error(msg, { id: "booking-step" });
+            setErrorMsg(msg);
         } finally {
             setSubmitting(false);
         }

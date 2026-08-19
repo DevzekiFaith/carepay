@@ -34,9 +34,9 @@ export default function SubscriptionPage() {
 
       if (profileError) throw profileError;
       setCurrentTier(profile?.subscription_tier || 'basic');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.message);
+      setError(err instanceof Error ? err.message : "Failed to load profile");
     } finally {
       setLoading(false);
     }
@@ -84,9 +84,10 @@ export default function SubscriptionPage() {
       toast.success(`Welcome to HomeCare ${tier.toUpperCase()}! Your benefits are now active.`, {
         description: "Your subscription has been activated successfully."
       });
-    } catch (err: any) {
-      setError(`Upgrade failed: ${err.message}`);
-      toast.error(`Upgrade failed: ${err.message}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Upgrade failed";
+      setError(`Upgrade failed: ${msg}`);
+      toast.error(`Upgrade failed: ${msg}`);
     } finally {
       setUpgrading(null);
     }
@@ -175,7 +176,7 @@ export default function SubscriptionPage() {
             {Object.entries(stateNames).map(([key, name]) => (
               <button
                 key={key}
-                onClick={() => setSelectedState(key as any)}
+                onClick={() => setSelectedState(key as keyof typeof statePricing)}
                 className={`px-4 py-2 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all ${
                   selectedState === key
                     ? 'bg-brand-primary text-background shadow-premium'

@@ -8,7 +8,6 @@ import { X, ShoppingCart, Star, Flame, ArrowRight } from "lucide-react";
 import { PRODUCTS } from "@/lib/products";
 import { useCart } from "@/lib/cart";
 
-const PROMO_DELAY_MS = 4000; // First popup after 4 seconds
 const PROMO_INTERVAL_MS = 60000; // Show a new product every 60 seconds
 
 // Get a pool of featured products (prioritize badged items, then all)

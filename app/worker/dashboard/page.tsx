@@ -10,6 +10,8 @@ import dynamic from "next/dynamic";
 
 const ChatModal = dynamic(() => import("@/app/components/ChatModal"), { ssr: false });
 
+import { User } from "@supabase/supabase-js";
+
 // Types
 interface ServiceRequest {
   id: string;
@@ -42,7 +44,7 @@ export default function WorkerDashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'radar' | 'my-jobs'>('radar');
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [balance, setBalance] = useState<number>(0);
   const [trackingJobId, setTrackingJobId] = useState<string | null>(null);
   const [chatJob, setChatJob] = useState<ServiceRequest | null>(null);
@@ -55,7 +57,7 @@ export default function WorkerDashboardPage() {
       setUser(userData.user);
 
       if (userData.user) {
-        let { data: wallet } = await supabase
+        const { data: wallet } = await supabase
           .from('wallets')
           .select('balance')
           .eq('user_id', userData.user.id)
@@ -80,8 +82,8 @@ export default function WorkerDashboardPage() {
 
       if (fetchError) throw fetchError;
       setRequests(data || []);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to load requests");
     } finally {
       setLoading(false);
     }
@@ -100,9 +102,9 @@ export default function WorkerDashboardPage() {
           schema: 'public',
           table: 'service_requests',
         },
-        (payload: any) => {
+        (payload: { eventType: string; new: Record<string, unknown>; old: Record<string, unknown> }) => {
           if (payload.eventType === 'INSERT') {
-            const newJob = payload.new as ServiceRequest;
+            const newJob = payload.new as unknown as ServiceRequest;
             setRequests((prev) => [newJob, ...prev]);
             toast.info("New Job Nearby!", {
               description: `${newJob.service_type} requested in ${newJob.address.split(',')[0]}`,
@@ -112,12 +114,12 @@ export default function WorkerDashboardPage() {
               }
             });
           } else if (payload.eventType === 'UPDATE') {
-            const updatedJob = payload.new as ServiceRequest;
+            const updatedJob = payload.new as unknown as ServiceRequest;
             setRequests((prev) =>
               prev.map((job) => (job.id === updatedJob.id ? updatedJob : job))
             );
           } else if (payload.eventType === 'DELETE') {
-            const deletedId = payload.old.id;
+            const deletedId = (payload.old as { id: string }).id;
             setRequests((prev) => prev.filter((job) => job.id !== deletedId));
           }
         }
@@ -129,7 +131,7 @@ export default function WorkerDashboardPage() {
           schema: 'public',
           table: 'wallets',
         },
-        async (payload: any) => {
+        async (payload: { new: { user_id: string; balance: number }; old: { balance: number } }) => {
           const updatedWallet = payload.new;
           const { data } = await supabase.auth.getUser();
           if (data.user && updatedWallet.user_id === data.user.id) {
@@ -168,8 +170,8 @@ export default function WorkerDashboardPage() {
       });
       fetchRequests();
       setActiveTab('my-jobs');
-    } catch (err: any) {
-      toast.error("Failed to claim job", { description: err.message });
+    } catch (err: unknown) {
+      toast.error("Failed to claim job", { description: err instanceof Error ? err.message : "Error" });
     }
   };
 
@@ -186,8 +188,8 @@ export default function WorkerDashboardPage() {
          description: "Well done, Pro! Earnings updated."
        });
        fetchRequests();
-     } catch (err: any) {
-       toast.error("Update failed", { description: err.message });
+     } catch (err: unknown) {
+       toast.error("Update failed", { description: err instanceof Error ? err.message : "Error" });
      }
   };
 
@@ -410,7 +412,7 @@ export default function WorkerDashboardPage() {
                           {new Date(job.created_at).toLocaleDateString()} at {new Date(job.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                         </p>
                         <p className="text-xs text-zinc-500 line-clamp-2 mt-2 leading-relaxed bg-white/5 p-3 rounded-lg border border-white/5">
-                          "{job.description}"
+                          &ldquo;{job.description}&rdquo;
                         </p>
                         
                         <div className="flex justify-between items-center mt-auto pt-4">

@@ -1,35 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  ArrowLeft, 
   Search, 
   Package, 
   Truck, 
   CheckCircle2, 
   Clock, 
   CreditCard,
-  ChevronRight,
   Loader2,
   AlertCircle,
-  Download
+  Download,
+  LucideIcon
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import Logo from "@/app/components/Logo";
 import OrderReceipt from "@/app/components/OrderReceipt";
+import { Suspense } from "react";
+
+interface OrderItem {
+  name: string;
+  price: number;
+  quantity: number;
+}
 
 interface Order {
   order_ref: string;
   status: string;
   created_at: string;
-  items: any[];
+  customer_name: string;
+  customer_email: string;
+  subtotal: number;
+  delivery_fee: number;
+  items: OrderItem[];
   total: number;
   delivery_address: string;
 }
 
-const statusMap: Record<string, { label: string; icon: any; color: string; description: string; step: number }> = {
+const statusMap: Record<string, { label: string; icon: LucideIcon; color: string; description: string; step: number }> = {
   "pending_payment": { 
     label: "Pending Payment", 
     icon: CreditCard, 
@@ -67,13 +78,20 @@ const statusMap: Record<string, { label: string; icon: any; color: string; descr
   }
 };
 
-export default function OrderTrackingPage() {
+export function OrderTrackingContent() {
+  const searchParams = useSearchParams();
   const [orderRef, setOrderRef] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [order, setOrder] = useState<Order | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showReceipt, setShowReceipt] = useState(false);
+
+  // Pre-fill order reference from URL param (e.g. redirected from order confirmation)
+  useEffect(() => {
+    const ref = searchParams.get('ref');
+    if (ref) setOrderRef(ref.trim().toUpperCase());
+  }, [searchParams]);
 
   const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,8 +115,9 @@ export default function OrderTrackingPage() {
       } else {
         setOrder(data);
       }
-    } catch (err: any) {
-      setError(err.message || "Something went wrong. Please try again.");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -132,7 +151,7 @@ export default function OrderTrackingPage() {
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="glass-panel p-8 rounded-3xl border-brand-primary/20"
+            className="glass-panel p-8 rounded-3xl"
           >
             <form onSubmit={handleTrack} className="space-y-5">
               <div className="space-y-2">
@@ -144,7 +163,7 @@ export default function OrderTrackingPage() {
                   placeholder="e.g. HC-XXXXX"
                   value={orderRef}
                   onChange={(e) => setOrderRef(e.target.value)}
-                  className="w-full h-12 rounded-xl bg-white/5 border border-white/10 px-4 text-sm font-mono text-brand-primary placeholder:text-zinc-600 outline-none focus:border-brand-primary transition-all"
+                  className="w-full h-12 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 px-4 text-sm font-mono text-brand-primary placeholder:text-zinc-400 dark:placeholder:text-zinc-600 outline-none focus:border-brand-primary transition-all"
                 />
               </div>
               <div className="space-y-2">
@@ -157,7 +176,7 @@ export default function OrderTrackingPage() {
                   placeholder="The email used for checkout"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full h-12 rounded-xl bg-white/5 border border-white/10 px-4 text-sm outline-none focus:border-brand-primary transition-all"
+                  className="w-full h-12 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 px-4 text-sm text-zinc-800 dark:text-foreground placeholder:text-zinc-400 dark:placeholder:text-zinc-600 outline-none focus:border-brand-primary transition-all"
                 />
               </div>
               <button 
@@ -196,11 +215,11 @@ export default function OrderTrackingPage() {
                   className="space-y-6"
                 >
                   {/* Status Header */}
-                  <div className="glass-panel p-8 rounded-3xl border-white/10 overflow-hidden relative">
+                  <div className="glass-panel p-8 rounded-3xl overflow-hidden relative">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-brand-primary/5 blur-3xl pointer-events-none" />
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                       <div className="flex items-center gap-4">
-                        <div className={`h-16 w-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center ${currentStatus?.color}`}>
+                        <div className={`h-16 w-16 rounded-2xl bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 flex items-center justify-center ${currentStatus?.color}`}>
                           {currentStatus && <currentStatus.icon size={32} strokeWidth={1.5} />}
                         </div>
                         <div>
@@ -219,7 +238,7 @@ export default function OrderTrackingPage() {
                         </div>
                         <button 
                           onClick={() => setShowReceipt(true)}
-                          className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-brand-primary transition-all"
+                          className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 hover:text-brand-primary transition-all"
                         >
                           <Download size={12} /> View Receipt
                         </button>
@@ -231,11 +250,11 @@ export default function OrderTrackingPage() {
                   </div>
 
                   {/* Timeline */}
-                  <div className="glass-panel p-8 rounded-3xl border-white/10">
+                  <div className="glass-panel p-8 rounded-3xl">
                     <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-8">Delivery Timeline</h3>
                     <div className="relative">
                       {/* Line */}
-                      <div className="absolute left-6 top-0 bottom-0 w-px bg-white/10 hidden sm:block" />
+                      <div className="absolute left-6 top-0 bottom-0 w-px bg-zinc-200 dark:bg-white/10 hidden sm:block" />
                       
                       <div className="space-y-10 relative">
                         {[
@@ -245,14 +264,13 @@ export default function OrderTrackingPage() {
                           { step: 4, label: "Delivered", desc: "Items received and verified", date: "" },
                         ].map((s) => {
                           const isDone = currentStatus ? currentStatus.step >= s.step : false;
-                          const isCurrent = currentStatus ? currentStatus.step === s.step : false;
                           
                           return (
                             <div key={s.step} className="flex items-start gap-6 group">
                               <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border-2 transition-all duration-500 z-10 ${
                                 isDone 
                                   ? "bg-brand-primary/20 border-brand-primary text-brand-primary shadow-[0_0_15px_rgba(249,115,22,0.3)]" 
-                                  : "bg-white/5 border-white/10 text-zinc-600"
+                                  : "bg-zinc-100 dark:bg-white/5 border-zinc-200 dark:border-white/10 text-zinc-400 dark:text-zinc-600"
                               }`}>
                                 {isDone ? <CheckCircle2 size={20} /> : <span className="text-sm font-bold">{s.step}</span>}
                               </div>
@@ -275,7 +293,7 @@ export default function OrderTrackingPage() {
                   </div>
 
                   {/* Details Card */}
-                  <div className="glass-panel p-6 rounded-3xl border-white/10 grid gap-6 sm:grid-cols-2">
+                  <div className="glass-panel p-6 rounded-3xl grid gap-6 sm:grid-cols-2">
                     <div>
                       <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-4">Delivery Address</h3>
                       <div className="flex gap-3 text-zinc-300">
@@ -283,10 +301,10 @@ export default function OrderTrackingPage() {
                         <p className="text-xs font-medium leading-relaxed">{order.delivery_address}</p>
                       </div>
                     </div>
-                    <div className="sm:border-l border-white/5 sm:pl-6">
+                    <div className="sm:border-l border-zinc-200 dark:border-white/5 sm:pl-6">
                       <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-4">Order Items</h3>
                       <div className="space-y-2">
-                        {order.items?.map((item: any, idx: number) => (
+                        {order.items?.map((item: OrderItem, idx: number) => (
                           <div key={idx} className="flex justify-between items-center text-xs font-medium">
                             <span className="text-zinc-400 truncate max-w-[150px]">{item.quantity}x {item.name}</span>
                             <span className="text-foreground">₦{(item.price * item.quantity).toLocaleString()}</span>
@@ -301,7 +319,7 @@ export default function OrderTrackingPage() {
                   key="empty"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="h-full flex flex-col items-center justify-center text-center p-12 glass-panel rounded-3xl border-dashed border-white/10"
+                  className="h-full flex flex-col items-center justify-center text-center p-12 glass-panel rounded-3xl border-dashed"
                 >
                   <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center text-zinc-600 mb-6">
                     <Package size={40} strokeWidth={1} />
@@ -321,16 +339,29 @@ export default function OrderTrackingPage() {
         <OrderReceipt 
           orderRef={order.order_ref}
           date={order.created_at}
-          customerName={(order as any).customer_name}
-          customerEmail={(order as any).customer_email}
+          customerName={order.customer_name}
+          customerEmail={order.customer_email}
           address={order.delivery_address}
           items={order.items}
-          subtotal={(order as any).subtotal}
-          deliveryFee={(order as any).delivery_fee}
+          subtotal={order.subtotal}
+          deliveryFee={order.delivery_fee}
           total={order.total}
+          status={order.status}
           onClose={() => setShowReceipt(false)}
         />
       )}
     </div>
+  );
+}
+
+export default function OrderTrackingPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="animate-spin text-brand-primary" size={32} />
+      </div>
+    }>
+      <OrderTrackingContent />
+    </Suspense>
   );
 }

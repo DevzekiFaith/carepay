@@ -5,7 +5,7 @@ import { LayoutDashboard, ShieldCheck, Wallet, Zap, ShoppingCart, Shield } from 
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import type { User, UserResponse, Session, AuthChangeEvent } from "@supabase/supabase-js";
+import type { User, AuthChangeEvent, Session } from "@supabase/supabase-js";
 import LogoutButton from "./LogoutButton";
 import Logo from "./Logo";
 import { useCart } from "@/lib/cart";
@@ -24,9 +24,9 @@ export default function Nav() {
     const fetchUserAndRole = async () => {
       try {
         // Add a 5s timeout to the auth check (resolve instead of reject to prevent uncaught runtime errors)
-        const timeout = new Promise((resolve) => setTimeout(() => resolve({ timeout: true }), 5000));
+        const timeout = new Promise<{ timeout: boolean }>((resolve) => setTimeout(() => resolve({ timeout: true }), 5000));
         const getUser = supabase.auth.getUser();
-        const response = (await Promise.race([getUser, timeout])) as any;
+        const response = await Promise.race([getUser, timeout]);
         
         if (response && 'timeout' in response) {
           console.warn("Nav: Authentication check timed out. Proceeding as guest.");
@@ -35,14 +35,14 @@ export default function Nav() {
           return;
         }
 
-        const user = response?.data?.user ?? null;
-        setUser(user);
+        const authUser = 'data' in response ? response.data?.user ?? null : null;
+        setUser(authUser);
         
-        if (user) {
+        if (authUser) {
           const { data: profile } = await supabase
             .from('profiles')
             .select('role')
-            .eq('id', user.id)
+            .eq('id', authUser.id)
             .maybeSingle();
           if (profile) setRole(profile.role);
         }

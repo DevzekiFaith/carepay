@@ -63,8 +63,8 @@ export default function PaymentTable({ initialPayments }: { initialPayments: Pay
       toast.success("Payment Approved! Wallet credited.");
       // Optimistic update
       setPayments(prev => prev.map(p => p.id === payment.id ? { ...p, status: 'approved' } : p));
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Approval failed");
     } finally {
       setProcessing(null);
     }
@@ -79,8 +79,8 @@ export default function PaymentTable({ initialPayments }: { initialPayments: Pay
        
        toast.error("Payment Rejected");
        setPayments(prev => prev.map(p => p.id === paymentId ? { ...p, status: 'rejected' } : p));
-     } catch (err: any) {
-       toast.error(err.message);
+     } catch (err: unknown) {
+       toast.error(err instanceof Error ? err.message : "Rejection failed");
      } finally {
        setProcessing(null);
      }
@@ -111,8 +111,9 @@ export default function PaymentTable({ initialPayments }: { initialPayments: Pay
           <div className="flex flex-col md:flex-row gap-6">
             {/* Receipt Preview */}
             <div className="relative w-full md:w-40 aspect-video md:aspect-[3/4] rounded-xl overflow-hidden bg-black/40 border border-white/10 group shrink-0">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={p.receipt_url} alt="Receipt" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
-              <a href={p.receipt_url} target="_blank" className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity">
+              <a href={p.receipt_url} target="_blank" rel="noopener noreferrer" className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity">
                 <ExternalLink size={20} className="text-white" />
               </a>
             </div>

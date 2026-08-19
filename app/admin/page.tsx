@@ -17,12 +17,12 @@ export default async function AdminDashboardPage() {
 
   const stats = {
     totalJobs: jobs.length,
-    pendingJobs: jobs.filter((j: any) => !j.status || j.status === "pending").length,
+    pendingJobs: jobs.filter((j) => !j.status || j.status === "pending").length,
     totalWorkers: workers.length,
-    verifiedWorkers: workers.filter((w: any) => w.is_verified).length,
+    verifiedWorkers: workers.filter((w) => w.is_verified).length,
     totalStoreOrders: orders.length,
-    pendingStoreOrders: orders.filter((o: any) => o.status === "pending_payment").length,
-    totalStoreRevenue: orders.reduce((sum: number, o: any) => sum + (o.total || 0), 0),
+    pendingStoreOrders: orders.filter((o) => o.status === "pending_payment").length,
+    totalStoreRevenue: orders.reduce((sum: number, o) => sum + (Number(o.total) || 0), 0),
   };
 
   const activeCitiesCount = CITIES.filter((c) => c.active).length;

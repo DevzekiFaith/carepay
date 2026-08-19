@@ -87,11 +87,12 @@ export default function ChangePasswordPage() {
         router.push('/');
         router.refresh();
       }, 2000);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to change password. Please try again.";
       toast.error("Password change failed", {
-        description: err.message
+        description: msg
       });
-      setError(err.message || "Failed to change password. Please try again.");
+      setError(msg);
     } finally {
       setSubmitting(false);
     }

@@ -1,17 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { Home, LayoutDashboard, ShieldCheck, Wallet, LogOut, ShoppingBag, ShoppingCart } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Home, LayoutDashboard, Wallet, LogOut, ShoppingBag, ShoppingCart } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
-import { User } from "@supabase/supabase-js";
+import type { User, Session, AuthChangeEvent } from "@supabase/supabase-js";
 import { useCart } from "@/lib/cart";
 import { toast } from "sonner";
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
-  const router = useRouter();
   const supabase = createClient();
   const [user, setUser] = useState<User | null>(null);
   const { cartCount, setIsCartOpen } = useCart();
@@ -29,7 +28,7 @@ export default function MobileBottomNav() {
 
     let subscription: { unsubscribe: () => void } | null = null;
     try {
-      const { data: { subscription: sub } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+      const { data: { subscription: sub } } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
         try {
           setUser(session?.user ?? null);
         } catch (err) {

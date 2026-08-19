@@ -4,7 +4,7 @@ import { FormEvent, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { Loader2, ShieldCheck } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import Logo from "@/app/components/Logo";
 import ErrorAlert from "@/app/components/ErrorAlert";
@@ -61,11 +61,12 @@ export default function ResetPasswordPage() {
       setTimeout(() => {
         router.push("/auth/customer/login");
       }, 2000);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to update password.";
       toast.error("Update failed", {
-        description: err.message
+        description: msg
       });
-      setError(err.message || "Failed to update password. Please try again.");
+      setError(msg);
     } finally {
       setSubmitting(false);
     }

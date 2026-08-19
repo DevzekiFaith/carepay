@@ -12,10 +12,32 @@ import ErrorAlert from "@/app/components/ErrorAlert";
 
 export default function CustomerLoginPage() {
   const [submitting, setSubmitting] = useState(false);
+  const [resending, setResending] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [unconfirmedEmail, setUnconfirmedEmail] = useState<string | null>(null);
   const router = useRouter();
   const supabase = createClient();
+
+  const handleResendConfirmation = async () => {
+    if (!unconfirmedEmail) return;
+    try {
+      setResending(true);
+      const { error: resendError } = await supabase.auth.resend({
+        type: 'signup',
+        email: unconfirmedEmail,
+      });
+      if (resendError) throw resendError;
+      toast.success("Confirmation email resent!", {
+        description: `We've sent a new confirmation link to ${unconfirmedEmail}. Please check your inbox or spam.`
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to resend confirmation email.";
+      toast.error("Failed to resend email", { description: msg });
+    } finally {
+      setResending(false);
+    }
+  };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -26,6 +48,7 @@ export default function CustomerLoginPage() {
     }
     
     setError(null);
+    setUnconfirmedEmail(null);
     setSubmitting(true);
 
     const formData = new FormData(e.currentTarget);
@@ -55,11 +78,12 @@ export default function CustomerLoginPage() {
       } else {
         throw new Error("No user data returned from login");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Login error details:", err);
+      const errorObj = err as { name?: string; message?: string };
       
       // Handle AbortError specifically (concurrent auth requests)
-      if (err.name === 'AbortError' || err.message?.includes('Lock broken')) {
+      if (errorObj?.name === 'AbortError' || errorObj?.message?.includes('Lock broken')) {
         toast.error("Please wait", {
           description: "Another login request is in progress. Please wait a moment and try again."
         });
@@ -68,19 +92,16 @@ export default function CustomerLoginPage() {
         return;
       }
       
-      toast.error("Login failed", {
-        description: err.message || "Invalid login credentials"
-      });
-
-      // Provide more specific error messages
-      let errorMessage = "Invalid login credentials.";
-      if (err.message?.includes("Email not confirmed")) {
-        errorMessage = "Please confirm your email address before logging in. Check your inbox for the confirmation link.";
-      } else if (err.message?.includes("Invalid login credentials")) {
-        errorMessage = "Invalid email or password. Please check your credentials and try again.";
-      } else if (err.message) {
-        errorMessage = err.message;
+      const isEmailNotConfirmed = errorObj?.message?.toLowerCase().includes("email not confirmed");
+      if (isEmailNotConfirmed) {
+        setUnconfirmedEmail(email);
       }
+
+      const errorMessage = errorObj?.message?.includes("Invalid login credentials")
+        ? "Invalid email or PIN. Please check your credentials and try again."
+        : isEmailNotConfirmed
+        ? "Your email has not been confirmed yet. Please check your inbox or click below to resend the confirmation link."
+        : errorObj?.message || "Failed to log in. Please check your credentials.";
 
       setError(errorMessage);
     } finally {
@@ -159,9 +180,23 @@ export default function CustomerLoginPage() {
 
           <ErrorAlert 
             error={error} 
-            onClear={() => setError(null)} 
+            onClear={() => {
+              setError(null);
+              setUnconfirmedEmail(null);
+            }} 
             className="mt-6"
           />
+
+          {unconfirmedEmail && (
+            <button
+              type="button"
+              onClick={handleResendConfirmation}
+              disabled={resending}
+              className="mt-3 w-full rounded-xl border border-brand-primary/30 bg-brand-primary/10 py-2.5 px-4 text-xs font-bold uppercase tracking-widest text-brand-primary hover:bg-brand-primary/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              {resending ? <Loader2 size={14} className="animate-spin" /> : "Resend Confirmation Email"}
+            </button>
+          )}
         </form>
 
         <div className="mt-8 flex flex-col items-center justify-center space-y-4 border-t border-white/10 pt-6 text-xs text-zinc-500">

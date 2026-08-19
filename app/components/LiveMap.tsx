@@ -165,7 +165,7 @@ export default function LiveMap({
             .on(
                 'broadcast',
                 { event: 'location' },
-                (payload: any) => {
+                (payload: { payload: { lat: number; lng: number } }) => {
                     const { lat, lng } = payload.payload;
                     setProPos([lat, lng]);
                 }

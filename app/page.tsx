@@ -9,15 +9,19 @@ import {
   getSiteUrl,
 } from "@/lib/site";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   let user = null;
   try {
     const supabase = await createClient();
-    const { data } = await supabase.auth.getUser();
-    user = data.user;
+    const timeout = new Promise<{ data: { user: null } }>((resolve) => setTimeout(() => resolve({ data: { user: null } }), 3000));
+    const getUser = supabase.auth.getUser();
+    const response = await Promise.race([getUser, timeout]);
+    user = response?.data?.user ?? null;
   } catch (error) {
-    console.error('Failed to initialize Supabase client:', error);
-    // User remains null, page falls back to Gateway
+    console.error('Failed to fetch user from Supabase:', error);
+    user = null;
   }
 
   const base = getSiteUrl();

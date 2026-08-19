@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, History, ArrowUpRight, ArrowDownLeft, Loader2, Camera, Upload, CheckCircle2, Building2 } from "lucide-react";
+import { ArrowLeft, Plus, History, ArrowUpRight, ArrowDownLeft, Loader2, Upload, CheckCircle2, Building2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import ErrorAlert from "@/app/components/ErrorAlert";
 
@@ -15,6 +15,15 @@ interface Transaction {
   amount: number;
   created_at: string;
   description: string;
+}
+
+interface PaymentVerification {
+  id: string;
+  amount: number;
+  sender_name: string;
+  status: string;
+  created_at: string;
+  receipt_url: string;
 }
 
 const containerVariants = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.1 } } };
@@ -81,9 +90,9 @@ export default function CustomerWalletPage() {
       if (txError) throw txError;
       setTransactions(txs || []);
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.message);
+      setError(err instanceof Error ? err.message : "Failed to load wallet data");
     } finally {
       setLoading(false);
       isFetchingRef.current = false;
@@ -152,9 +161,10 @@ export default function CustomerWalletPage() {
       setFunding(false);
       setAmount("");
       toast.success(`Successfully funded ₦${val.toLocaleString()}`);
-    } catch (err: any) {
-      setError(`Funding failed: ${err.message}`);
-      toast.error(`Funding failed: ${err.message}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Funding failed";
+      setError(`Funding failed: ${msg}`);
+      toast.error(`Funding failed: ${msg}`);
     } finally {
       setLoading(false);
     }
@@ -208,9 +218,10 @@ export default function CustomerWalletPage() {
       setAmount("");
       setSenderName("");
       setReceiptFile(null);
-    } catch (err: any) {
-      setError(`Submission failed: ${err.message}`);
-      toast.error(`Submission failed: ${err.message}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Submission failed";
+      setError(`Submission failed: ${msg}`);
+      toast.error(`Submission failed: ${msg}`);
     } finally {
       setUploading(false);
     }
@@ -299,7 +310,7 @@ export default function CustomerWalletPage() {
                     <button 
                        type="button" 
                        onClick={() => setFunding(false)} 
-                       className="flex-1 sm:flex-none rounded-full border border-white/10 bg-white/5 hover:bg-white/10 px-6 h-12 text-xs font-bold uppercase tracking-widest text-zinc-400 transition-colors"
+                       className="flex-1 sm:flex-none rounded-full border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 hover:bg-zinc-100 dark:hover:bg-white/10 px-6 h-12 text-xs font-bold uppercase tracking-widest text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all"
                     >
                       Cancel
                     </button>
@@ -307,7 +318,7 @@ export default function CustomerWalletPage() {
                 </form>
               ) : (
                 <form onSubmit={handleTransferSubmit} className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-300">
-                  <div className="flex flex-col sm:flex-row gap-6 p-6 rounded-2xl bg-white/5 border border-white/10">
+                  <div className="flex flex-col sm:flex-row gap-6 p-6 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10">
                      <div className="flex-1 space-y-4">
                         <div className="space-y-1">
                            <p className="text-[9px] uppercase tracking-widest font-bold text-zinc-500">Beneficiary Bank</p>
@@ -328,7 +339,7 @@ export default function CustomerWalletPage() {
                            <input 
                               type="number" required placeholder="₦0.00" 
                               value={amount} onChange={e => setAmount(e.target.value)}
-                              className="w-full bg-transparent border-b border-white/10 py-2 text-xl font-heading font-extrabold text-foreground focus:border-brand-primary outline-none transition-colors"
+                              className="w-full bg-transparent border-b border-zinc-200 dark:border-white/10 py-2 text-xl font-heading font-extrabold text-foreground focus:border-brand-primary outline-none transition-colors"
                            />
                         </div>
                         <div className="space-y-1">
@@ -336,7 +347,7 @@ export default function CustomerWalletPage() {
                            <input 
                               type="text" required placeholder="As seen on your bank app" 
                               value={senderName} onChange={e => setSenderName(e.target.value)}
-                              className="w-full bg-transparent border-b border-white/10 py-2 text-sm font-medium text-foreground focus:border-brand-primary outline-none transition-colors"
+                              className="w-full bg-transparent border-b border-zinc-200 dark:border-white/10 py-2 text-sm font-medium text-foreground focus:border-brand-primary outline-none transition-colors"
                            />
                         </div>
                      </div>
@@ -344,7 +355,7 @@ export default function CustomerWalletPage() {
 
                   <div className="space-y-2">
                      <p className="text-[10px] uppercase tracking-widest font-bold text-zinc-500 pl-1">Upload Receipt</p>
-                     <label className="flex flex-col items-center justify-center gap-2 p-8 rounded-2xl border-2 border-dashed border-white/10 bg-white/5 hover:bg-white/10 hover:border-brand-primary/30 transition-all cursor-pointer group">
+                     <label className="flex flex-col items-center justify-center gap-2 p-8 rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 hover:bg-zinc-100 dark:hover:bg-white/10 hover:border-brand-primary/30 transition-all cursor-pointer group">
                         {receiptFile ? (
                            <div className="flex items-center gap-3">
                               <CheckCircle2 className="text-emerald-500" size={24} />
@@ -377,7 +388,7 @@ export default function CustomerWalletPage() {
                      <button 
                         type="button" 
                         onClick={() => setShowTransferForm(false)} 
-                        className="flex-1 h-12 rounded-full border border-white/10 bg-white/5 text-xs font-bold uppercase tracking-widest text-zinc-500 transition-colors"
+                        className="flex-1 h-12 rounded-full border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 text-xs font-bold uppercase tracking-widest text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all"
                      >
                         Cancel
                      </button>
@@ -392,7 +403,7 @@ export default function CustomerWalletPage() {
 
           {/* Transactions */}
           <motion.section variants={itemVariants} className="glass-panel p-4 sm:p-6 shadow-premium">
-            <div className="mb-4 sm:mb-6 flex items-center gap-2 border-b border-white/10 pb-4">
+            <div className="mb-4 sm:mb-6 flex items-center gap-2 border-b border-zinc-200 dark:border-white/10 pb-4">
               <History size={14} className="text-brand-primary" />
               <h2 className="text-[9px] sm:text-[10px] uppercase tracking-widest font-bold text-zinc-400">Transaction History</h2>
             </div>
@@ -404,7 +415,7 @@ export default function CustomerWalletPage() {
                 transactions.map((tx) => (
                   <div key={tx.id} className="flex items-center justify-between py-3 px-3 sm:py-4 sm:px-4 glass-panel glass-panel-hover rounded-xl transition-all group overflow-hidden">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className={`flex shrink-0 h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl bg-white/5 border border-white/10 ${tx.transaction_type === 'credit' ? 'text-emerald-500' : 'text-zinc-400'}`}>
+                      <div className={`flex shrink-0 h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 ${tx.transaction_type === 'credit' ? 'text-emerald-500' : 'text-zinc-500 dark:text-zinc-400'}`}>
                         {tx.transaction_type === 'credit' ? <ArrowDownLeft size={12} className="sm:size-[14px]" /> : <ArrowUpRight size={12} className="sm:size-[14px]" />}
                       </div>
                       <div className="overflow-hidden min-w-0">
@@ -427,7 +438,7 @@ export default function CustomerWalletPage() {
 }
 
 function PendingVerifications() {
-  const [pending, setPending] = useState<any[]>([]);
+  const [pending, setPending] = useState<PaymentVerification[]>([]);
   const supabase = createClient();
 
   useEffect(() => {
@@ -463,9 +474,9 @@ function PendingVerifications() {
       </div>
       <div className="space-y-3">
         {pending.map(p => (
-          <div key={p.id} className="flex items-center justify-between p-3 rounded-xl bg-black/20 border border-white/5">
+          <div key={p.id} className="flex items-center justify-between p-3 rounded-xl bg-black/10 dark:bg-black/20 border border-zinc-200 dark:border-white/5">
              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-lg bg-white/5 flex items-center justify-center text-amber-500 border border-amber-500/20">
+                <div className="h-8 w-8 rounded-lg bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-amber-500 border border-amber-500/20">
                    <Building2 size={14} />
                 </div>
                 <div>

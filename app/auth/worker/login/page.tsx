@@ -4,14 +4,35 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
-import { Eye, EyeOff, Lock } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import Logo from "@/app/components/Logo";
 import ErrorAlert from "@/app/components/ErrorAlert";
 
 export default function WorkerLoginPage() {
   const [submitting, setSubmitting] = useState(false);
+  const [resending, setResending] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [unconfirmedEmail, setUnconfirmedEmail] = useState<string | null>(null);
+
+  const handleResendConfirmation = async () => {
+    if (!unconfirmedEmail) return;
+    try {
+      setResending(true);
+      const supabase = createClient();
+      const { error: resendError } = await supabase.auth.resend({
+        type: 'signup',
+        email: unconfirmedEmail,
+      });
+      if (resendError) throw resendError;
+      setMessage("Confirmation email resent! Please check your inbox.");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to resend confirmation email.";
+      setMessage(`Failed to resend: ${msg}`);
+    } finally {
+      setResending(false);
+    }
+  };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -22,6 +43,7 @@ export default function WorkerLoginPage() {
     }
     
     setMessage(null);
+    setUnconfirmedEmail(null);
     setSubmitting(true);
 
     const form = e.target as HTMLFormElement;
@@ -44,23 +66,36 @@ export default function WorkerLoginPage() {
           setSubmitting(false);
           return;
         }
-        setMessage(`Login failed: Invalid phone number or PIN.`);
+
+        if (error.message?.toLowerCase().includes("email not confirmed")) {
+          setUnconfirmedEmail(email);
+          setMessage("Email not confirmed. Please check your inbox or click below to resend confirmation.");
+          return;
+        }
+
+        setMessage(`Login failed: Invalid email or PIN.`);
         return;
       }
 
       setSubmitting(false);
-      setMessage("Logged in securely. Redirecting...");
+      setMessage("Logged in securely. Redirecting to Pro Center...");
       setTimeout(() => {
-        window.location.href = "/"; // We will build a true pro dashboard soon
+        window.location.href = "/worker/dashboard";
       }, 1000);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorObj = err as { name?: string; message?: string };
       // Handle AbortError specifically
-      if (err.name === 'AbortError' || err.message?.includes('Lock broken')) {
+      if (errorObj?.name === 'AbortError' || errorObj?.message?.includes('Lock broken')) {
         setMessage("Please wait a moment before trying again.");
         setSubmitting(false);
         return;
       }
-      setMessage(`Login failed: ${err.message}`);
+      if (errorObj?.message?.toLowerCase().includes("email not confirmed")) {
+        setUnconfirmedEmail(email);
+        setMessage("Email not confirmed. Please check your inbox or click below to resend confirmation.");
+        return;
+      }
+      setMessage(`Login failed: ${errorObj?.message || "Invalid credentials"}`);
     } finally {
       setSubmitting(false);
     }
@@ -134,12 +169,26 @@ export default function WorkerLoginPage() {
           </button>
 
           <ErrorAlert 
-            error={message && message.includes("failed") ? message : null} 
-            onClear={() => setMessage(null)}
+            error={message && (message.includes("failed") || message.includes("not confirmed")) ? message : null} 
+            onClear={() => {
+              setMessage(null);
+              setUnconfirmedEmail(null);
+            }}
             className="mt-6"
           />
+
+          {unconfirmedEmail && (
+            <button
+              type="button"
+              onClick={handleResendConfirmation}
+              disabled={resending}
+              className="mt-3 w-full rounded-xl border border-brand-primary/30 bg-brand-primary/10 py-2.5 px-4 text-xs font-bold uppercase tracking-widest text-brand-primary hover:bg-brand-primary/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              {resending ? "Sending..." : "Resend Confirmation Email"}
+            </button>
+          )}
           
-          {message && !message.includes("failed") && (
+          {message && !message.includes("failed") && !message.includes("not confirmed") && (
              <p className="pt-4 text-center text-xs font-bold text-brand-primary">
                {message}
              </p>

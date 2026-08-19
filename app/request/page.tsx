@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 import SurgeBadge from "@/app/components/SurgeBadge";
 import type { SurgeResult } from "@/lib/surge";
 
-import { Wrench, Zap, Hammer, Armchair, Snowflake, Paintbrush, PenTool, Camera, X, Loader2, Calendar, Clock, ShoppingBag, Copy, Check, MessageCircle } from "lucide-react";
+import { Wrench, Zap, Hammer, Armchair, Snowflake, Paintbrush, PenTool, Camera, X, Loader2, ShoppingBag, Copy, Check, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import ErrorAlert from "@/app/components/ErrorAlert";
 import ModernDatePicker from "@/app/components/ModernDatePicker";
@@ -17,6 +17,7 @@ import { PRODUCTS, Product } from "@/lib/products";
 import ProductCard from "@/app/components/ProductCard";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { User } from "@supabase/supabase-js";
 
 const REQUEST_HERO_IMAGE = "/su4.jpg";
 
@@ -41,12 +42,12 @@ function RequestContent() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [paymentDetails, setPaymentDetails] = useState({ amount: 0, email: "", phone: "", name: "", txRef: "" });
-  const [paymentCompleted, setPaymentCompleted] = useState(false);
+  const [paymentCompleted] = useState(false);
   
   const [appointmentDate, setAppointmentDate] = useState<Date | null>(new Date());
   const [appointmentTime, setAppointmentTime] = useState("09:00");
 
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [selectedParts, setSelectedParts] = useState<Product[]>([]);
   const searchParams = useSearchParams();
 
@@ -55,8 +56,8 @@ function RequestContent() {
     const partId = searchParams.get('part');
     if (partId) {
       const part = PRODUCTS.find(p => p.id === partId);
-      if (part && !selectedParts.find(p => p.id === partId)) {
-        setSelectedParts(prev => [...prev, part]);
+      if (part) {
+        setSelectedParts(prev => prev.some(p => p.id === partId) ? prev : [...prev, part]);
         if (part.serviceLink.length > 0) {
            setSelectedService(part.serviceLink[0]);
         }
@@ -66,12 +67,17 @@ function RequestContent() {
 
   useEffect(() => {
     const checkUser = async () => {
-       const supabase = createClient();
-       const { data } = await supabase.auth.getUser();
-       setUser(data.user);
+      try {
+        const supabase = createClient();
+        const { data } = await supabase.auth.getUser();
+        setUser(data.user);
+      } catch {
+        // Supabase unavailable (e.g. paused) — proceed as guest
+      }
     };
     checkUser();
   }, []);
+
 
   const [copied, setCopied] = useState(false);
 
@@ -405,7 +411,7 @@ function RequestContent() {
                           required
                           name="fullName"
                           placeholder="John Doe"
-                          className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-foreground outline-none focus:border-brand-primary transition-all"
+                          className="w-full rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 px-4 py-3 text-sm text-zinc-800 dark:text-foreground outline-none focus:border-brand-primary transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
                         />
                       </div>
                       <div className="space-y-2">
@@ -417,7 +423,7 @@ function RequestContent() {
                           type="email"
                           name="email"
                           placeholder="you@example.com"
-                          className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-foreground outline-none focus:border-brand-primary transition-all"
+                          className="w-full rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 px-4 py-3 text-sm text-zinc-800 dark:text-foreground outline-none focus:border-brand-primary transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
                         />
                       </div>
                       <div className="space-y-2">
@@ -429,7 +435,7 @@ function RequestContent() {
                           type="tel"
                           name="phone"
                           placeholder="+234..."
-                          className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-foreground outline-none focus:border-brand-primary transition-all"
+                          className="w-full rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 px-4 py-3 text-sm text-zinc-800 dark:text-foreground outline-none focus:border-brand-primary transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
                         />
                       </div>
                     </motion.div>
@@ -444,7 +450,7 @@ function RequestContent() {
                       required
                       name="address"
                       placeholder="House number, street, area"
-                      className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-foreground outline-none focus:border-brand-primary transition-all"
+                      className="w-full rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 px-4 py-3 text-sm text-zinc-800 dark:text-foreground outline-none focus:border-brand-primary transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
                     />
                   </div>
                   {!user && (
@@ -459,13 +465,13 @@ function RequestContent() {
                          maxLength={6}
                          minLength={6}
                          placeholder="e.g. 123456"
-                         className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-foreground outline-none focus:border-brand-primary transition-all"
+                         className="w-full rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 px-4 py-3 text-sm text-zinc-800 dark:text-foreground outline-none focus:border-brand-primary transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
                        />
                      </div>
                   )}
                 </div>
 
-                <div className="pt-8 border-t border-white/5 space-y-8">
+                <div className="pt-8 border-t border-zinc-200 dark:border-white/5 space-y-8">
                   <ModernDatePicker 
                     selectedDate={appointmentDate} 
                     onSelect={(date) => setAppointmentDate(date)} 
@@ -483,7 +489,7 @@ function RequestContent() {
                     name="details"
                     rows={4}
                     placeholder="Describe the issue. Detailed descriptions help us match the right pro."
-                    className="w-full resize-none rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3.5 text-sm text-foreground outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary"
+                    className="w-full resize-none rounded-xl border border-zinc-200 dark:border-white/5 bg-zinc-50 dark:bg-zinc-900/50 px-4 py-3.5 text-sm text-zinc-800 dark:text-foreground outline-none transition focus:border-brand-primary focus:bg-zinc-100 dark:focus:bg-zinc-900/80 focus:ring-1 focus:ring-brand-primary placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
                   />
                 </div>
 
@@ -491,7 +497,7 @@ function RequestContent() {
                   <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
                     Photo of Issue (Optional)
                   </label>
-                  <div className="relative flex flex-col items-center justify-center w-full rounded-2xl border-2 border-dashed border-white/10 dark:border-white/5 bg-background/50 p-6 transition-all hover:bg-background/80 hover:border-brand-primary/40 group">
+                  <div className="relative flex flex-col items-center justify-center w-full rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/5 bg-zinc-50 dark:bg-zinc-900/50 p-6 transition-all hover:bg-zinc-100 dark:hover:bg-zinc-900/80 hover:border-brand-primary/40 group">
                     {imagePreview ? (
                       <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-black/50">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -510,7 +516,7 @@ function RequestContent() {
                       </div>
                     ) : (
                       <>
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/5 text-zinc-400 group-hover:text-brand-primary group-hover:bg-brand-primary/10 transition-colors mb-3">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 group-hover:text-brand-primary group-hover:bg-brand-primary/10 transition-colors mb-3">
                           <Camera size={20} />
                         </div>
                         <p className="text-sm font-bold text-foreground">Tap to take a photo</p>
@@ -599,13 +605,13 @@ function RequestContent() {
                                         toast.success("Account number copied!");
                                         setTimeout(() => setCopied(false), 2000);
                                       }}
-                                      className="h-8 w-8 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-zinc-400 hover:text-brand-primary transition-all"
+                                      className="h-8 w-8 flex items-center justify-center rounded-lg bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-500 dark:text-zinc-400 hover:text-brand-primary transition-all"
                                     >
                                       {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
                                     </button>
                                  </div>
                               </div>
-                              <div className="sm:col-span-2 pt-4 border-t border-white/5">
+                              <div className="sm:col-span-2 pt-4 border-t border-zinc-200 dark:border-white/5">
                                  <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Account Name</p>
                                  <p className="text-sm font-bold text-foreground">{PAYMENT_ACCOUNT.accountName}</p>
                               </div>
@@ -621,12 +627,12 @@ function RequestContent() {
                            >
                              <MessageCircle size={16} /> Notify via WhatsApp
                            </a>
-                           <Link
-                             href="/customer/dashboard"
-                             className="h-12 rounded-full px-8 border border-white/10 bg-white/5 flex-1 flex items-center justify-center text-[11px] font-bold uppercase tracking-widest text-zinc-400 hover:text-white transition-all"
-                           >
-                             View Dashboard
-                           </Link>
+                            <Link
+                              href="/customer/dashboard"
+                              className="h-12 rounded-full px-8 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 flex-1 flex items-center justify-center text-[11px] font-bold uppercase tracking-widest text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all"
+                            >
+                              View Dashboard
+                            </Link>
                         </div>
                       </>
                     ) : (

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ClipboardList, Users, MapPin, TrendingUp, ShoppingBag } from "lucide-react";
+import { ClipboardList, MapPin, TrendingUp, ShoppingBag } from "lucide-react";
 import { CITIES } from "@/lib/cities";
 
 interface DashboardClientProps {

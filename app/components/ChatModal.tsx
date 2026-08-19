@@ -34,21 +34,27 @@ export default function ChatModal({ requestId, isOpen, onClose, title = "Chat", 
     if (!isOpen) return;
 
     const setupChat = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) setUserId(user.id);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) setUserId(user.id);
 
-      // Fetch messages
-      const { data } = await supabase
-        .from("messages")
-        .select("*")
-        .eq("request_id", requestId)
-        .order("created_at", { ascending: true });
+        // Fetch messages
+        const { data } = await supabase
+          .from("messages")
+          .select("*")
+          .eq("request_id", requestId)
+          .order("created_at", { ascending: true });
 
-      if (data) setMessages(data);
-      setLoading(false);
+        if (data) setMessages(data);
+      } catch {
+        // Supabase unavailable — chat will show empty state
+      } finally {
+        setLoading(false);
+      }
     };
 
     setupChat();
+
 
     // Subscribe to new messages
     const channel = supabase
@@ -61,8 +67,8 @@ export default function ChatModal({ requestId, isOpen, onClose, title = "Chat", 
           table: "messages",
           filter: `request_id=eq.${requestId}`,
         },
-        (payload: any) => {
-          const newMsg = payload.new as Message;
+        (payload: { new: Record<string, unknown> }) => {
+          const newMsg = payload.new as unknown as Message;
           setMessages((prev) => {
             // Prevent duplicate messages if the insert comes back from the broadcast and fetch
             if (prev.some(m => m.id === newMsg.id)) return prev;
