@@ -22,13 +22,14 @@ export default function RootWrapper({ children }: { children: React.ReactNode })
   ];
 
   const shouldHideFooter = hideFooterPaths.includes(pathname);
+  const isStore = pathname.startsWith("/store");
 
   return (
     <>
       {children}
       {!shouldHideFooter && <Footer />}
       <CartDrawer />
-      <PromoOverlay />
+      {isStore && <PromoOverlay />}
       <WhatsAppButton />
     </>
   );

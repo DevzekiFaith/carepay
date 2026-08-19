@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LayoutDashboard, Wallet, LogOut, ShoppingBag, ShoppingCart } from "lucide-react";
+import { Home, LayoutDashboard, Wallet, LogOut, ShoppingBag, ShoppingCart, LogIn } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import type { User, Session, AuthChangeEvent } from "@supabase/supabase-js";
@@ -83,16 +83,17 @@ export default function MobileBottomNav() {
     { label: "Store", href: "/store", icon: ShoppingBag },
   ];
 
-  // Add logged-in-only items
+  // Add logged-in or guest items
   if (user) {
     navItems.push(
       { label: "Wallet", href: "/customer/wallet", icon: Wallet },
       { label: "Dashboard", href: "/customer/dashboard", icon: LayoutDashboard },
     );
+  } else {
+    navItems.push(
+      { label: "Login", href: "/auth/customer/login", icon: LogIn },
+    );
   }
-
-  // Don't show on landing page for non-logged-in users (keep it clean)
-  if (!user && pathname === '/') return null;
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-[60] bg-white/90 dark:bg-zinc-950/90 backdrop-blur-xl border-t border-zinc-200 dark:border-zinc-800 px-4 pb-safe-area-inset-bottom">

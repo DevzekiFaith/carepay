@@ -142,7 +142,7 @@ export default function Nav() {
               ) : (
                 <Link
                   href="/auth/customer/login"
-                  className="hidden md:flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] uppercase tracking-widest font-bold text-zinc-500 hover:text-brand-primary hover:bg-brand-primary/10 transition-colors"
+                  className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] uppercase tracking-widest font-bold text-zinc-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
                 >
                   <span>Login</span>
                 </Link>
