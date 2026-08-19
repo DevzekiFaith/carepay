@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 import SurgeBadge from "@/app/components/SurgeBadge";
 import type { SurgeResult } from "@/lib/surge";
 
-import { Wrench, Zap, Hammer, Armchair, Snowflake, Paintbrush, PenTool, Camera, X, Loader2, ShoppingBag, Copy, Check, MessageCircle } from "lucide-react";
+import { Wrench, Zap, Hammer, Armchair, Snowflake, Paintbrush, PenTool, Camera, X, Loader2, ShoppingBag, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 import ErrorAlert from "@/app/components/ErrorAlert";
 import ModernDatePicker from "@/app/components/ModernDatePicker";
@@ -22,13 +22,13 @@ import { User } from "@supabase/supabase-js";
 const REQUEST_HERO_IMAGE = "/su4.jpg";
 
 const SERVICES = [
-  { label: "Plumber", icon: Wrench, price: "₦15,000 Start" },
-  { label: "Electrician", icon: Zap, price: "₦18,000 Start" },
-  { label: "Carpenter", icon: Hammer, price: "₦20,000 Start" },
-  { label: "Furniture Maker", icon: Armchair, price: "₦25,000 Start" },
-  { label: "AC & Fridge Repair", icon: Snowflake, price: "₦20,000 Start" },
-  { label: "Painter", icon: Paintbrush, price: "₦22,000 Start" },
-  { label: "General Handyman", icon: PenTool, price: "₦15,000 Start" },
+  { label: "Plumber", icon: Wrench, price: "₦15,000 Start", image: "/services/plumber.jpg" },
+  { label: "Electrician", icon: Zap, price: "₦18,000 Start", image: "/services/electrician.jpg" },
+  { label: "Carpenter", icon: Hammer, price: "₦20,000 Start", image: "/services/carpenter.jpg" },
+  { label: "Furniture Maker", icon: Armchair, price: "₦25,000 Start", image: "/services/furniture.jpg" },
+  { label: "AC & Fridge Repair", icon: Snowflake, price: "₦20,000 Start", image: "/services/ac-repair.jpg" },
+  { label: "Painter", icon: Paintbrush, price: "₦22,000 Start", image: "/services/painter.jpg" },
+  { label: "General Handyman", icon: PenTool, price: "₦15,000 Start", image: "/services/handyman.jpg" },
 ];
 
 
@@ -246,10 +246,7 @@ function RequestContent() {
   };
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground antialiased py-8 sm:py-24 overflow-hidden px-4 sm:px-0">
-      {/* Background Ambience */}
-      <div className="absolute inset-x-0 -top-[30%] -z-10 h-[80%] w-full rounded-full bg-brand-primary/5 opacity-50 blur-[120px] mix-blend-screen pointer-events-none" />
-
+    <div className="relative min-h-screen bg-slate-50 text-slate-900 antialiased py-8 sm:py-20 overflow-hidden px-4 sm:px-0">
       <div className="mx-auto flex min-w-0 max-w-5xl flex-col px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.header
           initial={{ opacity: 0, y: 10 }}
@@ -257,16 +254,19 @@ function RequestContent() {
           className="mb-8 sm:mb-12 flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between"
         >
           <div className="min-w-0">
-            <h1 className="text-2xl font-heading font-extrabold tracking-tight text-gradient-primary sm:text-4xl">
-              Book a Professional
+            <span className="text-xs font-bold uppercase tracking-wider text-sky-600 bg-sky-100/70 px-3 py-1 rounded-full border border-sky-200">
+              Verified Artisan Matching
+            </span>
+            <h1 className="text-2xl font-heading font-extrabold tracking-tight text-slate-900 sm:text-4xl uppercase mt-2">
+              Book a <span className="text-sky-600">Professional</span>
             </h1>
-            <p className="mt-2 text-[11px] sm:text-sm text-zinc-400 font-medium max-w-md leading-relaxed">
+            <p className="mt-1.5 text-xs sm:text-sm text-slate-500 font-medium max-w-md leading-relaxed">
               Fastest matching in Nigeria. {user ? "Your details are pre-filled." : "Signup instantly during checkout."}
             </p>
           </div>
           <Link
             href="/"
-            className="flex h-9 sm:h-10 w-fit items-center justify-center rounded-full border border-white/10 dark:border-white/5 glass-panel px-5 sm:px-6 text-[9px] font-bold uppercase tracking-widest text-zinc-400 glass-panel-hover transition-colors"
+            className="flex h-10 w-fit items-center justify-center rounded-full border border-slate-200 bg-white px-5 text-[11px] font-extrabold uppercase tracking-widest text-slate-600 hover:text-sky-600 hover:border-sky-300 shadow-xs transition-colors"
           >
             ← Home
           </Link>
@@ -280,8 +280,9 @@ function RequestContent() {
             className="space-y-12"
           >
             <div>
-              <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-6">
-                1. Select Service
+              <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-4 flex items-center gap-2">
+                <span className="w-5 h-5 rounded-full bg-sky-600 text-white text-[10px] flex items-center justify-center font-bold">1</span>
+                <span>Select Service</span>
               </h2>
               <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
                 {SERVICES.map((service) => {
@@ -291,29 +292,48 @@ function RequestContent() {
                       key={service.label}
                       type="button"
                       onClick={() => handleServiceSelect(service.label)}
-                      className={`group flex flex-col items-start rounded-2xl border transition-all duration-300 overflow-hidden text-left w-full p-3.5 sm:p-5 ${isActive
-                        ? "bg-brand-primary/10 text-foreground border-brand-primary/50 shadow-[0_0_20px_rgba(249,115,22,0.15)] scale-[1.02]"
-                        : "glass-panel glass-panel-hover"
-                        }`}
+                      className={`group flex flex-col items-start rounded-2xl border transition-all duration-300 overflow-hidden text-left w-full p-2.5 sm:p-3 relative ${
+                        isActive
+                          ? "bg-sky-50 border-sky-500 ring-2 ring-sky-500/20 shadow-md shadow-sky-500/10 scale-[1.02]"
+                          : "bg-white border-sky-100 hover:border-sky-300 hover:shadow-md shadow-xs"
+                      }`}
                     >
-                      <div className="flex w-full items-start justify-between mb-2">
-                        <div className={`flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl transition-colors ${isActive
-                          ? "bg-brand-primary/20 text-brand-primary"
-                          : "bg-white/5 border border-white/5 text-zinc-400 group-hover:bg-brand-primary/20 group-hover:border-brand-primary/30 group-hover:text-brand-primary"
-                          }`}>
-                          <service.icon size={16} strokeWidth={1.5} className="transition-transform group-hover:scale-110" />
+                      {/* Top Image Preview */}
+                      <div className="relative aspect-[16/11] w-full rounded-xl overflow-hidden mb-2.5 bg-slate-100 shrink-0">
+                        {service.image ? (
+                          <Image
+                            src={service.image}
+                            alt={service.label}
+                            fill
+                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                            sizes="(max-width: 640px) 50vw, 200px"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-sky-50 text-sky-600">
+                            <service.icon size={24} />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent" />
+                        
+                        {/* Icon badge overlay */}
+                        <div className={`absolute top-2 left-2 w-7 h-7 rounded-lg backdrop-blur-md flex items-center justify-center shadow-xs ${
+                          isActive ? "bg-sky-600 text-white" : "bg-white/90 text-sky-600"
+                        }`}>
+                          <service.icon size={14} strokeWidth={2} />
                         </div>
                       </div>
 
-                      <h3 className={`text-xs sm:text-sm font-bold tracking-tight mt-3 mb-1.5 ${isActive ? "text-brand-primary" : "text-foreground group-hover:text-brand-primary transition-colors"}`}>
+                      <h3 className={`text-xs sm:text-sm font-extrabold tracking-tight mb-1 truncate w-full ${
+                        isActive ? "text-sky-700" : "text-slate-800 group-hover:text-sky-600 transition-colors"
+                      }`}>
                         {service.label}
                       </h3>
 
-                      <div className={`flex flex-col items-start w-full pt-2.5 border-t transition-colors ${isActive ? "border-brand-primary/20" : "border-white/5"}`}>
-                        <span className={`text-xs sm:text-sm font-bold tracking-tight ${isActive ? "text-foreground" : "text-zinc-300"}`}>
+                      <div className="flex items-center justify-between w-full pt-1.5 border-t border-slate-100">
+                        <span className="text-[11px] sm:text-xs font-extrabold text-slate-900">
                           {service.price.split(' ')[0]}
                         </span>
-                        <span className={`text-[8px] font-bold uppercase tracking-widest ${isActive ? "text-brand-primary" : "text-zinc-500"}`}>
+                        <span className="text-[8px] font-bold uppercase tracking-wider text-sky-600">
                           {service.price.split(' ').slice(1).join(' ')}
                         </span>
                       </div>
@@ -392,7 +412,7 @@ function RequestContent() {
               )}
             </div>
 
-            <div className="border-t border-white/10 pt-10">
+            <div className="border-t border-slate-200 pt-10">
               <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-6">
                 2. Your Details
               </h2>
@@ -404,38 +424,38 @@ function RequestContent() {
                 {!user && (
                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="grid gap-4 sm:grid-cols-3 mb-6">
                       <div className="space-y-2">
-                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                        <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700">
                           Full Name
                         </label>
                         <input
                           required
                           name="fullName"
                           placeholder="John Doe"
-                          className="w-full rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 px-4 py-3 text-sm text-zinc-800 dark:text-foreground outline-none focus:border-brand-primary transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
+                          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 transition-all placeholder:text-slate-400 shadow-xs"
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                          Email
+                        <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700">
+                          Email Address
                         </label>
                         <input
                           required
                           type="email"
                           name="email"
                           placeholder="you@example.com"
-                          className="w-full rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 px-4 py-3 text-sm text-zinc-800 dark:text-foreground outline-none focus:border-brand-primary transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
+                          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 transition-all placeholder:text-slate-400 shadow-xs"
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                          Phone No.
+                        <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700">
+                          Phone Number
                         </label>
                         <input
                           required
                           type="tel"
                           name="phone"
                           placeholder="+234..."
-                          className="w-full rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 px-4 py-3 text-sm text-zinc-800 dark:text-foreground outline-none focus:border-brand-primary transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
+                          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 transition-all placeholder:text-slate-400 shadow-xs"
                         />
                       </div>
                     </motion.div>
@@ -443,20 +463,20 @@ function RequestContent() {
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                      Address
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700">
+                      Service Address
                     </label>
                     <input
                       required
                       name="address"
                       placeholder="House number, street, area"
-                      className="w-full rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 px-4 py-3 text-sm text-zinc-800 dark:text-foreground outline-none focus:border-brand-primary transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
+                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 transition-all placeholder:text-slate-400 shadow-xs"
                     />
                   </div>
                   {!user && (
                      <div className="space-y-2">
-                       <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                         6-Digit PIN <span className="text-zinc-600 lowercase">(To login later)</span>
+                       <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700">
+                         6-Digit PIN <span className="text-slate-400 font-normal lowercase">(To login later)</span>
                        </label>
                        <input
                          required
@@ -465,13 +485,13 @@ function RequestContent() {
                          maxLength={6}
                          minLength={6}
                          placeholder="e.g. 123456"
-                         className="w-full rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 px-4 py-3 text-sm text-zinc-800 dark:text-foreground outline-none focus:border-brand-primary transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
+                         className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 transition-all placeholder:text-slate-400 shadow-xs"
                        />
                      </div>
                   )}
                 </div>
 
-                <div className="pt-8 border-t border-zinc-200 dark:border-white/5 space-y-8">
+                <div className="pt-8 border-t border-slate-200 space-y-8">
                   <ModernDatePicker 
                     selectedDate={appointmentDate} 
                     onSelect={(date) => setAppointmentDate(date)} 
@@ -481,7 +501,7 @@ function RequestContent() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700">
                     Work Description
                   </label>
                   <textarea
@@ -489,15 +509,15 @@ function RequestContent() {
                     name="details"
                     rows={4}
                     placeholder="Describe the issue. Detailed descriptions help us match the right pro."
-                    className="w-full resize-none rounded-xl border border-zinc-200 dark:border-white/5 bg-zinc-50 dark:bg-zinc-900/50 px-4 py-3.5 text-sm text-zinc-800 dark:text-foreground outline-none transition focus:border-brand-primary focus:bg-zinc-100 dark:focus:bg-zinc-900/80 focus:ring-1 focus:ring-brand-primary placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
+                    className="w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm text-slate-800 outline-none transition focus:border-sky-600 focus:ring-2 focus:ring-sky-100 placeholder:text-slate-400 shadow-xs"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700">
                     Photo of Issue (Optional)
                   </label>
-                  <div className="relative flex flex-col items-center justify-center w-full rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/5 bg-zinc-50 dark:bg-zinc-900/50 p-6 transition-all hover:bg-zinc-100 dark:hover:bg-zinc-900/80 hover:border-brand-primary/40 group">
+                  <div className="relative flex flex-col items-center justify-center w-full rounded-2xl border-2 border-dashed border-slate-200 bg-white p-6 transition-all hover:border-sky-400 hover:bg-sky-50/50 group shadow-xs">
                     {imagePreview ? (
                       <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-black/50">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -509,18 +529,18 @@ function RequestContent() {
                             setImageFile(null); 
                             setImagePreview(null); 
                           }}
-                          className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-background/80 backdrop-blur-md text-foreground hover:bg-red-500 hover:text-white transition-all shadow-premium"
+                          className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 backdrop-blur-md text-slate-800 hover:bg-red-500 hover:text-white transition-all shadow-md"
                         >
                           <X size={14} strokeWidth={3} />
                         </button>
                       </div>
                     ) : (
                       <>
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 group-hover:text-brand-primary group-hover:bg-brand-primary/10 transition-colors mb-3">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-sky-50 text-sky-600 group-hover:bg-sky-600 group-hover:text-white transition-colors mb-3">
                           <Camera size={20} />
                         </div>
-                        <p className="text-sm font-bold text-foreground">Tap to take a photo</p>
-                        <p className="text-[10px] uppercase tracking-widest text-zinc-500 mt-1">or upload from gallery</p>
+                        <p className="text-sm font-bold text-slate-800">Tap to take a photo</p>
+                        <p className="text-[10px] uppercase tracking-widest text-slate-400 mt-1">or upload from gallery</p>
                         <input 
                           type="file" 
                           accept="image/*" 
@@ -540,27 +560,27 @@ function RequestContent() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="flex items-center gap-3 text-sm font-medium text-zinc-600 dark:text-zinc-400 cursor-pointer">
+                  <label className="flex items-center gap-3 text-sm font-medium text-slate-600 cursor-pointer">
                     <input
                       type="checkbox"
                       name="whatsapp"
                       defaultChecked
-                      className="h-4 w-4 rounded border-zinc-300 text-foreground focus:ring-foreground accent-foreground"
+                      className="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500 accent-sky-600"
                     />
                     Contact me on WhatsApp for faster updates
                   </label>
                 </div>
 
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pt-6 border-t border-zinc-100 dark:border-zinc-800">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pt-6 border-t border-slate-200">
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="btn-minimal h-12 w-full sm:w-auto min-w-[200px] rounded-full px-8 text-[11px] font-bold uppercase tracking-[0.2em] shadow-premium hover:shadow-[0_0_20px_rgba(249,115,22,0.4)] disabled:opacity-50 disabled:hover:shadow-none flex items-center justify-center gap-3 transition-all duration-300"
+                    className="h-13 w-full sm:w-auto min-w-[220px] rounded-full px-8 text-xs font-extrabold uppercase tracking-widest bg-sky-600 text-white hover:bg-sky-700 shadow-md shadow-sky-600/25 disabled:opacity-50 flex items-center justify-center gap-3 transition-all hover:scale-105"
                   >
                     {submitting ? (
                       <>
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-background/30 border-t-background" />
-                        Processing
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                        Processing...
                       </>
                     ) : (
                       "Submit Request"
@@ -578,58 +598,51 @@ function RequestContent() {
                   <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="mt-8 rounded-2xl border border-brand-primary/30 bg-brand-primary/5 p-8 shadow-[0_0_30px_rgba(249,115,22,0.1)] relative overflow-hidden"
+                    className="p-8 rounded-3xl bg-white border border-sky-100 shadow-xl"
                   >
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-brand-primary/20 blur-[50px] -mr-16 -mt-16 pointer-events-none" />
-                    
-                    {!paymentCompleted ? (
+                    {paymentDetails.amount > 0 && !paymentCompleted ? (
                       <>
-                        <h3 className="text-2xl font-heading font-extrabold text-foreground tracking-tight">Booking Received!</h3>
-                        <p className="mt-2 text-sm text-zinc-400 font-medium">To finalize your request, please make a bank transfer of <span className="text-brand-primary font-bold">₦{paymentDetails.amount.toLocaleString()}</span> to the account below.</p>
-
-                        <div className="mt-8 rounded-2xl bg-background/40 border border-white/10 p-6 backdrop-blur-md">
-                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                              <div>
-                                 <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Bank Name</p>
-                                 <p className="text-sm font-bold text-foreground">{PAYMENT_ACCOUNT.bankName}</p>
-                              </div>
-                              <div>
-                                 <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Account Number</p>
-                                 <div className="flex items-center gap-3">
-                                    <p className="text-lg font-mono font-black text-brand-primary tracking-widest">{PAYMENT_ACCOUNT.accountNumber}</p>
-                                    <button 
-                                      type="button"
-                                      onClick={() => {
-                                        navigator.clipboard.writeText(PAYMENT_ACCOUNT.accountNumber);
-                                        setCopied(true);
-                                        toast.success("Account number copied!");
-                                        setTimeout(() => setCopied(false), 2000);
-                                      }}
-                                      className="h-8 w-8 flex items-center justify-center rounded-lg bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-500 dark:text-zinc-400 hover:text-brand-primary transition-all"
-                                    >
-                                      {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
-                                    </button>
-                                 </div>
-                              </div>
-                              <div className="sm:col-span-2 pt-4 border-t border-zinc-200 dark:border-white/5">
-                                 <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Account Name</p>
-                                 <p className="text-sm font-bold text-foreground">{PAYMENT_ACCOUNT.accountName}</p>
-                              </div>
-                           </div>
+                        <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+                            <div>
+                              <h3 className="text-xl font-heading font-extrabold text-slate-900">Complete Payment</h3>
+                              <p className="text-xs text-slate-500 font-medium mt-1">Funds are protected in escrow until job completion.</p>
+                            </div>
+                            <div className="text-right">
+                              <span className="text-2xl font-black text-sky-600">₦{paymentDetails.amount.toLocaleString()}</span>
+                            </div>
                         </div>
 
-                        <div className="mt-8 flex flex-col sm:flex-row gap-4">
-                           <a
-                             href={`https://wa.me/2349060002990?text=${encodeURIComponent(`Hi, I just booked a ${selectedService} service (Ref: ${paymentDetails.txRef}).\n\nTotal: ₦${paymentDetails.amount.toLocaleString()}\n\nI've made the transfer. Please confirm.`)}`}
-                             target="_blank"
-                             rel="noopener noreferrer"
-                             className="btn-minimal h-12 rounded-full px-8 flex-1 flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-widest shadow-premium"
-                           >
-                             <MessageCircle size={16} /> Notify via WhatsApp
-                           </a>
+                        <div className="bg-sky-50/70 rounded-2xl p-5 border border-sky-100 space-y-3 mb-6">
+                            <div className="flex justify-between items-center text-xs">
+                              <span className="text-slate-500 font-bold uppercase tracking-wider">Bank Name</span>
+                              <span className="text-slate-900 font-bold">{PAYMENT_ACCOUNT.bankName}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-xs">
+                              <span className="text-slate-500 font-bold uppercase tracking-wider">Account Number</span>
+                              <span className="text-slate-900 font-extrabold font-mono text-sm">{PAYMENT_ACCOUNT.accountNumber}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-xs">
+                              <span className="text-slate-500 font-bold uppercase tracking-wider">Account Name</span>
+                              <span className="text-slate-900 font-bold">{PAYMENT_ACCOUNT.accountName}</span>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard.writeText(PAYMENT_ACCOUNT.accountNumber);
+                                setCopied(true);
+                                setTimeout(() => setCopied(false), 2000);
+                              }}
+                              className="h-12 rounded-full px-6 bg-white border border-slate-200 text-slate-700 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider shadow-xs hover:border-sky-400 hover:text-sky-600 transition-all"
+                            >
+                              {copied ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />}
+                              <span>{copied ? "Copied!" : "Copy Account"}</span>
+                            </button>
                             <Link
                               href="/customer/dashboard"
-                              className="h-12 rounded-full px-8 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 flex-1 flex items-center justify-center text-[11px] font-bold uppercase tracking-widest text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all"
+                              className="h-12 rounded-full px-8 bg-sky-600 text-white flex-1 flex items-center justify-center text-xs font-extrabold uppercase tracking-wider shadow-md shadow-sky-600/25 hover:bg-sky-700 transition-all"
                             >
                               View Dashboard
                             </Link>
@@ -637,13 +650,13 @@ function RequestContent() {
                       </>
                     ) : (
                       <>
-                        <h3 className="text-2xl font-heading font-extrabold text-foreground tracking-tight">Booking Confirmed!</h3>
-                        <p className="mt-2 text-sm text-zinc-400 font-medium">Your request has been successfully recorded and is being processed.</p>
+                        <h3 className="text-2xl font-heading font-extrabold text-slate-900 tracking-tight">Booking Confirmed!</h3>
+                        <p className="mt-2 text-sm text-slate-500 font-medium">Your request has been successfully recorded and is being processed.</p>
                         
                         <div className="mt-8 flex flex-col sm:flex-row gap-4">
                           <Link
                             href="/customer/dashboard"
-                            className="btn-minimal h-12 rounded-xl px-8 flex items-center justify-center text-[11px] font-bold uppercase tracking-[0.2em] w-full sm:w-auto"
+                            className="h-12 rounded-full px-8 bg-sky-600 text-white flex items-center justify-center text-xs font-extrabold uppercase tracking-wider shadow-md shadow-sky-600/25 hover:bg-sky-700 w-full sm:w-auto"
                           >
                             Track Status
                           </Link>
@@ -662,50 +675,52 @@ function RequestContent() {
             transition={{ delay: 0.2 }}
             className="space-y-8"
           >
-            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl glass-panel p-2">
-              <div className="relative w-full h-full rounded-xl overflow-hidden">
-                <Image
-                  src={REQUEST_HERO_IMAGE}
-                  alt="Expert Professional"
-                  fill
-                  priority
-                  className="object-cover scale-[1.05] transition-transform duration-[10s] hover:scale-[1.1]"
-                  sizes="(max-width: 1024px) 100vw, 400px"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-80" />
+            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl bg-white border-4 border-white shadow-xl shadow-sky-950/5">
+              <Image
+                src={REQUEST_HERO_IMAGE}
+                alt="Expert Professional"
+                fill
+                priority
+                className="object-cover object-top scale-[1.02] transition-transform duration-500 hover:scale-105"
+                sizes="(max-width: 1024px) 100vw, 400px"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent opacity-60" />
+              <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-sm border border-sky-100 flex items-center justify-between">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-900">Verified Pros on Duty</span>
+                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">100% Guaranteed</span>
               </div>
             </div>
 
-            <div className="glass-panel p-8">
-              <h2 className="text-[10px] font-bold uppercase tracking-widest text-brand-primary mb-6">
+            <div className="bg-white rounded-3xl p-8 border border-sky-100 shadow-sm">
+              <h2 className="text-xs font-extrabold uppercase tracking-wider text-sky-600 mb-6">
                 How It Works
               </h2>
-              <ol className="space-y-8">
+              <ol className="space-y-6">
                 <li className="flex gap-4 group">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-foreground group-hover:bg-brand-primary group-hover:text-background group-hover:border-brand-primary transition-all duration-300">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-sky-600 font-extrabold text-xs group-hover:bg-sky-600 group-hover:text-white transition-all duration-300 shadow-xs">
                     1
                   </span>
                   <div>
-                    <p className="text-sm font-bold text-foreground group-hover:text-brand-primary transition-colors">Submit Details</p>
-                    <p className="mt-1 text-xs text-zinc-400 font-medium leading-relaxed">Provide the task specifics, upload any photos, and select your preferred timing.</p>
+                    <p className="text-sm font-bold text-slate-900 group-hover:text-sky-600 transition-colors">Submit Details</p>
+                    <p className="mt-1 text-xs text-slate-500 font-medium leading-relaxed">Provide task specifics, upload any photos, and select your preferred date & time.</p>
                   </div>
                 </li>
                 <li className="flex gap-4 group">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-foreground group-hover:bg-brand-primary group-hover:text-background group-hover:border-brand-primary transition-all duration-300">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-sky-600 font-extrabold text-xs group-hover:bg-sky-600 group-hover:text-white transition-all duration-300 shadow-xs">
                     2
                   </span>
                   <div>
-                    <p className="text-sm font-bold text-foreground group-hover:text-brand-primary transition-colors">Match & Confirm</p>
-                    <p className="mt-1 text-xs text-zinc-400 font-medium leading-relaxed">We algorithmically assign an elite professional and confirm transparent pricing directly.</p>
+                    <p className="text-sm font-bold text-slate-900 group-hover:text-sky-600 transition-colors">Match & Confirm</p>
+                    <p className="mt-1 text-xs text-slate-500 font-medium leading-relaxed">We algorithmically assign a vetted pro and confirm transparent pricing directly.</p>
                   </div>
                 </li>
                 <li className="flex gap-4 group">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-foreground group-hover:bg-brand-primary group-hover:text-background group-hover:border-brand-primary transition-all duration-300">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-sky-600 font-extrabold text-xs group-hover:bg-sky-600 group-hover:text-white transition-all duration-300 shadow-xs">
                     3
                   </span>
                   <div>
-                    <p className="text-sm font-bold text-foreground group-hover:text-brand-primary transition-colors">Execution & Review</p>
-                    <p className="mt-1 text-xs text-zinc-400 font-medium leading-relaxed">Fast, reliable resolution of your issue with a 7-day satisfaction guarantee.</p>
+                    <p className="text-sm font-bold text-slate-900 group-hover:text-sky-600 transition-colors">Execution & Review</p>
+                    <p className="mt-1 text-xs text-slate-500 font-medium leading-relaxed">Fast, reliable resolution with escrow protection and 30-day service guarantee.</p>
                   </div>
                 </li>
               </ol>
