@@ -2,32 +2,21 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { LogOut } from "lucide-react";
-import { toast } from "sonner";
+import { useMemo } from "react";
 
 export default function LogoutButton() {
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     try {
-      const toastId = toast.loading("Logging out...");
-      
-      // Perform signOut via Supabase with timeout
-      const signOutPromise = supabase.auth.signOut();
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error("Logout timeout")), 5000)
-      );
-      
-      await Promise.race([signOutPromise, timeoutPromise]);
-
-      toast.success("Logged out", { id: toastId });
-
-      // Using window.location.href is the most reliable way to 
-      // ensure all client-side state, caches, and memory are cleared.
+      if (typeof window !== "undefined") {
+        localStorage.clear();
+        sessionStorage.clear();
+      }
+      // Fire local sign out in background without blocking navigation
+      supabase.auth.signOut({ scope: "local" }).catch(() => {});
       window.location.href = "/";
-      
-    } catch (err) {
-      console.error("Logout error:", err);
-      // Fallback: force redirect to home anyway
+    } catch {
       window.location.href = "/";
     }
   };
@@ -35,11 +24,12 @@ export default function LogoutButton() {
   return (
     <button
       onClick={handleLogout}
-      className="flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] uppercase tracking-widest font-bold text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
+      className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] uppercase tracking-widest font-extrabold text-slate-500 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 transition-all shadow-2xs cursor-pointer"
       title="Logout"
     >
-      <LogOut size={14} />
+      <LogOut size={13} />
       <span>Logout</span>
     </button>
   );
 }
+

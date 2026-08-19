@@ -4,7 +4,6 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import Logo from "@/app/components/Logo";
@@ -14,7 +13,6 @@ export default function CustomerRegisterPage() {
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
   const supabase = createClient();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -50,40 +48,58 @@ export default function CustomerRegisterPage() {
       if (signUpError) throw signUpError;
 
       if (data.user) {
-        // Check if email confirmation is required
-        if (data.user.identities?.length === 0) {
+        // If identities is empty array, it means this email already exists in Supabase
+        if (data.user.identities && data.user.identities.length === 0) {
           setSubmitting(false);
-          toast.success("Account created", {
-            description: "Please check your email to confirm your account before logging in."
+          toast.error("Account already exists", {
+            description: "An account with this email already exists. Please log in."
           });
-          setError("Please check your email to confirm your account. You'll need to click the confirmation link before you can log in.");
-        } else {
+          setError("An account with this email already exists. Please sign in instead.");
+          return;
+        }
+
+        // Auto-provision profile and wallet records in database
+        try {
+          await supabase.from('profiles').upsert({
+            id: data.user.id,
+            full_name: fullName,
+            phone: phone,
+            role: 'customer'
+          });
+
+          await supabase.from('wallets').upsert({
+            user_id: data.user.id,
+            balance: 0
+          });
+        } catch (dbErr) {
+          console.warn("Profile auto-provision note:", dbErr);
+        }
+
+        // If active session returned (auto-confirm or email confirmation disabled)
+        if (data.session) {
           setSubmitting(false);
-          toast.success("Account created successfully", {
+          toast.success("Account created successfully!", {
             description: "Welcome to HomeCare! Redirecting..."
           });
-          setTimeout(() => {
-            router.push('/');
-            router.refresh();
-          }, 1000);
+          window.location.href = "/customer/dashboard";
+          return;
+        } else {
+          // Email confirmation is required by Supabase project settings
+          setSubmitting(false);
+          toast.success("Registration successful!", {
+            description: "Please check your email to confirm your account, then log in."
+          });
+          setError("Account created! A confirmation link was sent to your email. Please click the link to activate your account, or log in.");
         }
       }
     } catch (err: unknown) {
       const errorObj = err as { name?: string; message?: string };
-      // Handle AbortError specifically
-      if (errorObj?.name === 'AbortError' || errorObj?.message?.includes('Lock broken')) {
-        toast.error("Please wait", {
-          description: "Another request is in progress. Please wait a moment and try again."
-        });
-        setError("Please wait a moment before trying again.");
-        setSubmitting(false);
-        return;
-      }
+      console.error("Registration error:", err);
       
       toast.error("Registration failed", {
         description: errorObj?.message || "Failed to create account"
       });
-      setError(errorObj?.message || "Failed to create account. Please try again.");
+      setError(errorObj?.message || "Failed to create account. Please check your credentials and try again.");
     } finally {
       setSubmitting(false);
     }

@@ -107,6 +107,12 @@ export async function GET(req: Request) {
       return NextResponse.redirect(`${origin}/customer/dashboard?payment=success&service=${encodeURIComponent(resolvedOrderRef)}`);
     }
 
+    if (paymentType === "inspection") {
+      return NextResponse.redirect(
+        `${origin}/customer/dashboard?inspection=success&ref=${encodeURIComponent(resolvedOrderRef || "")}&amount=${verifiedAmount}`
+      );
+    }
+
     // Default redirect to order confirmation
     return NextResponse.redirect(
       `${origin}/store/order-confirmation?ref=${encodeURIComponent(resolvedOrderRef || "")}&status=paid&total=${verifiedAmount}`

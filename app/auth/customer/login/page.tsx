@@ -4,7 +4,6 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import Logo from "@/app/components/Logo";
@@ -16,7 +15,6 @@ export default function CustomerLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [unconfirmedEmail, setUnconfirmedEmail] = useState<string | null>(null);
-  const router = useRouter();
   const supabase = createClient();
 
   const handleResendConfirmation = async () => {
@@ -68,13 +66,11 @@ export default function CustomerLoginPage() {
 
       if (data.user) {
         setSubmitting(false);
-        toast.success("Login successful", {
-          description: "Welcome back! Redirecting..."
+        toast.success("Login successful!", {
+          description: "Welcome back! Redirecting to dashboard..."
         });
-        setTimeout(() => {
-          router.push('/');
-          router.refresh();
-        }, 1000);
+        window.location.href = "/customer/dashboard";
+        return;
       } else {
         throw new Error("No user data returned from login");
       }

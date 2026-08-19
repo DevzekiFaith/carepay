@@ -633,25 +633,64 @@ function RequestContent() {
                             </div>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row gap-3">
+                        <div className="flex flex-col gap-3">
                             <button
                               type="button"
-                              onClick={() => {
-                                navigator.clipboard.writeText(PAYMENT_ACCOUNT.accountNumber);
-                                setCopied(true);
-                                setTimeout(() => setCopied(false), 2000);
+                              onClick={async () => {
+                                try {
+                                  toast.loading("Opening Flutterwave Escrow...", { id: "req-flw" });
+                                  const res = await fetch("/api/payment/flutterwave/initialize", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({
+                                      orderRef: paymentDetails.txRef || `REQ-${Date.now().toString(36).toUpperCase()}`,
+                                      amount: paymentDetails.amount,
+                                      email: paymentDetails.email || "customer@homecare.ng",
+                                      name: paymentDetails.name || "HomeCare Customer",
+                                      phone: paymentDetails.phone || "08000000000",
+                                      title: "HomeCare Artisan Escrow Deposit",
+                                      description: `Escrow payment for ${selectedService || "Service Booking"}`,
+                                      type: "service_request",
+                                      userId: user?.id || null,
+                                    }),
+                                  });
+                                  const data = await res.json();
+                                  if (data.success && data.paymentUrl) {
+                                    window.location.href = data.paymentUrl;
+                                  } else {
+                                    toast.error(data.error || "Failed to launch Flutterwave", { id: "req-flw" });
+                                  }
+                                } catch (err: unknown) {
+                                  toast.error(err instanceof Error ? err.message : "Payment error", { id: "req-flw" });
+                                }
                               }}
-                              className="h-12 rounded-full px-6 bg-white border border-slate-200 text-slate-700 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider shadow-xs hover:border-sky-400 hover:text-sky-600 transition-all"
+                              className="h-13 rounded-full bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-sky-600/30 transition-all hover:scale-102 cursor-pointer"
                             >
-                              {copied ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />}
-                              <span>{copied ? "Copied!" : "Copy Account"}</span>
+                              <Zap size={16} className="text-amber-300 fill-amber-300" />
+                              <span>Pay ₦{paymentDetails.amount.toLocaleString()} with Flutterwave</span>
                             </button>
-                            <Link
-                              href="/customer/dashboard"
-                              className="h-12 rounded-full px-8 bg-sky-600 text-white flex-1 flex items-center justify-center text-xs font-extrabold uppercase tracking-wider shadow-md shadow-sky-600/25 hover:bg-sky-700 transition-all"
-                            >
-                              View Dashboard
-                            </Link>
+
+                            <div className="flex gap-3">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(PAYMENT_ACCOUNT.accountNumber);
+                                  setCopied(true);
+                                  toast.success("Account number copied!");
+                                  setTimeout(() => setCopied(false), 2000);
+                                }}
+                                className="h-11 rounded-full px-6 bg-white border border-slate-200 text-slate-700 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider shadow-2xs hover:border-sky-400 hover:text-sky-600 transition-all flex-1"
+                              >
+                                {copied ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />}
+                                <span>{copied ? "Copied!" : "Manual Transfer (Globus)"}</span>
+                              </button>
+                              <Link
+                                href="/customer/dashboard"
+                                className="h-11 rounded-full px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center text-xs font-extrabold uppercase tracking-wider transition-all"
+                              >
+                                Dashboard
+                              </Link>
+                            </div>
                         </div>
                       </>
                     ) : (
