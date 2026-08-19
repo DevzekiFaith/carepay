@@ -99,7 +99,7 @@ export default function HeroSection() {
         >
           <div className="relative w-full max-w-md aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl border-4 border-white/20 bg-blue-900/40">
             <Image
-              src="/hero-tech.jpg"
+              src="/hero-technician-v2.jpg"
               alt="HomeCare Professional Technician"
               fill
               priority

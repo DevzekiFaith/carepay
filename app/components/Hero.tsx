@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 
-const HERO_IMAGE = "/su9.jpg";
+const HERO_IMAGE = "/hero-technician-v2.jpg";
 
 export default function Hero() {
 
