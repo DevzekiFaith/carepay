@@ -36,58 +36,68 @@ export default function PropertyInspectionPage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground antialiased overflow-hidden">
-      {/* Ambience */}
-      <div className="absolute inset-x-0 -top-[20%] -z-10 h-[60%] w-full rounded-full bg-brand-primary/10 blur-[120px] mix-blend-screen pointer-events-none" />
+    <div className="relative min-h-screen bg-slate-50 text-slate-900 antialiased overflow-hidden">
+      {/* Royal Blue Hero Banner */}
+      <section className="relative bg-gradient-to-br from-sky-600 via-blue-600 to-blue-800 text-white pt-12 pb-16 md:pb-20 px-6 rounded-b-[40px] md:rounded-b-[50px] shadow-2xl shadow-blue-900/15 overflow-hidden">
+        <div className="absolute -top-24 -left-24 w-80 h-80 bg-sky-400/20 rounded-full blur-[90px] pointer-events-none" />
+        <div className="absolute top-1/2 -right-24 w-80 h-80 bg-cyan-300/15 rounded-full blur-[100px] pointer-events-none" />
 
-      <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:py-12 lg:py-24 relative z-10 grid gap-10 lg:gap-12 lg:grid-cols-2 lg:items-start">
-        
-        {/* Left: Copy & Value Prop */}
-        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-          <Link href="/customer/dashboard" className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-brand-primary transition-colors w-fit mb-8">
-            <ArrowLeft size={12} /> Dashboard
+        <div className="mx-auto max-w-6xl relative z-10">
+          <Link
+            href="/customer/dashboard"
+            className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-sky-200 hover:text-white transition-colors mb-6 w-fit"
+          >
+            <ArrowLeft size={14} /> Back to Dashboard
           </Link>
 
-          <div className="inline-flex items-center gap-2 rounded-full border border-brand-primary/30 bg-brand-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-primary mb-6 shadow-[0_0_15px_-3px_rgba(249,115,22,0.3)]">
-            <ClipboardCheck size={12} />
-            <span>HomeCare Elite Service</span>
+          <div>
+            <span className="text-[11px] font-bold uppercase tracking-widest text-sky-200 bg-white/10 px-3.5 py-1.5 rounded-full border border-white/20 inline-block mb-3">
+              Elite Engineering Audit
+            </span>
+            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white uppercase">
+              Comprehensive <span className="text-cyan-200">Property Inspection</span>
+            </h1>
+            <p className="mt-2 text-sm sm:text-base text-sky-100/90 font-medium max-w-2xl leading-relaxed">
+              Don&apos;t sign that lease or transfer payment until verified engineers inspect the plumbing, electrical lines, and structural roofing.
+            </p>
           </div>
+        </div>
+      </section>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-extrabold tracking-tight text-white leading-tight">
-            Comprehensive <br/>
-            <span className="text-gradient-primary">Property Inspection</span>
-          </h1>
-          <p className="mt-4 text-base sm:text-lg text-zinc-400 font-medium max-w-lg">
-            Don&apos;t sign that lease or transfer payment until our verified engineers inspect the plumbing, electrical lines, and roofing. Save millions in hidden repair costs.
-          </p>
+      {/* Main Content */}
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10 relative z-10 grid gap-10 lg:gap-12 lg:grid-cols-2 lg:items-start">
+        
+        {/* Left: Value Prop */}
+        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="bg-white rounded-3xl p-8 border border-slate-200 shadow-xs">
+          <h2 className="text-xl font-extrabold text-slate-900 mb-6">Inspection Coverage</h2>
 
-          <div className="mt-8 space-y-4">
+          <div className="space-y-4">
             {[
-              "Complete Electrical Safety Sweep",
-              "Plumbing & Hidden Leak Detection",
-              "Structural & Roof Integrity Check",
-              "Same-day PDF Report Generation"
+              "Complete Electrical Safety & Load Sweep",
+              "Plumbing & Hidden Pipe Leak Detection",
+              "Structural, Dampness & Roof Integrity Check",
+              "Same-day Certified PDF Report Generation"
             ].map((feature, i) => (
               <div key={i} className="flex items-center gap-3">
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-primary/20 text-brand-primary">
-                  <Check size={12} strokeWidth={3} />
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-sky-50 text-sky-600">
+                  <Check size={14} strokeWidth={3} />
                 </div>
-                <span className="text-sm font-medium text-zinc-300">{feature}</span>
+                <span className="text-sm font-semibold text-slate-700">{feature}</span>
               </div>
             ))}
           </div>
 
-          <div className="mt-10 pt-8 border-t border-white/10">
-            <p className="text-[10px] uppercase tracking-widest font-bold text-zinc-500 mb-2">
+          <div className="mt-8 pt-6 border-t border-slate-100">
+            <p className="text-[10px] uppercase tracking-wider font-extrabold text-slate-500 mb-1">
               {propertyType ? "Fixed Pricing" : "Base Pricing"}
             </p>
-            <p className="text-4xl font-heading font-extrabold text-white tracking-tight">
+            <p className="text-4xl font-black text-sky-600 tracking-tight">
               ₦{(propertyType ? PRICING[propertyType] : 50000).toLocaleString()}
             </p>
-            <p className="text-xs text-zinc-400 mt-1">
+            <p className="text-xs text-slate-500 mt-1 font-medium">
               {propertyType 
                 ? `Standard pricing for ${propertyType} inspections.`
-                : "Select a property type to see exact pricing."}
+                : "Select a property type below to see exact pricing."}
             </p>
           </div>
         </motion.div>
@@ -163,7 +173,7 @@ export default function PropertyInspectionPage() {
             )}
           </div>
         </motion.div>
-      </main>
+      </div>
     </div>
   );
 }

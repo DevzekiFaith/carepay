@@ -244,22 +244,38 @@ export default function CustomerWalletPage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-background px-4 py-8 text-foreground antialiased overflow-hidden">
-      {/* Background Ambience */}
-      <div className="absolute inset-x-0 -top-[10%] -z-10 h-[40%] w-full rounded-full bg-brand-primary/10 opacity-60 blur-[100px] mix-blend-screen pointer-events-none" />
+    <div className="relative min-h-screen bg-slate-50 text-slate-900 antialiased overflow-hidden">
+      {/* Royal Blue Hero Banner */}
+      <section className="relative bg-gradient-to-br from-sky-600 via-blue-600 to-blue-800 text-white pt-12 pb-16 md:pb-20 px-6 rounded-b-[40px] md:rounded-b-[50px] shadow-2xl shadow-blue-900/15 overflow-hidden">
+        <div className="absolute -top-24 -left-24 w-80 h-80 bg-sky-400/20 rounded-full blur-[90px] pointer-events-none" />
+        <div className="absolute top-1/2 -right-24 w-80 h-80 bg-cyan-300/15 rounded-full blur-[100px] pointer-events-none" />
 
-      <div className="mx-auto max-w-3xl relative z-10 px-2 sm:px-0">
-        <header className="mb-6 sm:mb-8 flex flex-col gap-4 border-b border-white/10 pb-6">
-          <Link href="/customer/dashboard" className="flex items-center gap-1.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-brand-primary transition-colors w-fit">
-            <ArrowLeft size={12} /> Back to Dashboard
+        <div className="mx-auto max-w-4xl relative z-10">
+          <Link
+            href="/customer/dashboard"
+            className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-sky-200 hover:text-white transition-colors mb-6 w-fit"
+          >
+            <ArrowLeft size={14} /> Back to Dashboard
           </Link>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-heading font-extrabold tracking-tight text-gradient-primary">
-              Wallet
-            </h1>
-            <p className="mt-1 text-[11px] sm:text-sm text-zinc-400 font-medium leading-relaxed">Manage your funds and transaction history securely.</p>
+
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-widest text-sky-200 bg-white/10 px-3.5 py-1.5 rounded-full border border-white/20 inline-block mb-3">
+                Secure Escrow & Payments
+              </span>
+              <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white uppercase">
+                Customer <span className="text-cyan-200">Wallet</span>
+              </h1>
+              <p className="mt-2 text-sm sm:text-base text-sky-100/90 font-medium max-w-md leading-relaxed">
+                Manage your funds, view transactions, and enjoy instant one-tap service checkouts.
+              </p>
+            </div>
           </div>
-        </header>
+        </div>
+      </section>
+
+      {/* Main Wallet Content */}
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-10 relative z-10">
 
         <ErrorAlert 
           error={error} 

@@ -164,40 +164,53 @@ export default function SubscriptionPage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-background px-4 py-8 text-foreground antialiased overflow-hidden">
-      {/* Ambience */}
-      <div className="absolute inset-x-0 -top-[10%] -z-10 h-[40%] w-full rounded-full bg-brand-primary/10 opacity-60 blur-[100px] mix-blend-screen pointer-events-none" />
+    <div className="relative min-h-screen bg-slate-50 text-slate-900 antialiased overflow-hidden">
+      {/* Royal Blue Hero Banner */}
+      <section className="relative bg-gradient-to-br from-sky-600 via-blue-600 to-blue-800 text-white pt-12 pb-16 md:pb-20 px-6 rounded-b-[40px] md:rounded-b-[50px] shadow-2xl shadow-blue-900/15 overflow-hidden">
+        <div className="absolute -top-24 -left-24 w-80 h-80 bg-sky-400/20 rounded-full blur-[90px] pointer-events-none" />
+        <div className="absolute top-1/2 -right-24 w-80 h-80 bg-cyan-300/15 rounded-full blur-[100px] pointer-events-none" />
 
-      <div className="mx-auto max-w-5xl relative z-10">
-        <header className="mb-6 sm:mb-8 flex flex-col items-center text-center gap-4 pb-6">
-          <Link href="/customer/dashboard" className="flex items-center gap-1.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-brand-primary transition-colors absolute left-0 top-0">
-            <ArrowLeft size={12} /> <span className="hidden sm:inline">Dashboard</span>
+        <div className="mx-auto max-w-5xl relative z-10 text-center">
+          <Link
+            href="/customer/dashboard"
+            className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-sky-200 hover:text-white transition-colors mb-6 w-fit mx-auto sm:mx-0"
+          >
+            <ArrowLeft size={14} /> Back to Dashboard
           </Link>
-          <div className="mt-8 sm:mt-12">
-            <h1 className="text-2xl sm:text-4xl font-heading font-extrabold tracking-tight text-gradient-primary">
-              HomeCare Tiers
+
+          <div>
+            <span className="text-[11px] font-bold uppercase tracking-widest text-sky-200 bg-white/10 px-3.5 py-1.5 rounded-full border border-white/20 inline-block mb-3">
+              Membership & Protection
+            </span>
+            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white uppercase">
+              HomeCare <span className="text-cyan-200">Tiers</span>
             </h1>
-            <p className="mt-2 text-[11px] sm:text-sm text-zinc-400 font-medium max-w-md mx-auto leading-relaxed">
-              Choose your location for state-specific pricing and unlock premium benefits.
+            <p className="mt-2 text-sm sm:text-base text-sky-100/90 font-medium max-w-md mx-auto leading-relaxed">
+              Choose your state for customized coverage and unlock unlimited maintenance discounts.
             </p>
           </div>
-          
-          {/* State Selector */}
-          <div className="mt-6 flex flex-wrap justify-center gap-2">
+
+          {/* State Selector Pills */}
+          <div className="mt-8 flex flex-wrap justify-center gap-2">
             {Object.entries(stateNames).map(([key, name]) => (
               <button
                 key={key}
                 onClick={() => setSelectedState(key as keyof typeof statePricing)}
-                className={`px-4 py-2 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all ${
+                className={`px-5 py-2.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider transition-all ${
                   selectedState === key
-                    ? 'bg-brand-primary text-background shadow-premium'
-                    : 'bg-white/5 border border-white/10 text-zinc-400 hover:text-foreground hover:border-white/20'
+                    ? 'bg-sky-400 text-blue-950 shadow-lg shadow-sky-400/25 scale-105'
+                    : 'bg-white/10 border border-white/20 text-sky-100 hover:bg-white/20 hover:text-white'
                 }`}
               >
                 {name}
               </button>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Main Subscription Content */}
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-10 relative z-10">
 
           {/* Payment Period Selector */}
           <div className="mt-4 flex flex-wrap justify-center gap-2">
@@ -224,7 +237,6 @@ export default function SubscriptionPage() {
               </button>
             ))}
           </div>
-        </header>
 
         <ErrorAlert 
           error={error} 

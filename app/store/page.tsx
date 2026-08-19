@@ -58,28 +58,37 @@ export default function StorePage() {
   }, [searchQuery, selectedCategory, sortBy]);
 
   return (
-    <div className="relative min-h-screen bg-slate-50 text-slate-900 antialiased py-8 sm:py-16 overflow-hidden px-4 sm:px-0">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 relative z-10">
-        <header className="mb-12">
+    <div className="relative min-h-screen bg-slate-50 text-slate-900 antialiased overflow-hidden">
+      {/* Royal Blue Hero Banner */}
+      <section className="relative bg-gradient-to-br from-sky-600 via-blue-600 to-blue-800 text-white pt-12 pb-16 md:pb-20 px-6 rounded-b-[40px] md:rounded-b-[50px] shadow-2xl shadow-blue-900/15 overflow-hidden">
+        <div className="absolute -top-24 -left-24 w-80 h-80 bg-sky-400/20 rounded-full blur-[90px] pointer-events-none" />
+        <div className="absolute top-1/2 -right-24 w-80 h-80 bg-cyan-300/15 rounded-full blur-[100px] pointer-events-none" />
+
+        <div className="mx-auto max-w-7xl relative z-10">
           <Link
             href="/"
-            className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-slate-500 hover:text-sky-600 transition-colors mb-6 w-fit"
+            className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-sky-200 hover:text-white transition-colors mb-6 w-fit"
           >
             <ArrowLeft size={14} /> Back to Home
           </Link>
+          
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div>
-              <h1 className="text-3xl sm:text-5xl font-heading font-extrabold tracking-tight text-slate-900 uppercase">
-                HomeCare <span className="text-sky-600">Store</span>
+              <span className="text-[11px] font-bold uppercase tracking-widest text-sky-200 bg-white/10 px-3.5 py-1.5 rounded-full border border-white/20 inline-block mb-3">
+                Original Parts & Fittings
+              </span>
+              <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white uppercase">
+                HomeCare <span className="text-cyan-200">Store</span>
               </h1>
-              <p className="mt-2 text-sm sm:text-base text-slate-500 font-medium max-w-2xl leading-relaxed">
-                Premium certified parts and fittings curated for professional installations. Instant checkout with guaranteed delivery.
+              <p className="mt-2 text-sm sm:text-base text-sky-100/90 font-medium max-w-2xl leading-relaxed">
+                Certified premium parts and fittings curated for professional installations. Instant checkout with guaranteed dispatch.
               </p>
             </div>
+
             <div className="flex items-center gap-3">
-              <div className="bg-white border border-sky-100 shadow-xs rounded-full px-4 py-2.5 flex items-center gap-2.5">
-                <Package size={16} className="text-sky-600" />
-                <span className="text-[11px] font-extrabold uppercase tracking-widest text-slate-700">
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-2.5 flex items-center gap-2.5 text-white">
+                <Package size={16} className="text-cyan-300" />
+                <span className="text-[11px] font-extrabold uppercase tracking-widest text-sky-100">
                   {PRODUCTS.length} Products
                 </span>
               </div>
@@ -87,7 +96,7 @@ export default function StorePage() {
               {/* Cart Button */}
               <button
                 onClick={() => setIsCartOpen(true)}
-                className="relative flex items-center gap-2 px-6 py-2.5 rounded-full bg-sky-600 text-white text-[11px] font-extrabold uppercase tracking-widest hover:bg-sky-700 transition-all shadow-md shadow-sky-600/25"
+                className="relative flex items-center gap-2 px-6 py-2.5 rounded-full bg-sky-400 hover:bg-sky-300 text-blue-950 text-[11px] font-extrabold uppercase tracking-widest transition-all shadow-lg shadow-sky-400/25 hover:scale-105"
               >
                 <ShoppingCart size={16} />
                 {cartCount > 0 ? (
@@ -103,10 +112,11 @@ export default function StorePage() {
               </button>
             </div>
           </div>
-        </header>
+        </div>
+      </section>
 
-        {/* Filters, Search, Sort */}
-        <div className="mb-10 space-y-4">
+      {/* Main Store Catalog Content */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 py-10 relative z-10">
           {/* Category pills + Sort */}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div className="flex flex-wrap gap-2">
@@ -160,7 +170,6 @@ export default function StorePage() {
               className="w-full rounded-full border border-slate-200 bg-white pl-12 pr-6 py-3.5 text-sm text-slate-800 outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 shadow-xs transition-all"
             />
           </div>
-        </div>
 
         {/* Product Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">

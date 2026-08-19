@@ -4,9 +4,8 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Image as ImageIcon, Loader2, Shield, Zap, CheckCircle2 } from "lucide-react";
+import { Image as ImageIcon, Loader2, CheckCircle2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
-import Logo from "@/app/components/Logo";
 import dynamic from "next/dynamic";
 import { X, MessageCircle, Navigation } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
@@ -191,100 +190,109 @@ export default function CustomerDashboardPage() {
   }, [fetchData, supabase]);
 
   return (
-    <div className="relative min-h-screen bg-background px-4 py-8 text-foreground antialiased overflow-hidden">
-      {/* Background Ambience */}
-      <div className="absolute inset-x-0 top-0 -z-10 h-[50%] w-full rounded-full bg-brand-primary/5 opacity-50 blur-[120px] mix-blend-screen pointer-events-none" />
+    <div className="relative min-h-screen bg-slate-50 text-slate-900 antialiased overflow-hidden">
+      {/* Royal Blue Hero Banner */}
+      <section className="relative bg-gradient-to-br from-sky-600 via-blue-600 to-blue-800 text-white pt-12 pb-16 md:pb-20 px-6 rounded-b-[40px] md:rounded-b-[50px] shadow-2xl shadow-blue-900/15 overflow-hidden">
+        <div className="absolute -top-24 -left-24 w-80 h-80 bg-sky-400/20 rounded-full blur-[90px] pointer-events-none" />
+        <div className="absolute top-1/2 -right-24 w-80 h-80 bg-cyan-300/15 rounded-full blur-[100px] pointer-events-none" />
 
-      <div className="mx-auto max-w-5xl relative z-10 px-2 sm:px-0">
-        <header className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/10 pb-6">
-          <div className="flex flex-col gap-4">
-            <Logo size="sm" />
-            <div>
-               <div className="flex items-center gap-2">
-                 <h1 className="text-2xl sm:text-3xl font-heading font-extrabold tracking-tight text-gradient-primary">
-                   Welcome back
-                 </h1>
-                 <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[7px] sm:text-[8px] font-bold uppercase tracking-wider ${
-                   tier === 'elite' ? 'bg-zinc-100 text-black' : 
-                   tier === 'pro' ? 'bg-brand-primary text-background' : 
-                   'bg-white/5 text-zinc-500 border border-white/10'
-                 }`}>
-                   {tier === 'elite' && <Shield size={8} />}
-                   {tier === 'pro' && <Zap size={8} />}
-                   {tier}
-                 </span>
-               </div>
-               <p className="mt-1 text-[11px] sm:text-sm text-zinc-400 font-medium leading-relaxed">
-                 Track your requests, see your history, and manage your account.
-               </p>
+        <div className="mx-auto max-w-5xl relative z-10">
+          <div className="flex items-center justify-between mb-6">
+            <Link
+              href="/"
+              className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-sky-200 hover:text-white transition-colors w-fit"
+            >
+              <ArrowLeft size={14} /> Back to Home
+            </Link>
+            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 text-[11px] font-bold text-sky-100">
+              <span className="capitalize">{tier} Plan</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             </div>
           </div>
-          <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-end text-[10px] sm:text-xs text-zinc-500 border-t border-white/5 sm:border-0 pt-3 sm:pt-0">
-            <p className="font-bold text-foreground capitalize">{tier} {tier !== 'basic' ? 'Member' : 'User'}</p>
-            <p className="uppercase tracking-widest sm:mt-1 text-[8px] sm:text-[9px] font-bold bg-white/5 sm:bg-transparent px-2 py-1 sm:p-0 rounded-full">Active Profile</p>
-          </div>
-        </header>
 
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-widest text-sky-200 bg-white/10 px-3.5 py-1.5 rounded-full border border-white/20 inline-block mb-3">
+                Customer Portal
+              </span>
+              <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white uppercase">
+                Welcome <span className="text-cyan-200">Back</span>
+              </h1>
+              <p className="mt-2 text-sm sm:text-base text-sky-100/90 font-medium max-w-md leading-relaxed">
+                Track your jobs, manage your wallet, and view service warranties.
+              </p>
+            </div>
+
+            {/* Wallet Quick Pill */}
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-5 text-white sm:min-w-[240px]">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-sky-200">Wallet Balance</p>
+              <div className="flex items-baseline justify-between gap-3 mt-1">
+                <p className="text-2xl sm:text-3xl font-black text-white">₦{balance.toLocaleString()}</p>
+                <Link
+                  href="/customer/wallet"
+                  className="px-4 py-1.5 rounded-full bg-sky-400 hover:bg-sky-300 text-blue-950 text-[10px] font-extrabold uppercase tracking-wider transition-all shadow-md shadow-sky-400/25"
+                >
+                  Fund
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Dashboard Content */}
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-10 relative z-10">
         <motion.main
           variants={containerVariants}
           initial="hidden"
           animate="show"
           className="space-y-6"
         >
-          {/* Wallet Summary */}
-          <motion.section variants={itemVariants} className="glass-panel p-4 sm:p-6 shadow-premium flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 border-brand-primary/30 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/10 blur-[50px] -mr-32 -mt-32 pointer-events-none" />
-            <div className="relative z-10 text-center sm:text-left">
-              <p className="text-[9px] sm:text-[10px] uppercase tracking-widest font-bold text-zinc-400">Available Balance</p>
-              <div className="flex items-baseline justify-center sm:justify-start gap-1">
-                <p className="mt-1 text-3xl sm:text-4xl font-heading font-extrabold text-brand-primary tracking-tight">₦{balance.toLocaleString()}</p>
-                <span className="text-lg sm:text-xl text-brand-primary/50 font-heading font-bold">.00</span>
-              </div>
-            </div>
-            <div className="relative z-10 flex items-center gap-3 w-full sm:w-auto mt-2 sm:mt-0">
-              <Link href="/customer/wallet" className="btn-minimal rounded-full px-8 h-12 w-full sm:w-auto text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.2em] flex items-center justify-center">
-                Fund Wallet
-              </Link>
-            </div>
-          </motion.section>
-
           {/* Stats */}
-          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3">
-            <motion.div variants={itemVariants} className="glass-panel p-4 sm:p-6 shadow-premium text-center sm:text-left">
-              <p className="text-[9px] sm:text-[10px] uppercase tracking-widest font-bold text-zinc-500">Total requests</p>
-              <p className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-heading font-extrabold text-foreground">{requests.length}</p>
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+            <motion.div variants={itemVariants} className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs">
+              <p className="text-[10px] uppercase tracking-wider font-extrabold text-slate-500">Total Requests</p>
+              <p className="mt-2 text-3xl font-black text-slate-900">{requests.length}</p>
             </motion.div>
-            <motion.div variants={itemVariants} className="glass-panel p-6 shadow-premium border-brand-primary/20">
-              <p className="text-[10px] uppercase tracking-widest font-bold text-brand-primary">Completed</p>
-              <p className="mt-2 text-3xl font-heading font-extrabold text-foreground">
+            <motion.div variants={itemVariants} className="bg-white rounded-3xl p-6 border border-sky-200 shadow-xs">
+              <p className="text-[10px] uppercase tracking-wider font-extrabold text-sky-600">Completed Jobs</p>
+              <p className="mt-2 text-3xl font-black text-slate-900">
                 {requests.filter(r => r.status?.toLowerCase() === 'completed').length}
               </p>
             </motion.div>
-            <motion.div variants={itemVariants} className="glass-panel p-6 shadow-premium">
-              <p className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">In progress</p>
-              <p className="mt-2 text-3xl font-heading font-extrabold text-foreground">
+            <motion.div variants={itemVariants} className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs">
+              <p className="text-[10px] uppercase tracking-wider font-extrabold text-slate-500">In Progress</p>
+              <p className="mt-2 text-3xl font-black text-slate-900">
                 {requests.filter(r => r.status?.toLowerCase() !== 'completed').length}
               </p>
             </motion.div>
-          </div>          {/* Quick actions */}
-          <motion.section variants={itemVariants} className="glass-panel p-4 sm:p-6 shadow-premium">
-            <h2 className="mb-4 text-[9px] sm:text-[10px] uppercase tracking-widest font-bold text-zinc-400">Quick actions</h2>
-            <div className="grid grid-cols-1 sm:flex sm:flex-wrap gap-3">
+          </div>
+
+          {/* Quick Actions */}
+          <motion.section variants={itemVariants} className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs">
+            <h2 className="mb-4 text-[10px] uppercase tracking-wider font-extrabold text-slate-500">Quick Actions</h2>
+            <div className="flex flex-wrap gap-3">
               <Link
                 href="/request"
-                className="btn-minimal inline-flex items-center justify-center rounded-full px-6 h-12 text-[10px] font-bold uppercase tracking-widest bg-brand-primary text-background sm:bg-transparent sm:text-foreground"
+                className="inline-flex items-center justify-center rounded-full px-6 h-11 text-xs font-extrabold uppercase tracking-wider bg-sky-600 text-white hover:bg-sky-700 shadow-md shadow-sky-600/25 transition-all"
               >
-                New request
+                + Book New Service
+              </Link>
+              <Link
+                href="/store"
+                className="inline-flex items-center justify-center rounded-full px-6 h-11 text-xs font-extrabold uppercase tracking-wider bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 transition-all"
+              >
+                Store & Parts
               </Link>
               <Link
                 href="/customer/subscription"
-                className="inline-flex h-12 items-center justify-center rounded-full border border-brand-primary/30 bg-brand-primary/10 px-6 text-[10px] font-bold uppercase tracking-widest text-brand-primary hover:bg-brand-primary/20 transition-colors"
+                className="inline-flex items-center justify-center rounded-full px-6 h-11 text-xs font-extrabold uppercase tracking-wider bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 transition-all"
               >
-                Subscription Tiers
+                Subscription
               </Link>
               <Link
                 href="/inspection"
-                className="inline-flex h-12 items-center justify-center rounded-full border border-white/10 dark:border-white/5 bg-background/50 backdrop-blur-sm px-6 text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-foreground hover:bg-white/5 transition-colors"
+                className="inline-flex items-center justify-center rounded-full px-6 h-11 text-xs font-extrabold uppercase tracking-wider bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200 transition-all"
               >
                 Property Inspection
               </Link>

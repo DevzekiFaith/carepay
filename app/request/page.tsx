@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 import SurgeBadge from "@/app/components/SurgeBadge";
 import type { SurgeResult } from "@/lib/surge";
 
-import { Wrench, Zap, Hammer, Armchair, Snowflake, Paintbrush, PenTool, Camera, X, Loader2, ShoppingBag, Copy, Check } from "lucide-react";
+import { Wrench, Zap, Hammer, Armchair, Snowflake, Paintbrush, PenTool, Camera, X, Loader2, ShoppingBag, Copy, Check, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import ErrorAlert from "@/app/components/ErrorAlert";
 import ModernDatePicker from "@/app/components/ModernDatePicker";
@@ -246,32 +246,38 @@ function RequestContent() {
   };
 
   return (
-    <div className="relative min-h-screen bg-slate-50 text-slate-900 antialiased py-8 sm:py-20 overflow-hidden px-4 sm:px-0">
-      <div className="mx-auto flex min-w-0 max-w-5xl flex-col px-4 sm:px-6 lg:px-8 relative z-10">
-        <motion.header
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8 sm:mb-12 flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between"
-        >
-          <div className="min-w-0">
-            <span className="text-xs font-bold uppercase tracking-wider text-sky-600 bg-sky-100/70 px-3 py-1 rounded-full border border-sky-200">
-              Verified Artisan Matching
-            </span>
-            <h1 className="text-2xl font-heading font-extrabold tracking-tight text-slate-900 sm:text-4xl uppercase mt-2">
-              Book a <span className="text-sky-600">Professional</span>
-            </h1>
-            <p className="mt-1.5 text-xs sm:text-sm text-slate-500 font-medium max-w-md leading-relaxed">
-              Fastest matching in Nigeria. {user ? "Your details are pre-filled." : "Signup instantly during checkout."}
-            </p>
-          </div>
+    <div className="relative min-h-screen bg-slate-50 text-slate-900 antialiased overflow-hidden">
+      {/* Royal Blue Hero Banner */}
+      <section className="relative bg-gradient-to-br from-sky-600 via-blue-600 to-blue-800 text-white pt-12 pb-16 md:pb-20 px-6 rounded-b-[40px] md:rounded-b-[50px] shadow-2xl shadow-blue-900/15 overflow-hidden">
+        <div className="absolute -top-24 -left-24 w-80 h-80 bg-sky-400/20 rounded-full blur-[90px] pointer-events-none" />
+        <div className="absolute top-1/2 -right-24 w-80 h-80 bg-cyan-300/15 rounded-full blur-[100px] pointer-events-none" />
+
+        <div className="mx-auto max-w-5xl relative z-10">
           <Link
             href="/"
-            className="flex h-10 w-fit items-center justify-center rounded-full border border-slate-200 bg-white px-5 text-[11px] font-extrabold uppercase tracking-widest text-slate-600 hover:text-sky-600 hover:border-sky-300 shadow-xs transition-colors"
+            className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-sky-200 hover:text-white transition-colors mb-6 w-fit"
           >
-            ← Home
+            <ArrowLeft size={14} /> Back to Home
           </Link>
-        </motion.header>
 
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-widest text-sky-200 bg-white/10 px-3.5 py-1.5 rounded-full border border-white/20 inline-block mb-3">
+                Verified Artisan Dispatch
+              </span>
+              <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white uppercase">
+                Book a <span className="text-cyan-200">Professional</span>
+              </h1>
+              <p className="mt-2 text-sm sm:text-base text-sky-100/90 font-medium max-w-md leading-relaxed">
+                Fastest matching in Nigeria. {user ? "Your details are pre-filled." : "Signup instantly during checkout."}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Request Booking Content */}
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-10 relative z-10">
         <main className="grid flex-1 gap-8 sm:gap-12 grid-cols-1 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
           <motion.section
             initial={{ opacity: 0, y: 20 }}
