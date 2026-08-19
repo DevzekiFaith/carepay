@@ -36,9 +36,9 @@ export default function FooterSection() {
           <ul className="space-y-3 text-sm text-sky-200/80">
             <li><Link href="/auth/customer/register" className="hover:text-white transition-colors">Create Account</Link></li>
             <li><Link href="/auth/worker/register" className="hover:text-white transition-colors">Join as a Pro</Link></li>
-            <li><Link href="/inspection" className="hover:text-white transition-colors">Property Inspection</Link></li>
             <li><Link href="/auth/customer/login" className="hover:text-white transition-colors">Customer Login</Link></li>
             <li><Link href="/auth/worker/login" className="hover:text-white transition-colors">Artisan Portal</Link></li>
+            <li><Link href="/admin" className="text-cyan-300 hover:text-white font-bold transition-colors">🔒 Admin Dashboard</Link></li>
           </ul>
         </div>
       </div>

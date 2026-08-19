@@ -120,7 +120,7 @@ export default function Nav() {
               </Link>
               {role === 'admin' && (
                 <Link
-                  href="/admin/dashboard"
+                  href="/admin"
                   className="flex items-center gap-2 rounded-full px-4 py-2 text-[10px] sm:text-[11px] uppercase tracking-widest font-black text-white bg-sky-600 hover:bg-sky-500 transition-all shadow-md shadow-sky-500/20"
                 >
                   <Shield size={14} className="fill-white" />

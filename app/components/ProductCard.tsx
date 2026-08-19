@@ -91,6 +91,15 @@ export default function ProductCard({
             {product.description}
           </p>
 
+          {product.sourceOrigin && (
+            <div className="mt-2.5 flex items-center justify-between text-[10px] text-sky-700 bg-sky-50/80 px-2.5 py-1 rounded-lg border border-sky-100 font-bold">
+              <span className="truncate">⭐ {product.sourceOrigin}</span>
+              {product.warrantyMonths && (
+                <span className="shrink-0 font-extrabold text-emerald-700 ml-1.5">{product.warrantyMonths}m Warranty</span>
+              )}
+            </div>
+          )}
+
           <div className="flex items-center justify-between mt-3">
             {/* Rating */}
             {product.rating ? (

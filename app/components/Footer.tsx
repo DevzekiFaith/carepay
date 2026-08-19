@@ -69,6 +69,11 @@ export default function Footer() {
                   WhatsApp Support
                 </a>
               </li>
+              <li>
+                <Link href="/admin" className="text-sky-600 hover:text-sky-700 font-bold transition-colors">
+                  🔒 Admin Portal
+                </Link>
+              </li>
             </ul>
           </div>
         </div>

@@ -22,7 +22,15 @@ export default function StorePage() {
   const [sortBy, setSortBy] = useState<SortOption>("default");
   const { cartCount, cartTotal, setIsCartOpen } = useCart();
 
-  const categories = ["All", "Plumbing", "Electrical", "Carpentry", "General"];
+  const categories = [
+    "All",
+    "Smart Security",
+    "Smart Climate",
+    "Smart Cleaning",
+    "Smart Lighting",
+    "Smart Kitchen",
+    "Smart Automation"
+  ];
 
   const filteredProducts = useMemo(() => {
     let results = PRODUCTS.filter((product) => {
@@ -75,13 +83,13 @@ export default function StorePage() {
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div>
               <span className="text-[11px] font-bold uppercase tracking-widest text-sky-200 bg-white/10 px-3.5 py-1.5 rounded-full border border-white/20 inline-block mb-3">
-                Original Parts & Fittings
+                Grade A Smart Home Appliances · Direct China Sourcing
               </span>
               <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white uppercase">
-                HomeCare <span className="text-cyan-200">Store</span>
+                HomeCare <span className="text-cyan-200">Smart Store</span>
               </h1>
               <p className="mt-2 text-sm sm:text-base text-sky-100/90 font-medium max-w-2xl leading-relaxed">
-                Certified premium parts and fittings curated for professional installations. Instant checkout with guaranteed dispatch.
+                Premium IoT appliances, robotic vacuums, biometric security, and climate automation with pro installation support.
               </p>
             </div>
 
