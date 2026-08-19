@@ -14,13 +14,13 @@ const PRO_IMAGES = [
 ];
 
 const SERVICES = [
-  { label: "Plumber", icon: Wrench, price: "₦15,000 Start", time: "2-4 hrs" },
-  { label: "Electrician", icon: Zap, price: "₦18,000 Start", time: "2-5 hrs" },
-  { label: "Carpenter", icon: Hammer, price: "₦20,000 Start", time: "3-6 hrs" },
-  { label: "Furniture Maker", icon: Armchair, price: "₦25,000 Start", time: "4-8 hrs" },
-  { label: "AC & Fridge Repair", icon: Snowflake, price: "₦20,000 Start", time: "2-4 hrs" },
-  { label: "Painter", icon: Paintbrush, price: "₦22,000 Start", time: "4-8 hrs" },
-  { label: "General Handyman", icon: PenTool, price: "₦15,000 Start", time: "2-5 hrs" },
+  { label: "Plumber", icon: Wrench, price: "₦15,000 Start", time: "2-4 hrs", image: "/services/plumber.jpg" },
+  { label: "Electrician", icon: Zap, price: "₦18,000 Start", time: "2-5 hrs", image: "/services/electrician.jpg" },
+  { label: "Carpenter", icon: Hammer, price: "₦20,000 Start", time: "3-6 hrs", image: "/services/carpenter.jpg" },
+  { label: "Furniture Maker", icon: Armchair, price: "₦25,000 Start", time: "4-8 hrs", image: "/services/furniture.jpg" },
+  { label: "AC & Fridge Repair", icon: Snowflake, price: "₦20,000 Start", time: "2-4 hrs", image: "/services/ac-repair.jpg" },
+  { label: "Painter", icon: Paintbrush, price: "₦22,000 Start", time: "4-8 hrs", image: "/services/painter.jpg" },
+  { label: "General Handyman", icon: PenTool, price: "₦15,000 Start", time: "2-5 hrs", image: "/services/handyman.jpg" },
 ];
 
 const JOBS_COMPLETED = 85;

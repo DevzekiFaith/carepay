@@ -2,14 +2,15 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Zap, ShieldCheck } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight, ShieldCheck, CheckCircle2, Clock } from "lucide-react";
 
 export default function HeroSection() {
   const containerVariants = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
-      transition: { staggerChildren: 0.15, delayChildren: 0.2 },
+      transition: { staggerChildren: 0.12, delayChildren: 0.1 },
     },
   };
 
@@ -19,63 +20,110 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative min-h-[90vh] flex flex-col items-center justify-center px-6 pt-24 pb-12 overflow-hidden">
-      {/* Dynamic Background Elements */}
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-brand-primary/15 rounded-full blur-[120px] mix-blend-screen pointer-events-none animate-pulse" />
-      <div className="absolute bottom-[10%] right-[-10%] w-[40%] h-[40%] bg-rose-500/10 rounded-full blur-[120px] mix-blend-screen pointer-events-none animate-pulse" style={{ animationDelay: '1s' }} />
+    <section className="relative bg-gradient-to-br from-sky-600 via-blue-600 to-blue-800 text-white pt-16 pb-32 lg:pb-36 px-6 overflow-hidden rounded-b-[40px] md:rounded-b-[60px] shadow-2xl shadow-blue-900/20">
+      {/* Ambient background glows */}
+      <div className="absolute -top-32 -left-32 w-96 h-96 bg-sky-400/20 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/2 -right-32 w-96 h-96 bg-cyan-300/15 rounded-full blur-[120px] pointer-events-none" />
 
-      <motion.div 
-        variants={containerVariants}
-        initial="hidden"
-        animate="show"
-        className="max-w-3xl w-full text-center relative z-10 flex flex-col items-center"
-      >
-        <motion.div variants={itemVariants} className="mb-6 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
-          <Zap size={14} className="text-brand-primary" />
-          <span>Flash Match Technology</span>
-        </motion.div>
-
-        <motion.h1 variants={itemVariants} className="text-3xl sm:text-4xl md:text-6xl font-extrabold text-foreground mb-6 leading-[1.15] tracking-tight">
-          Find Vetted Home Service Pros in <span className="text-brand-primary">Minutes.</span>
-        </motion.h1>
-
-        <motion.p variants={itemVariants} className="text-sm sm:text-base md:text-lg font-medium text-zinc-400 max-w-xl mx-auto leading-relaxed mb-8 sm:mb-10 lg:px-0 px-2">
-          Connecting you to skilled workers, service providers, and artisans instantly. 
-          Snap a photo, get a match, and fix your home with absolute confidence.
-        </motion.p>
-
-        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
-          <Link
-            href="/auth/customer/register"
-            className="w-full sm:w-auto h-14 px-8 rounded-full bg-brand-primary text-foreground flex items-center justify-center gap-3 text-sm font-bold uppercase tracking-[0.2em] shadow-[0_0_30px_rgba(249,115,22,0.3)] hover:shadow-[0_0_50px_rgba(249,115,22,0.5)] transition-all hover:scale-105"
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center relative z-10">
+        
+        {/* Left Column: Headlines & CTA */}
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+          className="lg:col-span-7 flex flex-col items-start text-left"
+        >
+          <motion.div 
+            variants={itemVariants} 
+            className="mb-4 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[11px] font-bold uppercase tracking-widest text-sky-200"
           >
-            Get Started <ArrowRight size={18} />
-          </Link>
-          <Link
-            href="/auth/worker/login"
-            className="w-full sm:w-auto h-14 px-8 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 flex items-center justify-center text-sm font-bold uppercase tracking-[0.2em] text-zinc-300 transition-colors"
+            <ShieldCheck size={15} className="text-cyan-300" />
+            <span>Verified Local Professionals</span>
+          </motion.div>
+
+          <motion.h1 
+            variants={itemVariants} 
+            className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tight text-white leading-[1.1] mb-6 uppercase"
           >
-            Provide Help
-          </Link>
+            Fast & Reliable <br />
+            <span className="text-cyan-200">Home Care</span> Repairs
+          </motion.h1>
+
+          <motion.p 
+            variants={itemVariants} 
+            className="text-base sm:text-lg text-sky-100/90 font-medium max-w-xl leading-relaxed mb-8"
+          >
+            Direct connection to verified plumbers, electricians, carpenters, and repair specialists. Rapid dispatch, transparent pricing, and quality guaranteed before payment is released.
+          </motion.p>
+
+          {/* Action Buttons */}
+          <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
+            <Link
+              href="/request"
+              className="w-full sm:w-auto h-14 px-8 rounded-full bg-sky-400 hover:bg-sky-300 text-blue-950 flex items-center justify-center gap-3 text-xs sm:text-sm font-extrabold uppercase tracking-widest shadow-lg shadow-sky-400/30 hover:scale-105 transition-all"
+            >
+              Request a Service <ArrowRight size={18} />
+            </Link>
+            <Link
+              href="/store"
+              className="w-full sm:w-auto h-14 px-8 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center text-xs sm:text-sm font-bold uppercase tracking-widest transition-colors backdrop-blur-sm"
+            >
+              Browse Parts Store
+            </Link>
+          </motion.div>
+
+          {/* Trust badges */}
+          <motion.div variants={itemVariants} className="mt-8 flex flex-wrap items-center gap-6 text-xs font-semibold text-sky-100/90">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 size={16} className="text-cyan-300" />
+              <span>100% Vetted Artisans</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock size={16} className="text-cyan-300" />
+              <span>15 Min Avg Arrival</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <ShieldCheck size={16} className="text-cyan-300" />
+              <span>Escrow Protected</span>
+            </div>
+          </motion.div>
         </motion.div>
 
-        <motion.div variants={itemVariants} className="flex items-center gap-2 mt-6">
-          <ShieldCheck size={16} className="text-emerald-500" />
-          <span className="text-xs font-semibold text-emerald-500 uppercase tracking-wider">All providers physically verified</span>
-        </motion.div>
+        {/* Right Column: Hero Visual with Technician */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="lg:col-span-5 relative flex justify-center"
+        >
+          <div className="relative w-full max-w-md aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl border-4 border-white/20 bg-blue-900/40">
+            <Image
+              src="/hero-tech.jpg"
+              alt="HomeCare Professional Technician"
+              fill
+              priority
+              className="object-cover object-top"
+              sizes="(max-width: 768px) 100vw, 450px"
+            />
+            
+            {/* Gradient overlay at bottom */}
+            <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-blue-950/80 via-blue-950/20 to-transparent" />
 
-        <motion.div variants={itemVariants} className="mt-16 text-zinc-500 text-[11px] font-bold uppercase tracking-widest flex items-center gap-4">
-          <div className="flex -space-x-3">
-             {[1,2,3,4].map((i) => (
-                <div key={i} className="w-8 h-8 rounded-full border-2 border-background bg-zinc-800 flex items-center justify-center text-xs">
-                  {['T','A','O','K'][i-1]}
-                </div>
-             ))}
+            {/* Floating pro status pill */}
+            <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-sky-100">
+              <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white shrink-0 shadow-md">
+                <CheckCircle2 size={20} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-slate-900 truncate">Verified Professional on Duty</p>
+                <p className="text-[10px] text-emerald-600 font-semibold uppercase tracking-wider">Ready for instant dispatch</p>
+              </div>
+            </div>
           </div>
-          <p>Join 10,000+ satisfied users</p>
         </motion.div>
 
-      </motion.div>
+      </div>
     </section>
   );
 }

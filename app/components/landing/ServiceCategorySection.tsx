@@ -1,65 +1,144 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Wrench, Sparkles, Home, Truck, Scissors, Zap, Droplet, Monitor } from "lucide-react";
+import Link from "next/link";
+import { Wrench, Sparkles, Home, Zap, Droplet, ArrowRight } from "lucide-react";
 
-const categories = [
-  { name: "Plumbing", icon: <Droplet size={20} className="text-zinc-400 group-hover:text-brand-primary transition-colors" /> },
-  { name: "Electrical", icon: <Zap size={20} className="text-zinc-400 group-hover:text-brand-primary transition-colors" /> },
-  { name: "AC & Fridge", icon: <Monitor size={20} className="text-zinc-400 group-hover:text-brand-primary transition-colors" /> },
-  { name: "Cleaning", icon: <Sparkles size={20} className="text-zinc-400 group-hover:text-brand-primary transition-colors" /> },
-  { name: "Carpentry", icon: <Home size={20} className="text-zinc-400 group-hover:text-brand-primary transition-colors" /> },
-  { name: "Haulage & Movers", icon: <Truck size={20} className="text-zinc-400 group-hover:text-brand-primary transition-colors" />, comingSoon: true },
-  { name: "Beauty & Makeup", icon: <Scissors size={20} className="text-zinc-400 group-hover:text-brand-primary transition-colors" /> },
-  { name: "Auto Mechanic", icon: <Wrench size={20} className="text-zinc-400 group-hover:text-brand-primary transition-colors" />, comingSoon: true },
-  { name: "Generator Repair", icon: <Zap size={20} className="text-zinc-400 group-hover:text-brand-primary transition-colors" /> },
-  { name: "Fumigation", icon: <Sparkles size={20} className="text-zinc-400 group-hover:text-brand-primary transition-colors" />, comingSoon: true },
-  { name: "Appliance Repair", icon: <Monitor size={20} className="text-zinc-400 group-hover:text-brand-primary transition-colors" />, comingSoon: true },
-  { name: "Painting", icon: <Droplet size={20} className="text-zinc-400 group-hover:text-brand-primary transition-colors" /> },
+const heroCards = [
+  {
+    title: "Leak Repair",
+    desc: "Fast diagnosis and emergency fixes for leaking pipes, faucets, drainage systems, and toilet cisterns.",
+    icon: Droplet,
+    color: "bg-sky-500",
+    badgeColor: "bg-sky-100 text-sky-700",
+    isFeatured: false,
+    link: "/request?category=plumbing",
+  },
+  {
+    title: "Pipe Fixing",
+    desc: "Complete pipeline installation, high-pressure fittings, valve swaps, and water tank connections.",
+    icon: Wrench,
+    color: "bg-blue-600",
+    badgeColor: "bg-blue-100 text-blue-700",
+    isFeatured: false,
+    link: "/request?category=plumbing",
+  },
+  {
+    title: "Drain Cleaning",
+    desc: "Heavy-duty unclogging for kitchens, bathrooms, inspection chambers, and underground drainage channels.",
+    icon: Sparkles,
+    color: "bg-cyan-400",
+    badgeColor: "bg-cyan-100 text-cyan-900",
+    isFeatured: true, // Vibrant featured card like in Pinterest reference
+    link: "/request?category=plumbing",
+  },
+];
+
+const secondaryCategories = [
+  { name: "Electrical & Wiring", icon: Zap, count: "120+ Pros", link: "/request?category=electrical" },
+  { name: "AC & Refrigeration", icon: Sparkles, count: "85+ Pros", link: "/request?category=ac" },
+  { name: "Carpentry & Furniture", icon: Home, count: "90+ Pros", link: "/request?category=carpentry" },
+  { name: "Painting & Masonry", icon: Droplet, count: "65+ Pros", link: "/request?category=painting" },
+  { name: "Generator Repair", icon: Zap, count: "70+ Pros", link: "/request?category=generator" },
+  { name: "General Handyman", icon: Wrench, count: "150+ Pros", link: "/request?category=general" },
 ];
 
 export default function ServiceCategorySection() {
   return (
-    <section className="py-24 px-6 bg-zinc-950/50 border-y border-white/5 relative z-10 overflow-hidden">
-      <div className="absolute top-[-20%] right-[-10%] w-[30%] h-[30%] bg-brand-primary/5 rounded-full blur-[120px] pointer-events-none" />
-      
-      <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Over 20+ Service Categories</h2>
-            <p className="text-zinc-400 max-w-xl text-sm md:text-base">We&apos;ve expanded our platform. From quick home fixes to heavy lifting and personal grooming, find any expert you need.</p>
-          </div>
-          <button className="h-12 px-6 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 transition-colors text-xs font-bold uppercase tracking-widest text-white whitespace-nowrap">
-            View All Services
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {categories.map((category, index) => (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
+    <section className="relative z-20 px-6 -mt-20 md:-mt-24 pb-20">
+      <div className="max-w-7xl mx-auto">
+        
+        {/* 3 Floating Cards Directly from Pinterest Reference */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mb-20">
+          {heroCards.map((card, idx) => (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.05 }}
-              key={index} 
-              className={`relative flex flex-col items-start rounded-2xl border transition-all duration-300 overflow-hidden text-left p-4 sm:p-5 group ${category.comingSoon ? "bg-white/5 border-white/5 opacity-75 grayscale cursor-not-allowed" : "bg-white/5 border-white/10 hover:border-brand-primary/30 hover:bg-white/10 cursor-pointer"}`}
+              transition={{ delay: idx * 0.15, duration: 0.5 }}
+              whileHover={{ y: -8 }}
+              className={`rounded-3xl p-8 transition-all duration-300 flex flex-col justify-between relative overflow-hidden ${
+                card.isFeatured
+                  ? "bg-gradient-to-b from-sky-600 to-blue-700 text-white shadow-2xl shadow-sky-600/30 border border-sky-400/30"
+                  : "bg-white text-slate-900 shadow-xl shadow-slate-200/60 border border-sky-100/80 hover:border-sky-300"
+              }`}
             >
-              <div className="flex w-full items-start justify-between mb-2">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-xl transition-colors ${category.comingSoon ? "bg-white/5 border-white/5" : "bg-white/5 border border-white/5 group-hover:bg-brand-primary/20 group-hover:border-brand-primary/30"}`}>
-                  <div className={category.comingSoon ? "" : "group-hover:scale-110 transition-transform"}>
-                    {category.icon}
-                  </div>
+              <div>
+                {/* Top Icon Circle */}
+                <div
+                  className={`w-16 h-16 rounded-full flex items-center justify-center mb-6 shadow-md ${
+                    card.isFeatured ? "bg-white text-sky-600" : "bg-sky-50 text-sky-600"
+                  }`}
+                >
+                  <card.icon size={28} />
                 </div>
-                {category.comingSoon && (
-                  <span className="text-[8px] font-bold uppercase tracking-widest text-brand-primary bg-brand-primary/10 border border-brand-primary/20 px-2 py-1 rounded-full whitespace-nowrap ml-2 mt-1">
-                    Waitlist
-                  </span>
-                )}
+
+                <h3 className={`text-2xl font-extrabold mb-3 ${card.isFeatured ? "text-white" : "text-slate-900"}`}>
+                  {card.title}
+                </h3>
+
+                <p className={`text-sm leading-relaxed mb-6 font-medium ${card.isFeatured ? "text-sky-100" : "text-slate-500"}`}>
+                  {card.desc}
+                </p>
               </div>
-              <h3 className={`font-bold text-sm mt-3 ${category.comingSoon ? "text-zinc-500" : "text-foreground group-hover:text-brand-primary transition-colors"}`}>{category.name}</h3>
+
+              <Link
+                href={card.link}
+                className={`inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest pt-4 border-t transition-colors ${
+                  card.isFeatured
+                    ? "border-white/20 text-cyan-200 hover:text-white"
+                    : "border-slate-100 text-sky-600 hover:text-sky-700"
+                }`}
+              >
+                <span>Book Service</span>
+                <ArrowRight size={14} />
+              </Link>
             </motion.div>
           ))}
         </div>
+
+        {/* Secondary Category Grid */}
+        <div className="bg-white rounded-3xl p-8 sm:p-12 shadow-xl shadow-slate-200/50 border border-sky-100">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-sky-600 bg-sky-50 px-3 py-1 rounded-full border border-sky-100">
+                Full Service Coverage
+              </span>
+              <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 mt-2">
+                Explore All Home Repair Categories
+              </h2>
+            </div>
+            <Link
+              href="/request"
+              className="inline-flex items-center gap-2 text-xs font-bold text-sky-600 hover:text-sky-700 uppercase tracking-widest"
+            >
+              <span>View All Services</span>
+              <ArrowRight size={14} />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {secondaryCategories.map((item, i) => (
+              <Link
+                key={i}
+                href={item.link}
+                className="group p-5 rounded-2xl bg-slate-50 hover:bg-sky-50 border border-slate-100 hover:border-sky-200 transition-all flex flex-col items-center text-center"
+              >
+                <div className="w-12 h-12 rounded-xl bg-white group-hover:bg-sky-600 text-sky-600 group-hover:text-white shadow-xs flex items-center justify-center mb-3 transition-colors">
+                  <item.icon size={22} />
+                </div>
+                <h4 className="text-xs font-bold text-slate-800 group-hover:text-sky-700 transition-colors">
+                  {item.name}
+                </h4>
+                <span className="text-[10px] text-slate-400 font-semibold mt-1">
+                  {item.count}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+
       </div>
     </section>
   );

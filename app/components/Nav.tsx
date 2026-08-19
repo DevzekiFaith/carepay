@@ -83,20 +83,20 @@ export default function Nav() {
 
   return (
     <nav
-      className="sticky top-0 z-50 border-b border-zinc-200/50 dark:border-zinc-800/50 bg-background/50 backdrop-blur-xl transition-all"
+      className="sticky top-0 z-50 border-b border-sky-100 bg-white/90 backdrop-blur-xl transition-all shadow-xs"
       aria-label="Main"
     >
-      <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-brand-primary/20 to-transparent" />
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-6 lg:px-12 relative z-10">
+      <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-sky-500/20 to-transparent" />
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-12 relative z-10">
         <Logo 
           size="sm" 
           href="/" 
           className="transition-opacity hover:opacity-80"
           aria-label="HomeCare home"
         />
-        <div className="flex items-center gap-2 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-3">
           {loading ? (
-            <div className="h-8 w-20 animate-pulse rounded-full bg-zinc-100 dark:bg-zinc-800/50" />
+            <div className="h-8 w-20 animate-pulse rounded-full bg-sky-50" />
           ) : (
             <>
               {user ? (
@@ -104,7 +104,7 @@ export default function Nav() {
                   {pathname !== "/" && (
                     <Link
                       href="/customer/wallet"
-                      className="hidden md:flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] uppercase tracking-widest font-bold text-zinc-500 hover:text-brand-primary hover:bg-brand-primary/10 transition-colors"
+                      className="hidden md:flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] uppercase tracking-widest font-bold text-slate-600 hover:text-sky-600 hover:bg-sky-50 transition-colors"
                       title="Your Wallet"
                     >
                       <Wallet size={14} />
@@ -113,14 +113,14 @@ export default function Nav() {
                   )}
                   <Link
                     href="/customer/dashboard"
-                    className="hidden md:flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] uppercase tracking-widest font-bold text-zinc-500 hover:text-brand-primary hover:bg-brand-primary/10 transition-colors"
+                    className="hidden md:flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] uppercase tracking-widest font-bold text-slate-600 hover:text-sky-600 hover:bg-sky-50 transition-colors"
                   >
                     <LayoutDashboard size={14} />
                     <span className="hidden sm:inline">Dashboard</span>
                   </Link>
                   <Link
                     href="/customer/subscription"
-                    className="hidden lg:flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] uppercase tracking-widest font-bold text-zinc-500 hover:text-brand-primary hover:bg-brand-primary/10 transition-colors"
+                    className="hidden lg:flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] uppercase tracking-widest font-bold text-slate-600 hover:text-sky-600 hover:bg-sky-50 transition-colors"
                     title="Manage Tiers"
                   >
                     <ShieldCheck size={14} />
@@ -129,10 +129,10 @@ export default function Nav() {
                   {role === 'admin' && (
                     <Link
                       href="/admin/dashboard"
-                      className="flex items-center gap-2 rounded-full px-4 py-2 text-[10px] sm:text-[11px] uppercase tracking-widest font-black text-white bg-orange-600 hover:bg-orange-500 transition-all shadow-[0_0_20px_rgba(234,88,12,0.3)] animate-pulse hover:animate-none"
+                      className="flex items-center gap-2 rounded-full px-4 py-2 text-[10px] sm:text-[11px] uppercase tracking-widest font-black text-white bg-sky-600 hover:bg-sky-500 transition-all shadow-md shadow-sky-500/20"
                     >
                       <Shield size={14} className="fill-white" />
-                      <span>Admin Panel</span>
+                      <span>Admin</span>
                     </Link>
                   )}
                   <div className="hidden md:block">
@@ -142,7 +142,7 @@ export default function Nav() {
               ) : (
                 <Link
                   href="/auth/customer/login"
-                  className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] uppercase tracking-widest font-bold text-zinc-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
+                  className="flex items-center gap-1.5 rounded-full px-4 py-2 text-[11px] uppercase tracking-widest font-bold text-sky-700 hover:text-sky-800 bg-sky-50 hover:bg-sky-100 border border-sky-200 transition-colors"
                 >
                   <span>Login</span>
                 </Link>
@@ -152,21 +152,21 @@ export default function Nav() {
 
           <Link
             href="/store"
-            className="hidden md:flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] uppercase tracking-widest font-bold text-zinc-500 hover:text-brand-primary hover:bg-brand-primary/10 transition-colors mr-1"
+            className="hidden md:flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] uppercase tracking-widest font-bold text-slate-600 hover:text-sky-600 hover:bg-sky-50 transition-colors mr-1"
           >
-            <Zap size={14} className="text-brand-primary" />
+            <Zap size={14} className="text-sky-600" />
             <span>Store</span>
           </Link>
 
           {/* Cart Icon */}
           <button
             onClick={() => setIsCartOpen(true)}
-            className="relative flex items-center justify-center h-10 w-10 rounded-full border border-white/10 bg-white/5 text-zinc-400 hover:text-brand-primary hover:border-brand-primary/30 hover:bg-brand-primary/10 transition-all mr-1"
+            className="relative flex items-center justify-center h-10 w-10 rounded-full border border-sky-100 bg-sky-50/60 text-slate-600 hover:text-sky-600 hover:border-sky-300 hover:bg-sky-100/60 transition-all mr-1"
             title="Shopping Cart"
           >
             <ShoppingCart size={16} />
             {cartCount > 0 && (
-              <span suppressHydrationWarning className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-brand-primary text-background text-[9px] font-extrabold ring-2 ring-background animate-in zoom-in duration-200">
+              <span suppressHydrationWarning className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-sky-600 text-white text-[9px] font-extrabold ring-2 ring-white animate-in zoom-in duration-200 shadow-xs">
                 {cartCount > 9 ? "9+" : cartCount}
               </span>
             )}
@@ -174,7 +174,7 @@ export default function Nav() {
 
           <Link
             href="/request"
-            className="btn-minimal flex items-center rounded-full px-4 sm:px-6 py-2.5 text-xs font-bold uppercase tracking-widest shadow-premium"
+            className="flex items-center rounded-full px-4 sm:px-6 py-2.5 text-xs font-bold uppercase tracking-widest bg-sky-600 hover:bg-sky-700 text-white shadow-md shadow-sky-600/30 transition-all hover:scale-105"
           >
             {user ? "New Request" : "Book Now"}
           </Link>

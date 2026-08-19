@@ -35,21 +35,21 @@ export default function ProductCard({
   };
 
   return (
-    <div className="group relative flex h-full flex-col justify-between rounded-3xl border border-zinc-200 dark:border-white/5 bg-white/50 dark:bg-background/40 backdrop-blur-xl p-4 transition-all duration-500 hover:-translate-y-1.5 hover:bg-white dark:hover:bg-background/60 hover:border-brand-primary/40 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] dark:hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] overflow-hidden">
+    <div className="group relative flex h-full flex-col justify-between rounded-3xl border border-sky-100 bg-white p-4 transition-all duration-500 hover:-translate-y-1.5 hover:border-sky-300 hover:shadow-xl hover:shadow-sky-500/10 overflow-hidden">
       {/* Background Gradient Glow */}
-      <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/5 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 pointer-events-none" />
 
       {/* Badge */}
       {product.badge && (
         <div
-          className={`absolute top-5 right-5 z-20 px-3 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border backdrop-blur-md shadow-sm transition-transform duration-300 group-hover:scale-105 flex items-center gap-1 ${
+          className={`absolute top-5 right-5 z-20 px-3 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border shadow-xs transition-transform duration-300 group-hover:scale-105 flex items-center gap-1 ${
             product.badge === "Best Seller"
-              ? "bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400"
+              ? "bg-amber-50 border-amber-200 text-amber-700"
               : product.badge === "New"
-              ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+              ? "bg-emerald-50 border-emerald-200 text-emerald-700"
               : product.badge === "Hot Deal"
-              ? "bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400"
-              : "bg-violet-500/10 border-violet-500/20 text-violet-600 dark:text-violet-400"
+              ? "bg-rose-50 border-rose-200 text-rose-700"
+              : "bg-sky-50 border-sky-200 text-sky-700"
           }`}
         >
           {product.badge === "Hot Deal" && <Sparkles size={10} className="mr-0.5" />}
@@ -58,7 +58,7 @@ export default function ProductCard({
       )}
 
       <div className="relative z-10 flex flex-col flex-grow">
-        <div className="relative aspect-[4/3] sm:aspect-square w-full overflow-hidden rounded-2xl bg-zinc-100 dark:bg-white/5 shrink-0 flex items-center justify-center group/image">
+        <div className="relative aspect-[4/3] sm:aspect-square w-full overflow-hidden rounded-2xl bg-slate-50 shrink-0 flex items-center justify-center group/image border border-slate-100">
           {!imgError ? (
             <Image
               src={product.image}
@@ -67,30 +67,27 @@ export default function ProductCard({
               priority={priority}
               unoptimized={product.image.startsWith("http")}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-1"
+              className="object-cover transition-all duration-700 group-hover:scale-105"
               onError={() => setImgError(true)}
             />
           ) : (
-            <div className="flex flex-col items-center justify-center gap-3 text-zinc-400 dark:text-zinc-600">
+            <div className="flex flex-col items-center justify-center gap-3 text-slate-400">
               <ShoppingBag size={48} strokeWidth={1} className="opacity-50" />
               <span className="text-[10px] font-bold uppercase tracking-widest opacity-70">Image Pending</span>
             </div>
           )}
-          
-          {/* Subtle Image Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
           {/* Category Tag */}
-          <div className="absolute top-3 left-3 z-20 px-2.5 py-1 rounded-lg bg-white/90 dark:bg-black/60 backdrop-blur-md border border-zinc-200 dark:border-white/10 text-[9px] font-bold uppercase tracking-widest text-zinc-800 dark:text-zinc-200 shadow-sm transition-transform duration-300 group-hover:-translate-y-0.5">
+          <div className="absolute top-3 left-3 z-20 px-2.5 py-1 rounded-lg bg-white/90 backdrop-blur-md border border-slate-200 text-[9px] font-bold uppercase tracking-widest text-slate-700 shadow-xs">
             {product.category}
           </div>
         </div>
 
         <div className="mt-4 flex flex-col flex-grow">
-          <h3 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-brand-primary transition-colors line-clamp-1">
+          <h3 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-sky-600 transition-colors line-clamp-1">
             {product.name}
           </h3>
-          <p className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed flex-grow">
+          <p className="mt-1.5 text-xs text-slate-500 line-clamp-2 leading-relaxed flex-grow">
             {product.description}
           </p>
 
@@ -106,22 +103,22 @@ export default function ProductCard({
                       className={
                         star <= Math.round(product.rating!)
                           ? "text-amber-400 fill-amber-400"
-                          : "text-zinc-300 dark:text-zinc-700"
+                          : "text-slate-200"
                       }
                     />
                   ))}
                 </div>
-                <span className="text-[10px] text-zinc-500 dark:text-zinc-400 font-medium">
+                <span className="text-[10px] text-slate-500 font-medium">
                   {product.rating} <span className="opacity-70">({product.reviewCount})</span>
                 </span>
               </div>
             ) : (
-              <div /> // Spacer if no rating
+              <div />
             )}
 
             {/* Stock indicator */}
             {product.stock !== undefined && product.stock <= 20 && (
-              <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400">
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-rose-50 text-rose-600">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500"></span>
@@ -136,9 +133,9 @@ export default function ProductCard({
       </div>
 
       {/* Price and Actions */}
-      <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-white/5 relative z-10">
-        <p suppressHydrationWarning className="text-lg sm:text-xl font-black text-zinc-900 dark:text-zinc-100 mb-4 flex items-start">
-          <span className="text-brand-primary text-xs sm:text-sm mr-0.5 font-bold mt-1">
+      <div className="mt-4 pt-4 border-t border-slate-100 relative z-10">
+        <p suppressHydrationWarning className="text-lg sm:text-xl font-extrabold text-slate-900 mb-4 flex items-start">
+          <span className="text-sky-600 text-xs sm:text-sm mr-0.5 font-bold mt-1">
             ₦
           </span>
           {product.price.toLocaleString()}
@@ -150,8 +147,8 @@ export default function ProductCard({
             onClick={() => onAddStep(product)}
             className={`w-full flex items-center justify-center gap-2 h-10 rounded-xl border transition-all duration-300 text-[10px] font-bold uppercase tracking-widest ${
               isAdded
-                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 shadow-sm"
-                : "border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 hover:border-brand-primary/50 hover:text-brand-primary hover:bg-brand-primary/5 active:scale-[0.98]"
+                ? "bg-emerald-50 border-emerald-200 text-emerald-700 shadow-xs"
+                : "border-slate-200 bg-slate-50 text-slate-700 hover:border-sky-400 hover:text-sky-600 hover:bg-sky-50 active:scale-[0.98]"
             }`}
           >
             {isAdded ? (
@@ -173,24 +170,24 @@ export default function ProductCard({
           <div className="flex flex-col gap-2">
             {quantity > 0 ? (
               <div className="flex items-center flex-1 w-full h-11">
-                <div className="flex items-center w-full h-full justify-between rounded-xl border border-brand-primary/30 bg-brand-primary/5 p-1 shadow-inner">
+                <div className="flex items-center w-full h-full justify-between rounded-xl border border-sky-200 bg-sky-50/60 p-1 shadow-inner">
                   <button
                     onClick={() =>
                       quantity === 1
                         ? removeFromCart(product.id)
                         : updateQuantity(product.id, quantity - 1)
                     }
-                    className="flex h-full aspect-square items-center justify-center rounded-lg bg-white dark:bg-background text-zinc-600 dark:text-zinc-400 hover:text-rose-500 transition-all shadow-sm hover:shadow active:scale-95 border border-zinc-200 dark:border-white/5"
+                    className="flex h-full aspect-square items-center justify-center rounded-lg bg-white text-slate-700 hover:text-rose-600 transition-all shadow-xs active:scale-95 border border-slate-200"
                     aria-label="Decrease quantity"
                   >
                     <Minus size={16} strokeWidth={2.5} />
                   </button>
-                  <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 select-none w-8 text-center tabular-nums">
+                  <span className="text-sm font-bold text-slate-900 select-none w-8 text-center tabular-nums">
                     {quantity}
                   </span>
                   <button
                     onClick={() => updateQuantity(product.id, quantity + 1)}
-                    className="flex h-full aspect-square items-center justify-center rounded-lg bg-brand-primary text-white hover:bg-brand-primary/90 transition-all shadow-sm hover:shadow active:scale-95"
+                    className="flex h-full aspect-square items-center justify-center rounded-lg bg-sky-600 text-white hover:bg-sky-700 transition-all shadow-xs active:scale-95"
                     aria-label="Increase quantity"
                   >
                     <Plus size={16} strokeWidth={2.5} />
@@ -200,7 +197,7 @@ export default function ProductCard({
             ) : (
               <button
                 onClick={handleAddToCart}
-                className="group/btn relative w-full overflow-hidden flex items-center justify-center gap-2 h-11 rounded-xl bg-brand-primary text-white text-[11px] font-bold uppercase tracking-wider transition-all hover:bg-brand-primary/90 hover:shadow-[0_8px_20px_-6px_rgba(249,115,22,0.5)] active:scale-[0.98]"
+                className="group/btn relative w-full overflow-hidden flex items-center justify-center gap-2 h-11 rounded-xl bg-sky-600 text-white text-[11px] font-bold uppercase tracking-wider transition-all hover:bg-sky-700 shadow-md shadow-sky-600/20 active:scale-[0.98]"
               >
                 {justAdded ? (
                   <>
@@ -211,17 +208,15 @@ export default function ProductCard({
                   <>
                     <ShoppingCart size={16} className="transition-transform duration-300 group-hover/btn:-rotate-12 group-hover/btn:scale-110" />
                     <span>Add to Cart</span>
-                    {/* Shine Effect */}
-                    <div className="absolute inset-0 -translate-x-[150%] bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-1000 group-hover/btn:translate-x-[150%] skew-x-12" />
                   </>
                 )}
               </button>
             )}
-            {/* View Cart / Checkout button — only visible when item is in cart */}
+            {/* View Cart / Checkout button */}
             {quantity > 0 && (
               <button
                 onClick={() => setIsCartOpen(true)}
-                className="w-full flex items-center justify-center gap-1.5 h-10 rounded-xl border border-brand-primary/30 bg-brand-primary/5 text-[10px] font-bold uppercase tracking-widest text-brand-primary hover:bg-brand-primary/10 active:scale-[0.98] transition-all"
+                className="w-full flex items-center justify-center gap-1.5 h-10 rounded-xl border border-sky-200 bg-sky-50 text-[10px] font-bold uppercase tracking-widest text-sky-700 hover:bg-sky-100 active:scale-[0.98] transition-all"
               >
                 <ShoppingCart size={12} />
                 <span>View Cart & Checkout</span>

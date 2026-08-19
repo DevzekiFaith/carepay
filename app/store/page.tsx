@@ -58,33 +58,28 @@ export default function StorePage() {
   }, [searchQuery, selectedCategory, sortBy]);
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground antialiased py-8 sm:py-20 overflow-hidden px-4 sm:px-0">
-      {/* Background Ambience */}
-      <div className="absolute inset-x-0 -top-[20%] -z-10 h-[60%] w-full rounded-full bg-brand-primary/5 opacity-40 blur-[120px] mix-blend-screen pointer-events-none" />
-
+    <div className="relative min-h-screen bg-slate-50 text-slate-900 antialiased py-8 sm:py-16 overflow-hidden px-4 sm:px-0">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 relative z-10">
         <header className="mb-12">
           <Link
             href="/"
-            className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-brand-primary transition-colors mb-6 w-fit"
+            className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-slate-500 hover:text-sky-600 transition-colors mb-6 w-fit"
           >
             <ArrowLeft size={14} /> Back to Home
           </Link>
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div>
-              <h1 className="text-3xl sm:text-5xl font-heading font-extrabold tracking-tight text-gradient-primary">
-                HomeCare Store
+              <h1 className="text-3xl sm:text-5xl font-heading font-extrabold tracking-tight text-slate-900 uppercase">
+                HomeCare <span className="text-sky-600">Store</span>
               </h1>
-              <p className="mt-2 text-sm sm:text-lg text-zinc-400 font-medium max-w-2xl leading-relaxed">
-                Premium parts and fittings curated for professional
-                installations. Browse, add to cart, and checkout — no account
-                needed.
+              <p className="mt-2 text-sm sm:text-base text-slate-500 font-medium max-w-2xl leading-relaxed">
+                Premium certified parts and fittings curated for professional installations. Instant checkout with guaranteed delivery.
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <div className="glass-panel px-4 py-2 flex items-center gap-3">
-                <Package size={16} className="text-brand-primary" />
-                <span className="text-[10px] font-bold uppercase tracking-widest">
+              <div className="bg-white border border-sky-100 shadow-xs rounded-full px-4 py-2.5 flex items-center gap-2.5">
+                <Package size={16} className="text-sky-600" />
+                <span className="text-[11px] font-extrabold uppercase tracking-widest text-slate-700">
                   {PRODUCTS.length} Products
                 </span>
               </div>
@@ -92,7 +87,7 @@ export default function StorePage() {
               {/* Cart Button */}
               <button
                 onClick={() => setIsCartOpen(true)}
-                className="relative flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-primary text-background text-[10px] font-bold uppercase tracking-widest hover:bg-brand-primary/90 transition-all shadow-lg shadow-brand-primary/20"
+                className="relative flex items-center gap-2 px-6 py-2.5 rounded-full bg-sky-600 text-white text-[11px] font-extrabold uppercase tracking-widest hover:bg-sky-700 transition-all shadow-md shadow-sky-600/25"
               >
                 <ShoppingCart size={16} />
                 {cartCount > 0 ? (
@@ -101,7 +96,7 @@ export default function StorePage() {
                   <span>Cart</span>
                 )}
                 {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-background text-[9px] font-extrabold ring-2 ring-background">
+                  <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-slate-900 text-white text-[9px] font-extrabold ring-2 ring-white">
                     {cartCount}
                   </span>
                 )}
@@ -119,10 +114,10 @@ export default function StorePage() {
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
-                  className={`px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
+                  className={`px-5 py-2.5 rounded-full text-[11px] font-extrabold uppercase tracking-widest transition-all ${
                     selectedCategory === category
-                      ? "bg-brand-primary text-background shadow-lg shadow-brand-primary/20"
-                      : "glass-panel glass-panel-hover text-zinc-400"
+                      ? "bg-sky-600 text-white shadow-md shadow-sky-600/25 scale-105"
+                      : "bg-white text-slate-600 border border-slate-200 hover:border-sky-300 hover:bg-sky-50 shadow-xs"
                   }`}
                 >
                   {category}
@@ -133,14 +128,14 @@ export default function StorePage() {
             <div className="flex items-center gap-3">
               {/* Sort */}
               <div className="relative">
-                <div className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-white/10 bg-white/5 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
-                  <ArrowUpDown size={12} />
+                <div className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-slate-200 bg-white text-[11px] font-bold uppercase tracking-widest text-slate-700 shadow-xs">
+                  <ArrowUpDown size={13} className="text-sky-600" />
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as SortOption)}
-                    className="bg-transparent outline-none text-foreground cursor-pointer appearance-none pr-4"
+                    className="bg-transparent outline-none text-slate-800 cursor-pointer appearance-none pr-4 text-xs"
                   >
-                    <option value="default">Default</option>
+                    <option value="default">Default Sorting</option>
                     <option value="price-asc">Price: Low → High</option>
                     <option value="price-desc">Price: High → Low</option>
                     <option value="rating">Top Rated</option>
@@ -154,15 +149,15 @@ export default function StorePage() {
           {/* Search */}
           <div className="relative w-full lg:max-w-md">
             <Search
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500"
-              size={16}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+              size={17}
             />
             <input
               type="text"
-              placeholder="Search premium parts..."
+              placeholder="Search fittings, pipes, cables, tools..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-full border border-white/10 bg-white/5 pl-12 pr-6 py-3.5 text-sm text-foreground outline-none focus:border-brand-primary transition-all"
+              className="w-full rounded-full border border-slate-200 bg-white pl-12 pr-6 py-3.5 text-sm text-slate-800 outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 shadow-xs transition-all"
             />
           </div>
         </div>
@@ -175,8 +170,8 @@ export default function StorePage() {
         </div>
 
         {filteredProducts.length === 0 && (
-          <div className="py-20 text-center">
-            <p className="text-zinc-500 font-medium">
+          <div className="py-20 text-center bg-white rounded-3xl border border-slate-100 p-8">
+            <p className="text-slate-500 font-medium">
               No products found matching your search.
             </p>
           </div>
@@ -191,7 +186,7 @@ export default function StorePage() {
           >
             <button
               onClick={() => setIsCartOpen(true)}
-              className="w-full flex items-center justify-between px-6 py-4 rounded-2xl bg-brand-primary text-background shadow-[0_0_30px_rgba(249,115,22,0.4)] active:scale-[0.98] transition-transform"
+              className="w-full flex items-center justify-between px-6 py-4 rounded-2xl bg-sky-600 text-white shadow-lg shadow-sky-600/30 active:scale-[0.98] transition-transform"
             >
               <div className="flex items-center gap-3">
                 <ShoppingCart size={18} />
@@ -201,7 +196,7 @@ export default function StorePage() {
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-extrabold">₦{cartTotal.toLocaleString()}</span>
-                <span className="text-[10px] font-bold uppercase tracking-widest opacity-70">Checkout →</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest opacity-80">Checkout →</span>
               </div>
             </button>
           </motion.div>

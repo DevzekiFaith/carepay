@@ -2,49 +2,53 @@
 
 import Link from "next/link";
 import Logo from "../Logo";
+import { ShieldCheck, Phone, Mail, MapPin } from "lucide-react";
 
 export default function FooterSection() {
   return (
-    <footer className="bg-background pt-24 pb-12 px-6 border-t border-white/5 relative z-10 w-full overflow-hidden">
-      <div className="absolute top-0 left-[20%] w-[30%] h-[100%] bg-brand-primary/5 blur-[150px] pointer-events-none" />
-      
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-16 relative z-10">
+    <footer className="bg-gradient-to-b from-sky-900 via-blue-950 to-blue-950 text-white pt-20 pb-12 px-6 relative z-10 w-full overflow-hidden">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-16 relative z-10">
         <div className="md:col-span-2">
           <Logo size="md" className="mb-6" />
-          <p className="text-zinc-500 text-sm max-w-sm leading-relaxed mb-6">
-            Connecting you to vetted home service professionals, artisans, and repair experts in minutes. Book it. Fix it. Done.
+          <p className="text-sky-200/80 text-sm max-w-sm leading-relaxed mb-6">
+            Connecting you to verified home repair professionals, plumbers, electricians, and artisans in minutes. Fast & Reliable.
           </p>
-          <div className="space-y-2 text-sm text-zinc-400">
-            <p>+234 706 994 8802</p>
-            <p>info@homecare.com</p>
-            <p>Enugu, Nigeria</p>
+          <div className="space-y-2.5 text-sm text-sky-100/90 font-medium">
+            <p className="flex items-center gap-2"><Phone size={15} className="text-cyan-400" /> +234 706 994 8802</p>
+            <p className="flex items-center gap-2"><Mail size={15} className="text-cyan-400" /> support@homecare.ng</p>
+            <p className="flex items-center gap-2"><MapPin size={15} className="text-cyan-400" /> Lagos · Enugu · Abeokuta, Nigeria</p>
           </div>
         </div>
 
         <div>
-          <h4 className="text-white font-bold mb-6 tracking-widest uppercase text-xs">Platform</h4>
-          <ul className="space-y-4 text-sm text-zinc-500">
-            <li><Link href="/auth/customer/register" className="hover:text-brand-primary transition-colors">Users Options</Link></li>
-            <li><Link href="/auth/worker/register" className="hover:text-brand-primary transition-colors">Professional Sign Up</Link></li>
-            <li><Link href="#" className="hover:text-brand-primary transition-colors">Services</Link></li>
-            <li><Link href="#" className="hover:text-brand-primary transition-colors">Contact Support</Link></li>
+          <h4 className="text-white font-bold mb-6 tracking-widest uppercase text-xs">Services</h4>
+          <ul className="space-y-3 text-sm text-sky-200/80">
+            <li><Link href="/request?category=plumbing" className="hover:text-white transition-colors">Plumbing & Leak Repairs</Link></li>
+            <li><Link href="/request?category=electrical" className="hover:text-white transition-colors">Electrical & Wiring</Link></li>
+            <li><Link href="/request?category=ac" className="hover:text-white transition-colors">AC & Refrigeration</Link></li>
+            <li><Link href="/request?category=carpentry" className="hover:text-white transition-colors">Carpentry & Furniture</Link></li>
+            <li><Link href="/store" className="hover:text-white transition-colors">Parts & Fittings Store</Link></li>
           </ul>
         </div>
 
         <div>
-          <h4 className="text-white font-bold mb-6 tracking-widest uppercase text-xs">Company</h4>
-          <ul className="space-y-4 text-sm text-zinc-500">
-            <li><Link href="#" className="hover:text-brand-primary transition-colors">About Us</Link></li>
-            <li><Link href="#" className="hover:text-brand-primary transition-colors">Privacy Policy</Link></li>
-            <li><Link href="#" className="hover:text-brand-primary transition-colors">Terms of Service</Link></li>
-            <li><Link href="#" className="hover:text-brand-primary transition-colors">FAQs</Link></li>
+          <h4 className="text-white font-bold mb-6 tracking-widest uppercase text-xs">Platform</h4>
+          <ul className="space-y-3 text-sm text-sky-200/80">
+            <li><Link href="/auth/customer/register" className="hover:text-white transition-colors">Create Account</Link></li>
+            <li><Link href="/auth/worker/register" className="hover:text-white transition-colors">Join as a Pro</Link></li>
+            <li><Link href="/inspection" className="hover:text-white transition-colors">Property Inspection</Link></li>
+            <li><Link href="/auth/customer/login" className="hover:text-white transition-colors">Customer Login</Link></li>
+            <li><Link href="/auth/worker/login" className="hover:text-white transition-colors">Artisan Portal</Link></li>
           </ul>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-bold text-zinc-600 uppercase tracking-widest relative z-10">
+      <div className="max-w-7xl mx-auto pt-8 border-t border-sky-800/60 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-semibold text-sky-300 uppercase tracking-widest relative z-10">
         <p>© {new Date().getFullYear()} HomeCare Technologies. All rights reserved.</p>
-        <p>Built for Nigeria.</p>
+        <div className="flex items-center gap-2 text-cyan-300">
+          <ShieldCheck size={16} />
+          <span>100% Escrow Protection Guaranteed</span>
+        </div>
       </div>
     </footer>
   );

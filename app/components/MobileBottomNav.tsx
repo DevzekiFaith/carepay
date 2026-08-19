@@ -96,7 +96,7 @@ export default function MobileBottomNav() {
   }
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-[60] bg-white/90 dark:bg-zinc-950/90 backdrop-blur-xl border-t border-zinc-200 dark:border-zinc-800 px-4 pb-safe-area-inset-bottom">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-[60] bg-white/95 backdrop-blur-xl border-t border-sky-100 px-4 pb-safe-area-inset-bottom shadow-lg">
       <div className="flex items-center justify-between h-16">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
@@ -105,7 +105,7 @@ export default function MobileBottomNav() {
               key={item.href}
               href={item.href}
               className={`flex flex-col items-center justify-center gap-1 transition-colors ${
-                isActive ? "text-brand-primary" : "text-zinc-500 hover:text-zinc-300"
+                isActive ? "text-sky-600 font-extrabold" : "text-slate-500 hover:text-slate-900"
               }`}
             >
               <item.icon 
@@ -121,11 +121,11 @@ export default function MobileBottomNav() {
         {/* Cart button */}
         <button
           onClick={() => setIsCartOpen(true)}
-          className="relative flex flex-col items-center justify-center gap-1 text-zinc-500 hover:text-brand-primary transition-colors"
+          className="relative flex flex-col items-center justify-center gap-1 text-slate-500 hover:text-sky-600 transition-colors"
         >
           <ShoppingCart size={20} />
           {cartCount > 0 && (
-            <span suppressHydrationWarning className="absolute -top-1 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-brand-primary text-background text-[8px] font-extrabold">
+            <span suppressHydrationWarning className="absolute -top-1 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-sky-600 text-white text-[8px] font-extrabold">
               {cartCount > 9 ? "9+" : cartCount}
             </span>
           )}
@@ -135,7 +135,7 @@ export default function MobileBottomNav() {
         {user && (
           <button
             onClick={handleLogout}
-            className="flex flex-col items-center justify-center gap-1 text-zinc-500 hover:text-rose-500 transition-colors"
+            className="flex flex-col items-center justify-center gap-1 text-slate-500 hover:text-rose-600 transition-colors"
           >
             <LogOut size={20} />
             <span className="text-[9px] font-bold uppercase tracking-widest">Logout</span>
