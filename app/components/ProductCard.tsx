@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import { ShoppingCart, Plus, Check, Minus, Star, ShoppingBag, Sparkles } from "lucide-react";
 import { Product } from "@/lib/products";
@@ -58,7 +59,7 @@ export default function ProductCard({
       )}
 
       <div className="relative z-10 flex flex-col flex-grow">
-        <div className="relative aspect-[4/3] sm:aspect-square w-full overflow-hidden rounded-2xl bg-slate-50 shrink-0 flex items-center justify-center group/image border border-slate-100">
+        <Link href={`/store/${product.id}`} className="block relative aspect-[4/3] sm:aspect-square w-full overflow-hidden rounded-2xl bg-slate-50 shrink-0 flex items-center justify-center group/image border border-slate-100 cursor-pointer">
           {!imgError ? (
             <Image
               src={product.image}
@@ -81,12 +82,14 @@ export default function ProductCard({
           <div className="absolute top-3 left-3 z-20 px-2.5 py-1 rounded-lg bg-white/90 backdrop-blur-md border border-slate-200 text-[9px] font-bold uppercase tracking-widest text-slate-700 shadow-xs">
             {product.category}
           </div>
-        </div>
+        </Link>
 
         <div className="mt-4 flex flex-col flex-grow">
-          <h3 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-sky-600 transition-colors line-clamp-1">
-            {product.name}
-          </h3>
+          <Link href={`/store/${product.id}`}>
+            <h3 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-sky-600 transition-colors line-clamp-1 hover:underline">
+              {product.name}
+            </h3>
+          </Link>
           <p className="mt-1.5 text-xs text-slate-500 line-clamp-2 leading-relaxed flex-grow">
             {product.description}
           </p>
