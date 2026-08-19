@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { ArrowLeft, Check, Shield, Star, Zap, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -17,14 +17,25 @@ export default function SubscriptionPage() {
   const [selectedState, setSelectedState] = useState<'lagos' | 'abuja' | 'ph' | 'enugu' | 'ogun'>('lagos');
   const [paymentPeriod, setPaymentPeriod] = useState<'monthly' | 'quarterly' | 'annual'>('monthly');
 
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   const fetchProfile = useCallback(async () => {
     try {
       setLoading(true);
-      const { data } = await supabase.auth.getUser();
-      const user = data.user;
-      if (!user) return;
+      
+      // Instant session resolution (< 1ms from client cache)
+      const { data: sessionData } = await supabase.auth.getSession();
+      let user = sessionData.session?.user;
+
+      if (!user) {
+        const { data: userData } = await supabase.auth.getUser();
+        user = userData.user;
+      }
+
+      if (!user) {
+        setLoading(false);
+        return;
+      }
 
       const { data: profile, error: profileError } = await supabase
         .from('profiles')

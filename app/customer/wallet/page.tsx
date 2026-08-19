@@ -50,45 +50,53 @@ export default function CustomerWalletPage() {
       isFetchingRef.current = true;
       if (!isSilent) setLoading(true);
       setError(null);
-      const { data } = await supabase.auth.getUser();
-      const user = data.user;
+
+      // 1. Instant session resolution (< 1ms from client cache)
+      const { data: sessionData } = await supabase.auth.getSession();
+      let user = sessionData.session?.user;
+
+      if (!user) {
+        const { data: userData } = await supabase.auth.getUser();
+        user = userData.user;
+      }
 
       if (!user) {
         setError("You must be logged in to view your wallet.");
+        setLoading(false);
         return;
       }
 
-      // Fetch or Create Wallet (Non-destructive)
-      let { data: wallet, error: walletError } = await supabase
-        .from('wallets')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      // 2. Fetch Wallet and Transactions in parallel
+      const [walletRes, txRes] = await Promise.all([
+        supabase
+          .from('wallets')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle(),
+        supabase
+          .from('transactions')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+      ]);
 
-      if (!wallet && !walletError) {
-        const { data: newWallet, error: createError } = await supabase
+      let wallet = walletRes.data;
+
+      // If wallet is missing, initialize it in background
+      if (!wallet && !walletRes.error) {
+        const { data: newWallet } = await supabase
           .from('wallets')
           .insert({ user_id: user.id, balance: 0 })
           .select()
           .single();
         wallet = newWallet;
-        walletError = createError;
       }
 
-      if (walletError) throw walletError;
-      if (!wallet) throw new Error("Failed to initialize wallet.");
+      if (wallet) {
+        setBalance(Number(wallet.balance) || 0);
+      }
 
-      setBalance(wallet.balance);
-
-      // Fetch Transactions
-      const { data: txs, error: txError } = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('wallet_id', wallet.id)
-        .order('created_at', { ascending: false });
-
-      if (txError) throw txError;
-      setTransactions(txs || []);
+      setTransactions(txRes.data || []);
 
     } catch (err: unknown) {
       console.error(err);

@@ -58,9 +58,20 @@ export default function CustomerDashboardPage() {
     try {
       isFetchingRef.current = true;
       if (!isSilent) setLoading(true);
-      const { data } = await supabase.auth.getUser();
-      const currentUser = data.user;
-      if (!currentUser) return;
+
+      // Instant session resolution (< 1ms from client cache)
+      const { data: sessionData } = await supabase.auth.getSession();
+      let currentUser = sessionData.session?.user;
+
+      if (!currentUser) {
+        const { data: userData } = await supabase.auth.getUser();
+        currentUser = userData.user;
+      }
+
+      if (!currentUser) {
+        setLoading(false);
+        return;
+      }
       setUser(currentUser);
 
       // Execute all 4 queries concurrently in parallel

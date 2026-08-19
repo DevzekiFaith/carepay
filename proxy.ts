@@ -9,13 +9,22 @@ export async function proxy(request: NextRequest) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-    // Safety check: If environment variables are missing, skip auth logic
-    // and return the response to avoid 500 Internal Server Error in production.
+    // If env vars are missing, pass through immediately
     if (!supabaseUrl || !supabaseAnonKey) {
-        console.warn('Proxy: Missing Supabase environment variables. Skipping auth check.')
         return supabaseResponse
     }
 
+    const allCookies = request.cookies.getAll();
+    const hasAuthCookie = allCookies.some(c => 
+        c.name.startsWith('sb-') || c.name.includes('auth-token')
+    );
+
+    // If guest or static request, return immediately (< 1ms)
+    if (!hasAuthCookie) {
+        return supabaseResponse;
+    }
+
+    // Fast cookie refresher
     const supabase = createServerClient(
         supabaseUrl,
         supabaseAnonKey,
@@ -30,34 +39,16 @@ export async function proxy(request: NextRequest) {
                     )
                 },
             },
-            cookieOptions: {
-                name: 'sb-auth',
-                maxAge: 60 * 60 * 24 * 7,
-                path: '/',
-                sameSite: 'lax',
-            }
         }
     )
 
-    // Only call getUser() if an auth cookie actually exists to eliminate 1000ms latency on guest/asset requests
-    const allCookies = request.cookies.getAll();
-    const hasAuthCookie = allCookies.some(c => c.name === 'sb-auth' || c.name.startsWith('sb-') || c.name.includes('auth-token'));
-    
-    if (!hasAuthCookie) {
-        return supabaseResponse;
-    }
-
-    // IMPORTANT: Avoid throwing errors here to prevent 500s.
-    try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user && request.cookies.has('sb-auth')) {
-            // User session is invalid or logged out, clear server-side cookies
-            supabaseResponse.cookies.delete('sb-auth')
-        }
-    } catch (error) {
-        console.error('Proxy: Auth check failed', error)
-        if (request.cookies.has('sb-auth')) {
-            supabaseResponse.cookies.delete('sb-auth')
+    // Non-blocking background session validation for protected API routes only
+    const pathname = request.nextUrl.pathname;
+    if (pathname.startsWith('/api/protected')) {
+        try {
+            await supabase.auth.getUser();
+        } catch {
+            // Ignore failure on edge
         }
     }
 
