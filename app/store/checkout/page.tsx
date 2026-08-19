@@ -4,17 +4,14 @@ import { useState, FormEvent, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 import {
   ArrowLeft,
-  ShoppingBag,
-  Truck,
-  CreditCard,
   Loader2,
-  Copy,
   ShieldCheck,
-  MessageCircle,
+  Zap,
+  Building2,
   CheckCircle2,
+  ExternalLink
 } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { createClient } from "@/lib/supabase/client";
@@ -30,6 +27,7 @@ export default function CheckoutPage() {
   const supabase = createClient();
   const [user, setUser] = useState<User | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"flutterwave" | "transfer">("flutterwave");
   const orderPlacedRef = useRef(false);
   const [offlineOrder, setOfflineOrder] = useState<{
     ref: string;
@@ -55,20 +53,19 @@ export default function CheckoutPage() {
         if (data.user) {
           setFormData(prev => ({
             ...prev,
-            fullName: data.user.user_metadata?.full_name || "",
-            email: data.user.email || "",
-            phone: data.user.user_metadata?.phone || "",
+            fullName: data.user?.user_metadata?.full_name || "",
+            email: data.user?.email || "",
+            phone: data.user?.user_metadata?.phone || "",
           }));
         }
       } catch {
-        // Supabase unavailable (e.g. paused) — proceed as guest
+        // Guest mode fallback
       }
     };
     checkUser();
   }, [supabase]);
 
-
-  // Redirect if cart is empty after hydration/mounted (but not after a successful order)
+  // Redirect if cart is empty after hydration/mounted
   useEffect(() => {
     if (mounted && cartCount === 0 && !orderPlacedRef.current) {
       router.push("/store");
@@ -82,23 +79,21 @@ export default function CheckoutPage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmitting(true);
 
-    // Generate order reference above try/catch so it's accessible in both blocks
     const orderRef = `HC-${typeof window !== 'undefined' ? Date.now().toString(36).toUpperCase() : 'PENDING'}`;
 
     try {
       if (!formData.fullName || !formData.email || !formData.phone || !formData.address) {
         toast.error("Please fill all required fields.");
+        setSubmitting(false);
         return;
       }
 
-      console.log("Starting order submission...", { orderRef, cartItems: cartItems.length });
-
-      const { data, error } = await supabase.from("store_orders").insert({
+      // 1. Insert order record into database
+      const { error } = await supabase.from("store_orders").insert({
         order_ref: orderRef,
         customer_name: formData.fullName,
         customer_email: formData.email,
@@ -117,19 +112,50 @@ export default function CheckoutPage() {
         total: grandTotal,
         status: "pending_payment",
         user_id: user?.id || null,
-      }).select();
+      });
 
-      console.log("Order submission result:", { data, error });
-
-      if (error) throw error;
+      if (error) {
+        console.warn("Supabase insert error (proceeding with payment init):", error);
+      }
 
       orderPlacedRef.current = true;
       clearCart();
-      router.push(`/store/order-confirmation?ref=${orderRef}&total=${grandTotal}`);
+
+      // 2. Route based on selected payment method
+      if (paymentMethod === "flutterwave") {
+        toast.loading("Opening Flutterwave Secure Checkout...");
+        
+        const initRes = await fetch("/api/payment/flutterwave/initialize", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderRef,
+            amount: grandTotal,
+            email: formData.email,
+            name: formData.fullName,
+            phone: formData.phone,
+            title: "HomeCare Smart Appliances Store",
+            description: `Payment for Order ${orderRef} (${cartCount} items)`,
+            type: "store_order",
+            userId: user?.id || null,
+          }),
+        });
+
+        const initData = await initRes.json();
+
+        if (initData.success && initData.paymentUrl) {
+          window.location.href = initData.paymentUrl;
+          return;
+        } else {
+          toast.error("Flutterwave Gateway notice: " + (initData.error || "Falling back to order confirmation"));
+          router.push(`/store/order-confirmation?ref=${orderRef}&total=${grandTotal}`);
+        }
+      } else {
+        // Globus Bank transfer fallback
+        router.push(`/store/order-confirmation?ref=${orderRef}&total=${grandTotal}`);
+      }
     } catch (err: unknown) {
       console.error("Checkout error:", err);
-      // If database/network is unavailable (e.g. Supabase paused), show offline
-      // payment fallback so the customer can still complete via bank transfer
       orderPlacedRef.current = true;
       clearCart();
       setOfflineOrder({
@@ -139,7 +165,7 @@ export default function CheckoutPage() {
         phone: formData.phone,
         email: formData.email,
       });
-      toast.info("Your order reference is ready. Please complete the bank transfer below.");
+      toast.info("Your order is received. Please complete the payment below.");
     } finally {
       setSubmitting(false);
     }
@@ -147,187 +173,76 @@ export default function CheckoutPage() {
 
   if (!mounted || (cartCount === 0 && !orderPlacedRef.current)) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="animate-spin text-brand-primary" size={32} />
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <Loader2 className="animate-spin text-sky-600" size={32} />
       </div>
     );
   }
 
-  // Offline / Supabase-unavailable fallback — customer can still pay via bank transfer
+  // Offline fallback
   if (offlineOrder) {
-    const whatsappMessage = encodeURIComponent(
-      `Hi! I just placed a HomeCare Store order.\n\nOrder Ref: ${offlineOrder.ref}\nName: ${offlineOrder.customerName}\nTotal: \u20a6${offlineOrder.total.toLocaleString()}\n\nI've made the bank transfer. Please confirm my order.`
-    );
     return (
-      <div className="relative min-h-screen bg-background text-foreground antialiased py-12 sm:py-24 overflow-hidden px-4">
-        <div className="absolute inset-x-0 -top-[20%] -z-10 h-[60%] w-full rounded-full bg-emerald-500/5 opacity-40 blur-[120px] mix-blend-screen pointer-events-none" />
-        <div className="mx-auto max-w-2xl relative z-10">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: "spring", damping: 25 }}
-            className="text-center mb-10"
-          >
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-500/30 mb-6">
-              <CheckCircle2 size={40} className="text-emerald-500" strokeWidth={1.5} />
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-heading font-extrabold tracking-tight text-foreground mb-3">Order Received!</h1>
-            <p className="text-sm text-zinc-400 max-w-md mx-auto leading-relaxed">
-              Your order reference is ready. Please complete your payment via bank transfer and notify us on WhatsApp to confirm.
-            </p>
-          </motion.div>
+      <div className="relative min-h-screen bg-slate-50 text-slate-900 py-16 px-4">
+        <div className="mx-auto max-w-xl bg-white rounded-3xl p-8 border border-slate-200 shadow-xl text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 mb-4">
+            <CheckCircle2 size={36} />
+          </div>
+          <h1 className="text-2xl font-extrabold text-slate-900 mb-2">Order Confirmed!</h1>
+          <p className="text-sm text-slate-500 mb-6">Order Ref: <strong className="text-sky-600 font-mono">{offlineOrder.ref}</strong></p>
+          <p className="text-sm text-slate-600 mb-6">Total: <strong>₦{offlineOrder.total.toLocaleString()}</strong></p>
 
-          {/* Order Reference Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-md overflow-hidden mb-6 shadow-premium"
+          <Link
+            href={`/store/order-confirmation?ref=${offlineOrder.ref}&total=${offlineOrder.total}`}
+            className="inline-flex items-center justify-center gap-2 w-full h-12 rounded-full bg-sky-600 text-white font-extrabold text-xs uppercase tracking-widest hover:bg-sky-700 transition-all shadow-md shadow-sky-600/20"
           >
-            <div className="p-6 sm:p-8 bg-white/[0.02] border-b border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="text-center sm:text-left">
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 block mb-1">Order Reference</span>
-                <span className="text-2xl font-mono font-extrabold text-brand-primary tracking-widest">{offlineOrder.ref}</span>
-              </div>
-              <button
-                onClick={() => { navigator.clipboard.writeText(offlineOrder.ref); toast.success("Order reference copied!"); }}
-                className="flex items-center gap-2 h-9 px-4 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-brand-primary transition-all"
-              >
-                <Copy size={12} /> Copy Ref
-              </button>
-            </div>
-            <div className="p-6 sm:p-8 flex items-center justify-between bg-emerald-500/5">
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-500/60 block mb-1">Amount to Pay</span>
-                <span className="text-3xl font-extrabold text-emerald-500">\u20a6{offlineOrder.total.toLocaleString()}</span>
-              </div>
-              <div className="text-right hidden sm:block">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Payment Status</p>
-                <p className="text-xs font-extrabold uppercase mt-1 text-amber-500">Pending Payment</p>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Bank Transfer Details */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="rounded-2xl border border-brand-primary/20 bg-brand-primary/5 p-6 sm:p-8 mb-6 relative overflow-hidden"
-          >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-brand-primary/10 blur-[50px] -mr-16 -mt-16 pointer-events-none" />
-            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-primary mb-6">Transfer to this account</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Bank Name</p>
-                <p className="text-base font-bold text-foreground">{PAYMENT_ACCOUNT.bankName}</p>
-              </div>
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Account No.</p>
-                <div className="flex items-center gap-2">
-                  <p className="text-base font-extrabold tracking-widest text-brand-primary font-mono">{PAYMENT_ACCOUNT.accountNumber}</p>
-                  <button
-                    onClick={() => { navigator.clipboard.writeText(PAYMENT_ACCOUNT.accountNumber); toast.success("Account number copied!"); }}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-400 hover:text-brand-primary transition-all"
-                    title="Copy account number"
-                  >
-                    <Copy size={14} />
-                  </button>
-                </div>
-              </div>
-              <div className="sm:col-span-2 pt-4 border-t border-white/5">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Account Name</p>
-                <p className="text-base font-bold text-foreground">{PAYMENT_ACCOUNT.accountName}</p>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Action Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-          >
-            <a
-              href={`https://wa.me/2349060002990?text=${whatsappMessage}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="sm:col-span-2 flex items-center justify-center gap-2 h-14 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold uppercase tracking-[0.15em] transition-all shadow-lg"
-            >
-              <MessageCircle size={18} /> Notify Payment via WhatsApp
-            </a>
-            <Link
-              href={`/store/track?ref=${offlineOrder.ref}`}
-              className="flex items-center justify-center gap-2 h-14 rounded-xl bg-brand-primary text-white text-[11px] font-bold uppercase tracking-[0.15em] hover:bg-brand-primary/90 transition-all shadow-lg"
-            >
-              Track Order Status
-            </Link>
-            <Link
-              href="/store"
-              className="flex items-center justify-center gap-2 h-14 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-[11px] font-bold uppercase tracking-[0.15em] text-zinc-400 transition-all"
-            >
-              Continue Shopping
-            </Link>
-          </motion.div>
-
-          <p className="text-center text-[10px] text-zinc-600 mt-8 leading-relaxed">
-            Save your reference: <span className="text-brand-primary font-mono font-bold">{offlineOrder.ref}</span> — use it to track your order at <span className="text-zinc-400">/store/track</span>
-          </p>
+            View Payment Instructions <ExternalLink size={14} />
+          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground antialiased py-8 sm:py-16 overflow-hidden px-4 sm:px-0">
-      <div className="absolute inset-x-0 -top-[20%] -z-10 h-[60%] w-full rounded-full bg-brand-primary/5 opacity-40 blur-[120px] mix-blend-screen pointer-events-none" />
+    <div className="relative min-h-screen bg-slate-50 text-slate-900 antialiased overflow-hidden">
+      {/* Royal Blue Hero Banner */}
+      <section className="relative bg-gradient-to-br from-sky-600 via-blue-600 to-blue-800 text-white pt-10 pb-16 px-6 rounded-b-[40px] md:rounded-b-[50px] shadow-2xl shadow-blue-900/15 overflow-hidden">
+        <div className="absolute -top-24 -left-24 w-80 h-80 bg-sky-400/20 rounded-full blur-[90px] pointer-events-none" />
+        <div className="absolute top-1/2 -right-24 w-80 h-80 bg-cyan-300/15 rounded-full blur-[100px] pointer-events-none" />
 
-      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Header */}
-        <Link
-          href="/store"
-          className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-brand-primary transition-colors mb-8 w-fit"
-        >
-          <ArrowLeft size={14} /> Back to Store
-        </Link>
+        <div className="mx-auto max-w-7xl relative z-10">
+          <Link
+            href="/store"
+            className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-sky-200 hover:text-white transition-colors mb-4 w-fit"
+          >
+            <ArrowLeft size={14} /> Back to Store
+          </Link>
+          
+          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white uppercase">
+            Secure <span className="text-cyan-200">Checkout</span>
+          </h1>
+          <p className="mt-1 text-sm sm:text-base text-sky-100/90 font-medium">
+            Fast escrow checkout powered by Flutterwave with nationwide delivery.
+          </p>
+        </div>
+      </section>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-3xl sm:text-4xl font-heading font-extrabold tracking-tight text-gradient-primary mb-2"
-        >
-          Checkout
-        </motion.h1>
-        <p className="text-sm text-zinc-400 mb-10">
-          {user
-            ? "Your details are pre-filled. Review and place your order."
-            : "No account needed — just fill in your details and pay."}
-        </p>
-
+      {/* Main Form & Summary Grid */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 py-10 relative z-10">
         <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-10">
-            {/* Left — Form */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="space-y-8"
-            >
-              {/* Customer Details */}
-              <div className="p-6 sm:p-8 rounded-2xl border border-zinc-200 dark:border-white/10 bg-white/50 dark:bg-white/[0.02] backdrop-blur-md">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary">
-                    <ShoppingBag size={18} />
-                  </div>
-                  <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-                    Customer Details
-                  </h2>
-                </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+            
+            {/* Left: Customer Info & Payment Selector (7 cols) */}
+            <div className="lg:col-span-7 space-y-6">
+              
+              {/* Customer Contact Card */}
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-4">
+                <h2 className="text-xs font-extrabold uppercase tracking-widest text-slate-400">
+                  1. Delivery & Contact Details
+                </h2>
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-700">
                       Full Name *
                     </label>
                     <input
@@ -335,13 +250,14 @@ export default function CheckoutPage() {
                       name="fullName"
                       value={formData.fullName}
                       onChange={handleInputChange}
-                      placeholder="John Doe"
-                      className="w-full rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 px-4 py-3 text-sm text-zinc-800 dark:text-foreground outline-none focus:border-brand-primary transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
+                      placeholder="e.g. David Adeleke"
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-sky-500 focus:bg-white transition-all"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                      Email *
+
+                  <div className="space-y-1.5">
+                    <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-700">
+                      Email Address *
                     </label>
                     <input
                       required
@@ -350,12 +266,13 @@ export default function CheckoutPage() {
                       value={formData.email}
                       onChange={handleInputChange}
                       placeholder="you@example.com"
-                      className="w-full rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 px-4 py-3 text-sm text-zinc-800 dark:text-foreground outline-none focus:border-brand-primary transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-sky-500 focus:bg-white transition-all"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                      Phone *
+
+                  <div className="space-y-1.5">
+                    <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-700">
+                      Phone Number *
                     </label>
                     <input
                       required
@@ -363,12 +280,13 @@ export default function CheckoutPage() {
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
-                      placeholder="+234..."
-                      className="w-full rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 px-4 py-3 text-sm text-zinc-800 dark:text-foreground outline-none focus:border-brand-primary transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
+                      placeholder="08012345678"
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-sky-500 focus:bg-white transition-all"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-700">
                       Delivery Address *
                     </label>
                     <input
@@ -376,168 +294,193 @@ export default function CheckoutPage() {
                       name="address"
                       value={formData.address}
                       onChange={handleInputChange}
-                      placeholder="House number, street, area"
-                      className="w-full rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 px-4 py-3 text-sm text-zinc-800 dark:text-foreground outline-none focus:border-brand-primary transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
+                      placeholder="Street, Estate / Area, City, State"
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-sky-500 focus:bg-white transition-all"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-700">
+                      Special Delivery Notes (Optional)
+                    </label>
+                    <textarea
+                      name="notes"
+                      value={formData.notes}
+                      onChange={handleInputChange}
+                      rows={2}
+                      placeholder="Any landmark, building number, or preferred delivery timing..."
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-sky-500 focus:bg-white transition-all resize-none"
                     />
                   </div>
                 </div>
+              </div>
 
-                <div className="mt-4 space-y-2">
-                  <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                    Order Notes (Optional)
+              {/* Payment Method Selector (Flutterwave Primary 90% vs Globus Bank Secondary) */}
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xs font-extrabold uppercase tracking-widest text-slate-400">
+                    2. Select Payment Method
+                  </h2>
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                    🔒 256-bit Encrypted
+                  </span>
+                </div>
+
+                <div className="space-y-3 pt-1">
+                  {/* Option A: Flutterwave (Primary 90%) */}
+                  <label
+                    onClick={() => setPaymentMethod("flutterwave")}
+                    className={`flex items-start justify-between p-5 rounded-2xl border-2 transition-all cursor-pointer ${
+                      paymentMethod === "flutterwave"
+                        ? "border-sky-600 bg-sky-50/70 shadow-sm"
+                        : "border-slate-200 bg-white hover:border-slate-300"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3.5">
+                      <input
+                        type="radio"
+                        name="payment_choice"
+                        checked={paymentMethod === "flutterwave"}
+                        onChange={() => setPaymentMethod("flutterwave")}
+                        className="mt-1 accent-sky-600 h-4 w-4"
+                      />
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-extrabold text-sm text-slate-900">
+                            Flutterwave Online Checkout
+                          </span>
+                          <span className="text-[9px] font-black uppercase tracking-widest bg-sky-600 text-white px-2 py-0.5 rounded-full">
+                            Recommended · Instant
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                          Pay instantly via <strong>MasterCard, Visa, Verve, USSD (*737#, *901#), Bank Transfer, or Apple Pay</strong>. Zero transaction delay.
+                        </p>
+                      </div>
+                    </div>
+                    <Zap size={20} className="text-amber-500 shrink-0 ml-2 mt-0.5" />
                   </label>
-                  <textarea
-                    name="notes"
-                    value={formData.notes}
-                    onChange={handleInputChange}
-                    rows={3}
-                    placeholder="Any special instructions for delivery..."
-                    className="w-full resize-none rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 px-4 py-3 text-sm text-zinc-800 dark:text-foreground outline-none focus:border-brand-primary transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
-                  />
+
+                  {/* Option B: Globus Bank Transfer (Substitute 10%) */}
+                  <label
+                    onClick={() => setPaymentMethod("transfer")}
+                    className={`flex items-start justify-between p-4 rounded-2xl border transition-all cursor-pointer ${
+                      paymentMethod === "transfer"
+                        ? "border-sky-600 bg-sky-50/50 shadow-sm"
+                        : "border-slate-200 bg-white hover:border-slate-300 opacity-80"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3.5">
+                      <input
+                        type="radio"
+                        name="payment_choice"
+                        checked={paymentMethod === "transfer"}
+                        onChange={() => setPaymentMethod("transfer")}
+                        className="mt-1 accent-sky-600 h-4 w-4"
+                      />
+                      <div>
+                        <span className="font-bold text-sm text-slate-800">
+                          Direct Bank Transfer (Globus Bank Alternative)
+                        </span>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          Manual bank deposit to {PAYMENT_ACCOUNT.bankName} ({PAYMENT_ACCOUNT.accountNumber}). Confirmation takes 10-20 mins.
+                        </p>
+                      </div>
+                    </div>
+                    <Building2 size={18} className="text-slate-400 shrink-0 ml-2 mt-0.5" />
+                  </label>
                 </div>
               </div>
 
-              {/* Delivery */}
-              <div className="p-6 sm:p-8 rounded-2xl border border-zinc-200 dark:border-white/10 bg-white/50 dark:bg-white/[0.02] backdrop-blur-md">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
-                    <Truck size={18} />
-                  </div>
-                  <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-                    Delivery Info
-                  </h2>
-                </div>
-                <p className="text-sm text-zinc-400 leading-relaxed">
-                  Flat delivery fee of{" "}
-                  <span className="font-bold text-foreground">
-                    ₦{DELIVERY_FEE.toLocaleString()}
-                  </span>{" "}
-                  within Enugu metropolis. Delivery takes 1-3 business days
-                  after payment confirmation.
-                </p>
-              </div>
+            </div>
 
-               {/* Payment */}
-                <div className="p-6 sm:p-8 rounded-2xl border border-zinc-200 dark:border-white/10 bg-white/50 dark:bg-white/[0.02] backdrop-blur-md">
-                 <div className="flex items-center gap-3 mb-6">
-                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary">
-                     <CreditCard size={18} />
-                   </div>
-                   <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-                     Payment Method
-                   </h2>
-                 </div>
- 
-                 <div className="flex items-center justify-between p-4 rounded-xl bg-brand-primary/5 border border-brand-primary/20">
-                   <div className="flex items-center gap-3">
-                     <div className="w-2 h-2 rounded-full bg-brand-primary animate-pulse" />
-                     <span className="text-sm font-bold text-foreground">Bank Transfer (Globus Bank)</span>
-                   </div>
-                   <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Manual</span>
-                 </div>
-                 
-                 <p className="mt-4 text-[10px] text-zinc-500 leading-relaxed">
-                   You will receive bank details on the next page to complete your transfer.
-                 </p>
-               </div>
-            </motion.div>
-
-            {/* Right — Order Summary */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="lg:sticky lg:top-24 self-start"
-            >
-              <div className="rounded-2xl border border-zinc-200 dark:border-white/10 bg-white/50 dark:bg-white/[0.02] backdrop-blur-md overflow-hidden">
-                <div className="p-6 border-b border-zinc-200 dark:border-white/5">
-                  <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-                    Order Summary ({cartCount} item{cartCount !== 1 ? "s" : ""})
+            {/* Right: Order Summary (5 cols) */}
+            <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-24">
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                  <h2 className="text-xs font-extrabold uppercase tracking-widest text-slate-400">
+                    Order Summary
                   </h2>
+                  <span className="text-xs font-bold text-sky-600 bg-sky-50 px-2.5 py-1 rounded-full border border-sky-100">
+                    {cartCount} {cartCount === 1 ? "Item" : "Items"}
+                  </span>
                 </div>
 
-                <div className="p-6 space-y-4 max-h-[400px] overflow-y-auto">
+                {/* Items List */}
+                <div className="space-y-3.5 max-h-[300px] overflow-y-auto pr-1">
                   {cartItems.map((item) => (
-                    <div
-                      key={item.product.id}
-                      className="flex gap-3"
-                    >
-                      <div className="relative w-14 h-14 shrink-0 rounded-lg overflow-hidden bg-white/5">
+                    <div key={item.product.id} className="flex items-center gap-3.5">
+                      <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
                         <Image
                           src={item.product.image}
                           alt={item.product.name}
                           fill
                           className="object-cover"
-                          sizes="56px"
                           unoptimized
                         />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold text-foreground truncate">
+                        <p className="text-xs font-bold text-slate-900 truncate">
                           {item.product.name}
                         </p>
-                        <p className="text-[10px] text-zinc-500">
-                          Qty: {item.quantity}
+                        <p className="text-[11px] text-slate-400 font-medium">
+                          Qty: {item.quantity} × ₦{item.product.price.toLocaleString()}
                         </p>
                       </div>
-                      <p className="text-xs font-bold text-foreground shrink-0">
-                        ₦
-                        {(
-                          item.product.price * item.quantity
-                        ).toLocaleString()}
+                      <p className="text-xs font-extrabold text-slate-900 shrink-0">
+                        ₦{(item.product.price * item.quantity).toLocaleString()}
                       </p>
                     </div>
                   ))}
                 </div>
 
-                <div className="p-6 border-t border-zinc-200 dark:border-white/5 space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-zinc-400">Subtotal</span>
-                    <span className="font-bold text-foreground">
-                      ₦{cartTotal.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-zinc-400">Delivery</span>
-                    <span className="font-bold text-foreground">
-                      ₦{DELIVERY_FEE.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="h-px bg-zinc-200 dark:bg-white/10" />
+                {/* Price Breakdown */}
+                <div className="space-y-2.5 border-t border-slate-100 pt-4 text-xs font-semibold text-slate-600">
                   <div className="flex justify-between">
-                    <span className="text-sm font-bold text-foreground">
-                      Total
-                    </span>
-                    <span className="text-xl font-extrabold text-brand-primary">
-                      ₦{grandTotal.toLocaleString()}
-                    </span>
+                    <span>Appliance Subtotal</span>
+                    <span className="font-bold text-slate-900">₦{cartTotal.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Priority Dispatch & Handling</span>
+                    <span className="font-bold text-slate-900">₦{DELIVERY_FEE.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between border-t border-slate-100 pt-3 text-sm font-extrabold text-slate-900">
+                    <span>Grand Total</span>
+                    <span className="text-xl font-black text-sky-600">₦{grandTotal.toLocaleString()}</span>
                   </div>
                 </div>
 
-                <div className="p-6 pt-0">
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="btn-minimal w-full h-14 rounded-xl text-[11px] font-bold uppercase tracking-[0.2em] shadow-premium hover:shadow-[0_0_20px_rgba(249,115,22,0.4)] disabled:opacity-50 flex items-center justify-center gap-3 transition-all cursor-pointer"
-                  >
-                    {submitting ? (
-                      <>
-                        <Loader2 size={16} className="animate-spin" />{" "}
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <ShieldCheck size={16} /> Place Order — ₦
-                        {grandTotal.toLocaleString()}
-                      </>
-                    )}
-                  </button>
-                  <p className="text-[9px] text-zinc-600 text-center mt-3">
-                    By placing your order, you agree to our terms. Manual bank transfer required.
-                  </p>
+                {/* Submit Action Button */}
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="w-full h-14 rounded-full bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-xs uppercase tracking-widest shadow-md shadow-sky-600/30 flex items-center justify-center gap-2.5 transition-all hover:scale-102 disabled:opacity-50 cursor-pointer"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      <span>Processing Payment...</span>
+                    </>
+                  ) : paymentMethod === "flutterwave" ? (
+                    <>
+                      <Zap size={16} className="text-cyan-200 fill-cyan-200" />
+                      <span>Pay with Flutterwave · ₦{grandTotal.toLocaleString()}</span>
+                    </>
+                  ) : (
+                    <>
+                      <ShieldCheck size={16} />
+                      <span>Place Order (Bank Transfer)</span>
+                    </>
+                  )}
+                </button>
+
+                <div className="flex items-center justify-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  <ShieldCheck size={14} className="text-emerald-600" />
+                  <span>100% Escrow Protection Guaranteed</span>
                 </div>
               </div>
-            </motion.div>
+            </div>
+
           </div>
         </form>
       </div>

@@ -97,36 +97,66 @@ function OrderConfirmationContent() {
   const displayTotal = orderData?.total ? Number(orderData.total) : total;
 
   const isPaid = orderData && orderData.status !== 'pending_payment' && orderData.status !== 'cancelled';
+  const [payingWithFlw, setPayingWithFlw] = useState(false);
+
+  const handleFlutterwavePay = async () => {
+    try {
+      setPayingWithFlw(true);
+      toast.loading("Opening Flutterwave Gateway...", { id: "flw-pay" });
+
+      const res = await fetch("/api/payment/flutterwave/initialize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderRef,
+          amount: displayTotal,
+          email: orderData?.customer_email || "customer@homecare.ng",
+          name: orderData?.customer_name || "HomeCare Customer",
+          title: "HomeCare Smart Appliances Store",
+          description: `Payment for Order ${orderRef}`,
+          type: "store_order",
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success && data.paymentUrl) {
+        window.location.href = data.paymentUrl;
+      } else {
+        toast.error(data.error || "Failed to launch Flutterwave", { id: "flw-pay" });
+        setPayingWithFlw(false);
+      }
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Payment launch failed", { id: "flw-pay" });
+      setPayingWithFlw(false);
+    }
+  };
 
   const whatsappMessage = encodeURIComponent(
     `Hi, I just placed an order on HomeCare Store.\n\nOrder Ref: ${orderRef}\nTotal: ₦${displayTotal.toLocaleString()}\n\nI've made the payment. Please confirm.`
   );
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground antialiased py-12 sm:py-24 overflow-hidden px-4">
-      <div className="absolute inset-x-0 -top-[20%] -z-10 h-[60%] w-full rounded-full bg-emerald-500/5 opacity-40 blur-[120px] mix-blend-screen pointer-events-none" />
-
+    <div className="relative min-h-screen bg-slate-50 text-slate-900 antialiased py-12 sm:py-24 overflow-hidden px-4">
       <div className="mx-auto max-w-2xl relative z-10">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ type: "spring", damping: 25 }}
-          className="text-center mb-12"
+          className="text-center mb-10"
         >
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-500/30 mb-6">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-50 text-emerald-600 mb-6">
             <CheckCircle2
               size={40}
-              className="text-emerald-500"
               strokeWidth={1.5}
             />
           </div>
-          <h1 className="text-3xl sm:text-4xl font-heading font-extrabold tracking-tight text-foreground mb-3">
-            Order Placed!
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 mb-3">
+            {isPaid ? "Payment Verified!" : "Order Recorded!"}
           </h1>
-          <p className="text-sm text-zinc-400 max-w-md mx-auto leading-relaxed">
+          <p className="text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
             {isPaid 
-              ? "Your payment was successful! We've received your order and we're processing your delivery within 24 hours."
-              : "Your order has been recorded. Please complete the payment to process your delivery."}
+              ? "Your payment was successful via Flutterwave! We've received your order and we're processing dispatch."
+              : "Please complete your payment below with Flutterwave for instant confirmation."}
           </p>
         </motion.div>
 
@@ -135,14 +165,14 @@ function OrderConfirmationContent() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="rounded-3xl border border-zinc-200 dark:border-white/10 bg-white/50 dark:bg-white/[0.03] backdrop-blur-md overflow-hidden mb-6 shadow-premium"
+          className="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden mb-6"
         >
-          <div className="p-6 sm:p-8 bg-zinc-50 dark:bg-white/[0.02] border-b border-zinc-200 dark:border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="p-6 sm:p-8 bg-slate-50/50 border-b border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-center sm:text-left">
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 block mb-1">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-1">
                 Order Reference
               </span>
-              <span className="text-2xl font-mono font-extrabold text-brand-primary tracking-widest">
+              <span className="text-2xl font-mono font-extrabold text-sky-600 tracking-widest">
                 {orderRef}
               </span>
             </div>
@@ -152,51 +182,79 @@ function OrderConfirmationContent() {
                    navigator.clipboard.writeText(orderRef);
                    toast.success("Order reference copied!");
                  }}
-                 className="flex items-center gap-2 h-9 px-4 rounded-full bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-brand-primary transition-all"
+                 className="flex items-center gap-2 h-9 px-4 rounded-full bg-white border border-slate-200 text-[10px] font-bold uppercase tracking-widest text-slate-600 hover:text-sky-600 hover:border-sky-300 transition-all shadow-2xs"
                >
                  <Copy size={12} /> Copy Ref
                </button>
             </div>
           </div>
  
-          <div className="p-6 sm:p-8 flex items-center justify-between bg-emerald-500/5">
+          <div className="p-6 sm:p-8 flex items-center justify-between bg-sky-50/40">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-500/60 block mb-1">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 block mb-1">
                 Amount to Pay
               </span>
-              <span className="text-3xl font-extrabold text-emerald-500">
+              <span className="text-3xl font-black text-sky-600">
                 ₦{displayTotal.toLocaleString()}
               </span>
             </div>
             <div className="text-right hidden sm:block">
-               <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Payment Status</p>
-               <p className={`text-xs font-extrabold uppercase mt-1 ${isPaid ? 'text-emerald-500' : 'text-amber-500'}`}>
-                 {isPaid ? 'Payment Successful' : 'Pending Payment'}
+               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Payment Status</p>
+               <p className={`text-xs font-black uppercase mt-1 ${isPaid ? 'text-emerald-600' : 'text-amber-600'}`}>
+                 {isPaid ? '✓ Paid & Confirmed' : '● Pending Payment'}
                </p>
             </div>
           </div>
         </motion.div>
 
-        {/* Payment Details — shown from URL params even when DB is temporarily unavailable */}
+        {/* Primary Flutterwave Pay CTA Button (90% Dominance) */}
+        {!isPaid && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            <button
+              onClick={handleFlutterwavePay}
+              disabled={payingWithFlw}
+              className="w-full h-15 rounded-full bg-sky-600 hover:bg-sky-700 text-white font-black text-sm uppercase tracking-widest shadow-xl shadow-sky-600/30 flex items-center justify-center gap-3 transition-all hover:scale-102 cursor-pointer disabled:opacity-50"
+            >
+              {payingWithFlw ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  <span>Connecting to Flutterwave...</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-amber-300">⚡</span>
+                  <span>Pay ₦{displayTotal.toLocaleString()} Now via Flutterwave (Card/USSD/Transfer)</span>
+                </>
+              )}
+            </button>
+            <p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">
+              Instant Automated Confirmation · Cards, USSD, Bank Transfer & Apple Pay
+            </p>
+          </motion.div>
+        )}
+
+        {/* Globus Bank Substitute Card (10% Alternative) */}
         {!isPaid && orderRef !== 'HC-UNKNOWN' && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="rounded-2xl border border-brand-primary/20 bg-brand-primary/5 dark:bg-brand-primary/[0.03] p-6 sm:p-8 mb-6 relative overflow-hidden"
+            className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 mb-6 relative overflow-hidden shadow-2xs"
           >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-brand-primary/10 blur-[50px] -mr-16 -mt-16 pointer-events-none" />
-
-            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-primary mb-6 flex items-center gap-2">
-              Transfer to this account
+            <h3 className="text-[11px] font-extrabold uppercase tracking-widest text-slate-600 mb-4 flex items-center gap-2">
+              <span>🏦 Alternative: Manual Bank Deposit</span>
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-slate-700">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
                   Bank Name
                 </p>
-                <p className="text-base font-bold text-foreground">
+                <p className="text-base font-extrabold text-slate-900">
                   {PAYMENT_ACCOUNT.bankName}
                 </p>
               </div>

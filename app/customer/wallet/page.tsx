@@ -118,62 +118,43 @@ export default function CustomerWalletPage() {
 
     try {
       setLoading(true);
-      const { data } = await supabase.auth.getUser();
-      const user = data.user;
+      const { data: sessionData } = await supabase.auth.getSession();
+      const user = sessionData.session?.user;
       if (!user) {
+        toast.error("Please login to fund your wallet.");
         setLoading(false);
         return;
       }
 
-      let { data: wallet } = await supabase
-        .from('wallets')
-        .select('id, balance')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      toast.loading("Connecting to Flutterwave Gateway...", { id: "wallet-fund" });
 
-      if (!wallet) {
-        // Just in case it was missing, create it
-        const { data: newWallet, error: createError } = await supabase
-          .from('wallets')
-          .insert({ user_id: user.id, balance: 0 })
-          .select()
-          .maybeSingle();
-
-        if (createError) throw createError;
-        if (!newWallet) throw new Error("Wallet initialization failed.");
-        wallet = newWallet;
-      }
-
-      // 1. Update Balance
-      const { error: balanceError } = await supabase
-        .from('wallets')
-        .update({ balance: wallet.balance + val })
-        .eq('id', wallet.id);
-
-      if (balanceError) throw balanceError;
-
-      // 2. Log Transaction
-      const { error: txError } = await supabase
-        .from('transactions')
-        .insert({
-          wallet_id: wallet.id,
+      const res = await fetch("/api/payment/flutterwave/initialize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderRef: `WLT-${user.id.slice(0, 6).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`,
           amount: val,
-          transaction_type: 'credit',
-          description: 'Deposit via Wallet Funding',
-          status: 'success'
-        });
+          email: user.email,
+          name: user.user_metadata?.full_name || "HomeCare Customer",
+          phone: user.user_metadata?.phone || "08000000000",
+          title: "HomeCare Wallet Top-Up",
+          description: `Deposit of ₦${val.toLocaleString()} to HomeCare Customer Wallet`,
+          type: "wallet_topup",
+          userId: user.id,
+        }),
+      });
 
-      if (txError) throw txError;
-
-      await fetchData();
-      setFunding(false);
-      setAmount("");
-      toast.success(`Successfully funded ₦${val.toLocaleString()}`);
+      const data = await res.json();
+      if (data.success && data.paymentUrl) {
+        window.location.href = data.paymentUrl;
+      } else {
+        toast.error(data.error || "Failed to launch Flutterwave payment", { id: "wallet-fund" });
+        setLoading(false);
+      }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Funding failed";
+      const msg = err instanceof Error ? err.message : "Funding initiation failed";
       setError(`Funding failed: ${msg}`);
-      toast.error(`Funding failed: ${msg}`);
-    } finally {
+      toast.error(`Funding failed: ${msg}`, { id: "wallet-fund" });
       setLoading(false);
     }
   };
