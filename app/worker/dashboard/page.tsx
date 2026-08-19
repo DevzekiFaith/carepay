@@ -56,32 +56,40 @@ export default function WorkerDashboardPage() {
       const { data: userData } = await supabase.auth.getUser();
       setUser(userData.user);
 
-      if (userData.user) {
-        const { data: wallet } = await supabase
+      if (!userData.user) {
+        setLoading(false);
+        return;
+      }
+
+      // Execute wallet and requests fetches concurrently in parallel
+      const [walletRes, requestsRes] = await Promise.all([
+        supabase
           .from('wallets')
           .select('balance')
           .eq('user_id', userData.user.id)
-          .maybeSingle();
-          
-        if (wallet) {
-           setBalance(Number(wallet.balance));
-        } else {
-           const { data: newWallet } = await supabase
-             .from('wallets')
-             .insert({ user_id: userData.user.id, balance: 0 })
-             .select('balance')
-             .single();
-           if (newWallet) setBalance(Number(newWallet.balance));
-        }
+          .maybeSingle(),
+        supabase
+          .from("service_requests")
+          .select("*")
+          .order("created_at", { ascending: false }),
+      ]);
+
+      if (walletRes.data) {
+        setBalance(Number(walletRes.data.balance));
+      } else {
+        // Create in background if missing
+        supabase
+          .from('wallets')
+          .insert({ user_id: userData.user.id, balance: 0 })
+          .select('balance')
+          .single()
+          .then((res: { data: { balance: number } | null }) => {
+            if (res.data) setBalance(Number(res.data.balance));
+          });
       }
 
-      const { data, error: fetchError } = await supabase
-        .from("service_requests")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (fetchError) throw fetchError;
-      setRequests(data || []);
+      if (requestsRes.error) throw requestsRes.error;
+      setRequests(requestsRes.data || []);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to load requests");
     } finally {

@@ -21,21 +21,10 @@ export default function Nav() {
     const supabase = createClient();
     console.log("Nav: Supabase client initialized");
     
-    const fetchUserAndRole = async () => {
+    const initAuth = async () => {
       try {
-        // Add a 5s timeout to the auth check (resolve instead of reject to prevent uncaught runtime errors)
-        const timeout = new Promise<{ timeout: boolean }>((resolve) => setTimeout(() => resolve({ timeout: true }), 5000));
-        const getUser = supabase.auth.getUser();
-        const response = await Promise.race([getUser, timeout]);
-        
-        if (response && 'timeout' in response) {
-          console.warn("Nav: Authentication check timed out. Proceeding as guest.");
-          setUser(null);
-          setRole(null);
-          return;
-        }
-
-        const authUser = 'data' in response ? response.data?.user ?? null : null;
+        const { data: { session } } = await supabase.auth.getSession();
+        const authUser = session?.user ?? null;
         setUser(authUser);
         
         if (authUser) {
@@ -53,7 +42,7 @@ export default function Nav() {
       }
     };
 
-    fetchUserAndRole();
+    initAuth();
 
     // Subscribe to auth state changes with error handling
     let subscription: { unsubscribe: () => void } | null = null;

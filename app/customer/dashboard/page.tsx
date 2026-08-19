@@ -63,54 +63,52 @@ export default function CustomerDashboardPage() {
       if (!currentUser) return;
       setUser(currentUser);
 
-      // 1. Fetch Requests
-      const { data: reqData } = await supabase
-        .from('service_requests')
-        .select('*')
-        .eq('customer_id', currentUser.id)
-        .order('created_at', { ascending: false });
-      
-      setRequests(reqData || []);
+      // Execute all 4 queries concurrently in parallel
+      const [reqRes, orderRes, walletRes, profileRes] = await Promise.all([
+        supabase
+          .from('service_requests')
+          .select('*')
+          .eq('customer_id', currentUser.id)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('store_orders')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('wallets')
+          .select('balance')
+          .eq('user_id', currentUser.id)
+          .maybeSingle(),
+        supabase
+          .from('profiles')
+          .select('subscription_tier')
+          .eq('id', currentUser.id)
+          .maybeSingle(),
+      ]);
 
-      // 1b. Fetch Store Orders
-      const { data: orderData } = await supabase
-        .from('store_orders')
-        .select('*')
-        .eq('user_id', currentUser.id)
-        .order('created_at', { ascending: false });
-      
-      setOrders(orderData || []);
+      setRequests(reqRes.data || []);
+      setOrders(orderRes.data || []);
 
-      // 2. Fetch or Create Wallet Balance (Non-destructive)
-      let { data: wallet } = await supabase
-        .from('wallets')
-        .select('balance')
-        .eq('user_id', currentUser.id)
-        .maybeSingle();
-      
-      if (!wallet) {
-        // Create only if missing
-        const { data: newWallet } = await supabase
+      if (walletRes.data) {
+        setBalance(Number(walletRes.data.balance));
+      } else {
+        // Create wallet in background if missing
+        supabase
           .from('wallets')
           .insert({ user_id: currentUser.id, balance: 0 })
           .select('balance')
-          .single();
-        wallet = newWallet;
+          .single()
+          .then((res: { data: { balance: number } | null }) => {
+            if (res.data) setBalance(Number(res.data.balance));
+          });
       }
-      
-      if (wallet) setBalance(Number(wallet.balance));
 
-      // 3. Fetch Profile Tier
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('subscription_tier')
-        .eq('id', currentUser.id)
-        .maybeSingle();
-      
-      if (profile) setTier(profile.subscription_tier || 'basic');
-
+      if (profileRes.data) {
+        setTier(profileRes.data.subscription_tier || 'basic');
+      }
     } catch (err) {
-      console.error(err);
+      console.error("Dashboard fetch error:", err);
     } finally {
       setLoading(false);
       isFetchingRef.current = false;

@@ -39,6 +39,14 @@ export async function proxy(request: NextRequest) {
         }
     )
 
+    // Only call getUser() if an auth cookie actually exists to eliminate 1000ms latency on guest/asset requests
+    const allCookies = request.cookies.getAll();
+    const hasAuthCookie = allCookies.some(c => c.name === 'sb-auth' || c.name.startsWith('sb-') || c.name.includes('auth-token'));
+    
+    if (!hasAuthCookie) {
+        return supabaseResponse;
+    }
+
     // IMPORTANT: Avoid throwing errors here to prevent 500s.
     try {
         const { data: { user } } = await supabase.auth.getUser()
