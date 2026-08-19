@@ -1,12 +1,21 @@
 import { ImageResponse } from 'next/og';
 import type { NextRequest } from 'next/server';
 
+export const dynamic = 'force-static';
+
+export async function generateStaticParams() {
+  return [
+    { size: '192' },
+    { size: '512' },
+  ];
+}
+
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ size: string }> }
+  props: { params: Promise<{ size: string }> }
 ) {
-  const { size: sizeStr } = await params;
-  const size = parseInt(sizeStr, 10) || 192;
+  const params = await props.params;
+  const size = parseInt(params.size, 10) || 192;
   const fontSize = Math.round(size * 0.48);
   const radius = Math.round(size * 0.22);
 
@@ -25,7 +34,7 @@ export async function GET(
       >
         <div
           style={{
-            fontFamily: 'serif',
+            fontFamily: 'sans-serif',
             fontSize: fontSize,
             fontWeight: 700,
             color: '#ffffff',
