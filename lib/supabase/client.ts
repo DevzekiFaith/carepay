@@ -56,7 +56,24 @@ export function createClient() {
             auth: {
                 persistSession: true,
                 autoRefreshToken: true,
-                detectSessionInUrl: true
+                detectSessionInUrl: true,
+                // Custom resilient lock to eliminate "Lock broken by another request with the 'steal' option" AbortError
+                lock: typeof window !== 'undefined' ? async (name, acquireTimeout, fn) => {
+                    try {
+                        if (typeof navigator !== 'undefined' && 'locks' in navigator) {
+                            return await navigator.locks.request(name, async () => {
+                                return await fn();
+                            });
+                        }
+                        return await fn();
+                    } catch (err: unknown) {
+                        if (err instanceof Error && err.name === 'AbortError') {
+                            // Concurrently handled by another request/tab, execute safely without crashing
+                            return await fn();
+                        }
+                        throw err;
+                    }
+                } : undefined
             }
         }
     )
