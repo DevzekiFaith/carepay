@@ -29,10 +29,10 @@ export default function CustomerRegisterPage() {
     setSubmitting(true);
 
     const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
+    const email = (formData.get('email') as string)?.trim().toLowerCase();
     const password = formData.get('password') as string;
-    const fullName = formData.get('fullName') as string;
-    const phone = formData.get('phone') as string;
+    const fullName = (formData.get('fullName') as string)?.trim();
+    const phone = (formData.get('phone') as string)?.trim();
 
     try {
       const { data, error: signUpError } = await supabase.auth.signUp({

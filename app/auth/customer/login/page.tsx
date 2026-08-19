@@ -52,8 +52,8 @@ export default function CustomerLoginPage() {
     setSubmitting(true);
 
     const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
+    const email = (formData.get('email') as string)?.trim().toLowerCase();
+    const password = (formData.get('password') as string);
 
     try {
       const { data, error: signInError } = await supabase.auth.signInWithPassword({

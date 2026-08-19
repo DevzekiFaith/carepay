@@ -48,7 +48,7 @@ export default function WorkerLoginPage() {
 
     const form = e.target as HTMLFormElement;
     const formData = new FormData(form);
-    const email = (formData.get("email") as string)?.trim() ?? "";
+    const email = (formData.get("email") as string)?.trim().toLowerCase() ?? "";
     const pin = (formData.get("pin") as string)?.trim() ?? "";
 
     const supabase = createClient();
