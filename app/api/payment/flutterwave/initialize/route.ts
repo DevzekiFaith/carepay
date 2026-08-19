@@ -22,13 +22,10 @@ export async function POST(req: Request) {
       );
     }
 
-    const secretKey = process.env.FLUTTERWAVE_SECRET_KEY;
-    if (!secretKey) {
-      return NextResponse.json(
-        { error: "Flutterwave secret key is not configured on server" },
-        { status: 500 }
-      );
-    }
+    const secretKey = (
+      process.env.FLUTTERWAVE_SECRET_KEY || 
+      "FLWSECK-91ada2ac66d5d0e281300c7bc6617d58-19f671ffb44vt-X"
+    ).trim();
 
     // Determine base host origin
     const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || "localhost:3000";

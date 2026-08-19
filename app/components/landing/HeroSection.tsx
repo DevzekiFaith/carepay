@@ -61,13 +61,13 @@ export default function HeroSection() {
           <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
             <Link
               href="/request"
-              className="w-full sm:w-auto h-14 px-8 rounded-full bg-sky-400 hover:bg-sky-300 text-blue-950 flex items-center justify-center gap-3 text-xs sm:text-sm font-extrabold uppercase tracking-widest shadow-lg shadow-sky-400/30 hover:scale-105 transition-all"
+              className="w-full sm:w-auto h-14 px-8 rounded-full bg-sky-500 hover:bg-sky-400 text-white flex items-center justify-center gap-3 text-xs sm:text-sm font-black uppercase tracking-widest shadow-xl shadow-sky-500/35 hover:scale-105 transition-all border border-sky-400/40"
             >
               Request a Service <ArrowRight size={18} />
             </Link>
             <Link
               href="/store"
-              className="w-full sm:w-auto h-14 px-8 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center text-xs sm:text-sm font-bold uppercase tracking-widest transition-colors backdrop-blur-sm"
+              className="w-full sm:w-auto h-14 px-8 rounded-full bg-blue-900/60 hover:bg-blue-900/90 border border-white/25 text-white flex items-center justify-center text-xs sm:text-sm font-extrabold uppercase tracking-widest transition-all backdrop-blur-sm"
             >
               Browse Parts Store
             </Link>

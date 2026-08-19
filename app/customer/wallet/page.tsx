@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import ErrorAlert from "@/app/components/ErrorAlert";
 
 import { toast } from "sonner";
+import { PAYMENT_ACCOUNT } from "@/lib/payment-details";
 
 interface Transaction {
   id: string;
@@ -327,15 +328,15 @@ export default function CustomerWalletPage() {
                      <div className="flex-1 space-y-4">
                         <div className="space-y-1">
                            <p className="text-[9px] uppercase tracking-widest font-bold text-zinc-500">Beneficiary Bank</p>
-                           <p className="text-sm font-bold text-foreground">First Bank of Nigeria</p>
+                           <p className="text-sm font-bold text-foreground">{PAYMENT_ACCOUNT.bankName}</p>
                         </div>
                         <div className="space-y-1">
                            <p className="text-[9px] uppercase tracking-widest font-bold text-zinc-500">Account Number</p>
-                           <p className="text-lg font-heading font-extrabold text-brand-primary tracking-widest">3123456789</p>
+                           <p className="text-lg font-heading font-extrabold text-brand-primary tracking-widest font-mono">{PAYMENT_ACCOUNT.accountNumber}</p>
                         </div>
                         <div className="space-y-1">
                            <p className="text-[9px] uppercase tracking-widest font-bold text-zinc-500">Account Name</p>
-                           <p className="text-sm font-bold text-foreground">HomeCare Services Ltd.</p>
+                           <p className="text-sm font-bold text-foreground">{PAYMENT_ACCOUNT.accountName}</p>
                         </div>
                      </div>
                      <div className="flex-1 space-y-4">

@@ -53,18 +53,16 @@ export default function Hero() {
                 >
                     <Link
                         href="/request"
-                        className="group btn-minimal flex w-full sm:w-auto h-14 items-center justify-center gap-2 rounded-full px-8 sm:px-10 text-xs sm:text-sm uppercase tracking-widest"
+                        className="group flex w-full sm:w-auto h-14 items-center justify-center gap-2 rounded-full px-8 sm:px-10 text-xs sm:text-sm uppercase tracking-widest bg-sky-600 hover:bg-sky-500 text-white font-extrabold shadow-xl shadow-sky-600/30 transition-all hover:scale-105"
                     >
                         Book Now
                         <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
                     </Link>
                     <Link
                         href="/auth/worker/register"
-                        className="flex w-full sm:w-auto h-14 items-center justify-center rounded-full px-8 sm:px-10 text-xs sm:text-sm font-bold uppercase tracking-widest text-zinc-600 hover:text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors group"
+                        className="flex w-full sm:w-auto h-14 items-center justify-center rounded-full px-8 sm:px-10 text-xs sm:text-sm font-extrabold uppercase tracking-widest bg-white dark:bg-slate-900 border-2 border-sky-600 text-sky-700 dark:text-sky-300 hover:bg-sky-600 hover:text-white transition-all shadow-md"
                     >
-                        <span className="group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:to-rose-500 transition-all duration-300">
-                            Join as Pro
-                        </span>
+                        Join as Pro
                     </Link>
                 </motion.div>
             </div>

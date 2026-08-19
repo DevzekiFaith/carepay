@@ -66,7 +66,7 @@ export default function HomeClient() {
                     alert("Referral link copied!");
                   }
                 }}
-                className="btn-minimal h-12 px-8 rounded-full text-xs font-bold uppercase tracking-widest shadow-premium"
+                className="h-12 px-8 rounded-full bg-sky-600 hover:bg-sky-500 text-white text-xs font-extrabold uppercase tracking-widest shadow-lg shadow-sky-600/30 transition-all hover:scale-105 cursor-pointer"
               >
                 Share Link
               </button>

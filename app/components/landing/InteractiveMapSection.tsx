@@ -50,11 +50,26 @@ export default function InteractiveMapSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
-            className="space-y-4 text-sm font-medium text-white"
+            className="space-y-4 text-sm font-semibold text-slate-700 dark:text-slate-200"
           >
-            <li className="flex items-center gap-3"><Navigation size={18} className="text-brand-primary" /> Visual location-based search filtering.</li>
-            <li className="flex items-center gap-3"><MapPin size={18} className="text-brand-primary" /> Moving pins showing provider transit ETA.</li>
-            <li className="flex items-center gap-3"><Clock size={18} className="text-brand-primary" /> Know exactly who is coming and when.</li>
+            <li className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-sky-100 dark:bg-sky-900/40 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
+                <Navigation size={16} />
+              </div>
+              <span>Visual location-based GPS radius filtering</span>
+            </li>
+            <li className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <MapPin size={16} />
+              </div>
+              <span>Moving radar pins showing live artisan transit ETA</span>
+            </li>
+            <li className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                <Clock size={16} />
+              </div>
+              <span>Real-time dispatch status: Know exactly who is arriving</span>
+            </li>
           </motion.ul>
         </div>
 

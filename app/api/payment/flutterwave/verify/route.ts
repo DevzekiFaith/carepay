@@ -13,7 +13,10 @@ export async function GET(req: Request) {
   const protocol = req.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
   const origin = `${protocol}://${host}`;
 
-  const secretKey = process.env.FLUTTERWAVE_SECRET_KEY;
+  const secretKey = (
+    process.env.FLUTTERWAVE_SECRET_KEY || 
+    "FLWSECK-91ada2ac66d5d0e281300c7bc6617d58-19f671ffb44vt-X"
+  ).trim();
 
   if (status === "cancelled") {
     if (paymentType === "store_order" && orderRef) {
