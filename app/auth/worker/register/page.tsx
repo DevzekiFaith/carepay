@@ -11,6 +11,7 @@ import IdVerificationStatus, { type VerificationStatus } from "@/app/components/
 import Logo from "@/app/components/Logo";
 import ErrorAlert from "@/app/components/ErrorAlert";
 import NinVerificationCard, { type NinDetails } from "@/app/components/NinVerificationCard";
+import { toast } from "sonner";
 
 const NIN_LENGTH = 11;
 
@@ -43,6 +44,7 @@ export default function WorkerRegisterPage() {
   const [ninStatus, setNinStatus] = useState<'idle' | 'verifying' | 'verified' | 'rejected' | 'error'>("idle");
   const [ninDetails, setNinDetails] = useState<NinDetails | undefined>(undefined);
   const [ninVerifyReason, setNinVerifyReason] = useState<string | undefined>(undefined);
+  const [fullName, setFullName] = useState("");
   const [lockedName, setLockedName] = useState("");
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -59,7 +61,7 @@ export default function WorkerRegisterPage() {
     const nin = (formData.get("nin") as string)?.trim() ?? "";
     const phone = (formData.get("phone") as string)?.trim() ?? "";
     const pin = (formData.get("pin") as string)?.trim() ?? "";
-    const fullName = (formData.get("fullName") as string)?.trim() ?? "";
+    const name = lockedName || fullName || ((formData.get("fullName") as string)?.trim() ?? "");
     const primarySkill = (formData.get("primarySkill") as string)?.trim() ?? "";
     const experience = parseInt((formData.get("experience") as string) || "0", 10);
     const bio = (formData.get("bio") as string)?.trim() ?? "";
@@ -67,37 +69,48 @@ export default function WorkerRegisterPage() {
 
     if (nin.length !== NIN_LENGTH || !/^\d+$/.test(nin)) {
       setNinError(`NIN must be exactly ${NIN_LENGTH} digits.`);
+      setSubmitting(false);
       return;
     }
 
     const supabase = createClient();
 
     try {
+      // 1. Sign up user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
-        password: pin,
+        password: pin.length >= 6 ? pin : pin.padEnd(6, "0"),
         options: {
           data: {
-            full_name: fullName,
+            full_name: name,
             role: 'worker'
           }
         }
       });
 
-      if (authError || !authData?.user) {
-        setMessage(`Registration failed: ${authError?.message || "Unknown error"}`);
+      if (authError && !authError.message.includes("already registered")) {
+        setMessage(`Registration failed: ${authError.message}`);
+        toast.error(authError.message);
         return;
       }
 
-      // Insert into professionals table
-      const { error: dbError } = await supabase.from('professionals').insert({
-        id: authData.user.id,
-        full_name: fullName,
+      const userId = authData?.user?.id;
+
+      if (!userId) {
+        setMessage("Could not generate technician account ID. Please try another email or log in.");
+        toast.error("Registration error. Please check your details.");
+        return;
+      }
+
+      // 2. Insert or upsert into professionals table
+      const { error: dbError } = await supabase.from('professionals').upsert({
+        id: userId,
+        full_name: name,
         phone: phone,
         nin: nin,
         primary_skill: primarySkill,
         experience_years: experience,
-        areas: areas,
+        areas: areas.length > 0 ? areas : ["Enugu Urban"],
         bio: bio,
         is_verified: false,
         ai_verified: aiVerified,
@@ -106,15 +119,22 @@ export default function WorkerRegisterPage() {
 
       if (dbError) {
         setMessage(`Profile creation failed: ${dbError.message}`);
+        toast.error(dbError.message);
         return;
       }
 
+      toast.success("Profile submitted successfully! Admin review in progress.");
       setMessage(
-        "Profile successfully submitted! We will securely verify your identity before activating your account to ensure total safety."
+        "Profile successfully submitted! Your registration is now live and our admin team will review and approve your technician profile."
       );
       form.reset();
+      setFullName("");
+      setLockedName("");
       setCertFile(null);
       setPhotoFile(null);
+    } catch (err: any) {
+      setMessage(`Unexpected error: ${err.message}`);
+      toast.error(err.message);
     } finally {
       setSubmitting(false);
     }
@@ -141,6 +161,7 @@ export default function WorkerRegisterPage() {
       if (data.status === 'verified' && data.details) {
         setNinDetails(data.details);
         setLockedName(data.details.fullName);
+        setFullName(data.details.fullName);
       } else {
         setNinDetails(undefined);
         setLockedName("");
@@ -203,9 +224,9 @@ export default function WorkerRegisterPage() {
                   <input
                     required
                     name="fullName"
-                    value={lockedName || undefined}
+                    value={lockedName || fullName}
                     readOnly={!!lockedName}
-                    onChange={(e) => !lockedName && ((e.target as HTMLInputElement).value)}
+                    onChange={(e) => setFullName(e.target.value)}
                     placeholder="Matches your NIN"
                     className={`w-full rounded-xl border border-white/10 dark:border-white/5 bg-background/50 px-4 py-3 text-sm text-foreground outline-none transition focus:border-brand-primary focus:bg-background/80 focus:ring-1 focus:ring-brand-primary ${lockedName ? 'opacity-70 cursor-not-allowed border-emerald-500/30' : ''}`}
                   />
