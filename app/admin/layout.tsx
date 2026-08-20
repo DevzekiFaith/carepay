@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   ClipboardList,
@@ -10,8 +11,13 @@ import {
   TrendingUp,
   ArrowLeft,
   ShoppingBag,
+  Lock,
+  ShieldCheck,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import AdminLockScreen from "@/app/components/admin/AdminLockScreen";
+import { isAdminUnlocked, lockAdmin } from "@/lib/admin-auth";
+import { playSound } from "@/lib/audio-fx";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -28,9 +34,34 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const [unlocked, setUnlocked] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    setUnlocked(isAdminUnlocked());
+  }, []);
+
+  const handleLock = () => {
+    playSound("click");
+    lockAdmin();
+    setUnlocked(false);
+  };
+
+  // Prevent flash of content during hydration
+  if (unlocked === null) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-sky-500/20 border-t-sky-500" />
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen bg-background text-foreground antialiased overflow-hidden">
+      {/* Biometric & Passcode Lock Guard */}
+      {!unlocked && (
+        <AdminLockScreen onUnlock={() => setUnlocked(true)} />
+      )}
+
       {/* Background Ambience */}
       <div className="fixed inset-x-0 -top-[30%] -z-10 h-[80%] w-full rounded-full bg-brand-primary/5 opacity-40 blur-[120px] mix-blend-screen pointer-events-none" />
 
@@ -50,7 +81,15 @@ export default function AdminLayout({
               Admin Panel
             </span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleLock}
+              className="inline-flex items-center gap-1.5 rounded-full border border-sky-500/30 bg-sky-500/10 hover:bg-sky-500/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-sky-400 transition-colors shadow-sm"
+              title="Lock Admin Console"
+            >
+              <Lock size={12} />
+              Lock Console
+            </button>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-500">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
               Live
@@ -98,3 +137,4 @@ export default function AdminLayout({
     </div>
   );
 }
+
