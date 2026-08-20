@@ -230,14 +230,33 @@ export default function WorkerTable({ initialWorkers }: { initialWorkers: Worker
                 <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600 border border-sky-200">
                   <AlertCircle size={24} />
                 </div>
-                <p className="text-sm font-bold text-slate-900">No matching professionals found</p>
-                <p className="text-xs text-slate-500">Try adjusting your filters or search terms.</p>
-                <button
-                  onClick={resetFilters}
-                  className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-600 text-white text-xs font-bold shadow-md hover:bg-sky-500 transition-colors cursor-pointer"
-                >
-                  <RotateCcw size={13} /> Clear All Filters
-                </button>
+                {workers.length === 0 ? (
+                  <>
+                    <p className="text-sm font-black text-slate-900">No Service Professionals Registered Yet</p>
+                    <p className="text-xs text-slate-500 max-w-md mx-auto">
+                      Technicians who register via the technician onboarding portal will appear here live in real-time for verification and background screening.
+                    </p>
+                    <a
+                      href="/worker/register"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-600 text-white text-xs font-bold uppercase tracking-wider shadow-md hover:bg-sky-500 transition-colors cursor-pointer"
+                    >
+                      <UserCheck size={14} /> Open Technician Onboarding
+                    </a>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm font-bold text-slate-900">No matching professionals found</p>
+                    <p className="text-xs text-slate-500">Try adjusting your filters or search terms.</p>
+                    <button
+                      onClick={resetFilters}
+                      className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-600 text-white text-xs font-bold shadow-md hover:bg-sky-500 transition-colors cursor-pointer"
+                    >
+                      <RotateCcw size={13} /> Clear All Filters
+                    </button>
+                  </>
+                )}
               </div>
             ) : (
               <div className="divide-y divide-slate-100">
