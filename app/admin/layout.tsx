@@ -24,6 +24,7 @@ const NAV = [
   { href: "/admin/jobs", label: "Jobs", icon: ClipboardList },
   { href: "/admin/workers", label: "Workers", icon: Users },
   { href: "/admin/store-orders", label: "Store Orders", icon: ShoppingBag },
+  { href: "/admin/payments", label: "Payments", icon: ShieldCheck },
   { href: "/admin/cities", label: "Cities", icon: MapPin },
   { href: "/admin/surge", label: "Surge Pricing", icon: TrendingUp },
 ];
@@ -50,7 +51,7 @@ export default function AdminLayout({
   if (unlocked === null) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-sky-500/20 border-t-sky-500" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-500/20 border-t-blue-500" />
       </div>
     );
   }
@@ -63,35 +64,35 @@ export default function AdminLayout({
       )}
 
       {/* Background Ambience */}
-      <div className="fixed inset-x-0 -top-[30%] -z-10 h-[80%] w-full rounded-full bg-brand-primary/5 opacity-40 blur-[120px] mix-blend-screen pointer-events-none" />
+      <div className="fixed inset-x-0 -top-[30%] -z-10 h-[80%] w-full rounded-full bg-blue-600/5 opacity-40 blur-[120px] mix-blend-screen pointer-events-none" />
 
       {/* Top bar */}
-      <header className="sticky top-0 z-40 border-b border-white/10 bg-background/50 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-blue-500/20 bg-slate-950/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
             <Link
               href="/"
-              className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-brand-primary transition-colors"
+              className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-blue-400 transition-colors"
             >
               <ArrowLeft size={12} />
               Back to site
             </Link>
             <span className="text-white/10">|</span>
-            <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-gradient-primary">
+            <span className="text-[11px] font-bold uppercase tracking-[0.2em] bg-gradient-to-r from-blue-400 via-indigo-300 to-sky-400 bg-clip-text text-transparent">
               Admin Panel
             </span>
           </div>
           <div className="flex items-center gap-3">
             <button
               onClick={handleLock}
-              className="inline-flex items-center gap-1.5 rounded-full border border-sky-500/30 bg-sky-500/10 hover:bg-sky-500/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-sky-400 transition-colors shadow-sm"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-blue-500/40 bg-blue-600/20 hover:bg-blue-600/30 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-blue-300 transition-all shadow-sm"
               title="Lock Admin Console"
             >
               <Lock size={12} />
               Lock Console
             </button>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-500">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
               Live
             </span>
           </div>
@@ -99,28 +100,33 @@ export default function AdminLayout({
       </header>
 
       <div className="mx-auto flex max-w-7xl gap-0 lg:gap-8 px-6 py-8 lg:flex-row flex-col">
-        {/* Sidebar nav */}
-        <nav className="flex-shrink-0 w-full lg:w-52 mb-8 lg:mb-0">
-          <ul className="flex lg:flex-col gap-1 flex-wrap">
-            {NAV.map(({ href, label, icon: Icon }) => {
-              const active = pathname === href;
-              return (
-                <li key={href}>
-                  <Link
-                    href={href}
-                    className={`flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-xs font-bold uppercase tracking-widest transition-all duration-300 ${
-                      active
-                        ? "bg-brand-primary text-background shadow-[0_0_15px_rgba(249,115,22,0.4)]"
-                        : "text-zinc-500 hover:text-brand-primary hover:bg-white/5 border border-transparent hover:border-white/5"
-                    }`}
-                  >
-                    <Icon size={14} className={active ? "" : "opacity-70"} />
-                    {label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+        {/* Sidebar nav with vibrant Blue Buttons */}
+        <nav className="flex-shrink-0 w-full lg:w-56 mb-8 lg:mb-0">
+          <div className="p-2 rounded-2xl bg-blue-950/20 border border-blue-500/20 backdrop-blur-md">
+            <p className="px-3 py-2 text-[10px] font-extrabold uppercase tracking-widest text-blue-400/70">
+              Navigation
+            </p>
+            <ul className="flex lg:flex-col gap-1.5 flex-wrap">
+              {NAV.map(({ href, label, icon: Icon }) => {
+                const active = pathname === href;
+                return (
+                  <li key={href} className="flex-1 lg:flex-none">
+                    <Link
+                      href={href}
+                      className={`flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-200 shadow-sm ${
+                        active
+                          ? "bg-blue-600 text-white shadow-[0_4px_20px_rgba(37,99,235,0.45)] border border-blue-400/50 font-extrabold translate-x-0.5"
+                          : "bg-blue-950/40 text-blue-200/90 hover:bg-blue-600/30 hover:text-white border border-blue-500/20 hover:border-blue-400/40"
+                      }`}
+                    >
+                      <Icon size={15} className={active ? "text-white" : "text-blue-400 opacity-90"} />
+                      <span>{label}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         </nav>
 
         {/* Page content */}

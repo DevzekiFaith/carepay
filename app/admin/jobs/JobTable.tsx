@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { CITIES } from "@/lib/cities";
-import { motion } from "framer-motion";
-import { Filter } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Filter, Search, RotateCcw, CheckCircle2, Clock, AlertCircle, XCircle, ArrowUpDown } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
 
-type Job = {
+export type Job = {
   id: string;
   service_type: string;
   description: string;
@@ -16,98 +18,269 @@ type Job = {
 };
 
 const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
-  pending: { label: "Pending", cls: "border-amber-500/30 bg-amber-500/10 text-amber-500" },
-  matched: { label: "Matched", cls: "border-blue-500/30 bg-blue-500/10 text-blue-500" },
-  completed: { label: "Completed", cls: "border-emerald-500/30 bg-emerald-500/10 text-emerald-500" },
-  cancelled: { label: "Cancelled", cls: "border-white/10 bg-white/5 text-zinc-400" },
+  pending: { label: "Pending", cls: "border-amber-500/40 bg-amber-500/15 text-amber-400" },
+  matched: { label: "Matched", cls: "border-blue-500/40 bg-blue-500/15 text-blue-400" },
+  completed: { label: "Completed", cls: "border-emerald-500/40 bg-emerald-500/15 text-emerald-400" },
+  cancelled: { label: "Cancelled", cls: "border-rose-500/40 bg-rose-500/15 text-rose-400" },
 };
 
 export default function JobTable({ initialJobs }: { initialJobs: Job[] }) {
+  const [jobs, setJobs] = useState<Job[]>(initialJobs);
   const [statusFilter, setStatusFilter] = useState("all");
   const [cityFilter, setCityFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
-  const filtered = initialJobs.filter((j) => {
-    if (statusFilter !== "all" && (j.status ?? "pending") !== statusFilter) return false;
-    // Note: city filter would require city_id in the Job type/data
-    return true;
-  });
+  const supabase = useMemo(() => createClient(), []);
+
+  const handleStatusChange = async (jobId: string, newStatus: string) => {
+    setUpdatingId(jobId);
+    try {
+      const { error } = await supabase
+        .from("service_requests")
+        .update({ status: newStatus })
+        .eq("id", jobId);
+
+      if (error) {
+        toast.error("Failed to update status: " + error.message);
+        return;
+      }
+
+      setJobs((prev) =>
+        prev.map((j) => (j.id === jobId ? { ...j, status: newStatus } : j))
+      );
+      toast.success(`Job updated to ${newStatus.toUpperCase()}`);
+    } catch (err: any) {
+      toast.error("Error updating status: " + err.message);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const filtered = useMemo(() => {
+    return jobs.filter((j) => {
+      const currentStatus = j.status ?? "pending";
+      if (statusFilter !== "all" && currentStatus !== statusFilter) {
+        return false;
+      }
+
+      // City filter matching: checks if address contains city name or city areas
+      if (cityFilter !== "all") {
+        const targetCity = CITIES.find((c) => c.id === cityFilter);
+        if (targetCity) {
+          const addr = (j.address || "").toLowerCase();
+          const cityName = targetCity.name.toLowerCase();
+          const matchesCity = addr.includes(cityName);
+          const matchesArea = targetCity.areas.some((area) =>
+            addr.includes(area.toLowerCase())
+          );
+          if (!matchesCity && !matchesArea) return false;
+        }
+      }
+
+      // Text search query matching
+      if (searchQuery.trim() !== "") {
+        const query = searchQuery.toLowerCase();
+        const matchesService = (j.service_type || "").toLowerCase().includes(query);
+        const matchesDesc = (j.description || "").toLowerCase().includes(query);
+        const matchesAddr = (j.address || "").toLowerCase().includes(query);
+        const matchesId = j.id.toLowerCase().includes(query);
+        if (!matchesService && !matchesDesc && !matchesAddr && !matchesId) return false;
+      }
+
+      return true;
+    });
+  }, [jobs, statusFilter, cityFilter, searchQuery]);
+
+  const resetFilters = () => {
+    setStatusFilter("all");
+    setCityFilter("all");
+    setSearchQuery("");
+  };
 
   return (
     <div className="space-y-6">
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3 p-4 glass-panel">
-        <div className="flex items-center gap-2">
-          <Filter size={12} className="text-brand-primary" />
-          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Filters</span>
+      {/* Search & Filter Toolbar */}
+      <div className="p-4 rounded-2xl bg-blue-950/20 border border-blue-500/20 backdrop-blur-md flex flex-wrap items-center gap-3">
+        {/* Search input */}
+        <div className="relative flex-1 min-w-[240px]">
+          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-blue-400" />
+          <input
+            type="text"
+            placeholder="Search service, address, description..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-900/80 border border-blue-500/20 text-xs text-foreground placeholder:text-zinc-500 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 transition-all"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white text-xs"
+            >
+              ✕
+            </button>
+          )}
         </div>
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="rounded-xl border border-white/10 bg-background/50 px-3 py-1.5 text-xs font-semibold text-foreground outline-none focus:border-brand-primary appearance-none hover:bg-white/5 transition-colors"
-        >
-          <option value="all">All Statuses</option>
-          <option value="pending">Pending</option>
-          <option value="matched">Matched</option>
-          <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
+
+        {/* Status Filter */}
+        <div className="flex items-center gap-2">
+          <Filter size={13} className="text-blue-400" />
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="rounded-xl border border-blue-500/30 bg-slate-900/90 px-3.5 py-2 text-xs font-semibold text-blue-100 outline-none focus:border-blue-400 transition-colors cursor-pointer"
+          >
+            <option value="all">All Statuses ({jobs.length})</option>
+            <option value="pending">Pending ({jobs.filter((j) => (j.status ?? "pending") === "pending").length})</option>
+            <option value="matched">Matched ({jobs.filter((j) => j.status === "matched").length})</option>
+            <option value="completed">Completed ({jobs.filter((j) => j.status === "completed").length})</option>
+            <option value="cancelled">Cancelled ({jobs.filter((j) => j.status === "cancelled").length})</option>
+          </select>
+        </div>
+
+        {/* City Filter */}
         <select
           value={cityFilter}
           onChange={(e) => setCityFilter(e.target.value)}
-          className="rounded-xl border border-white/10 bg-background/50 px-3 py-1.5 text-xs font-semibold text-foreground outline-none focus:border-brand-primary appearance-none hover:bg-white/5 transition-colors"
+          className="rounded-xl border border-blue-500/30 bg-slate-900/90 px-3.5 py-2 text-xs font-semibold text-blue-100 outline-none focus:border-blue-400 transition-colors cursor-pointer"
         >
           <option value="all">All Cities</option>
           {CITIES.map((c) => (
-            <option key={c.id} value={c.id}>{c.name}</option>
+            <option key={c.id} value={c.id}>
+              {c.name} ({c.active ? "Live" : "Upcoming"})
+            </option>
           ))}
         </select>
+
+        {/* Reset Filter Button */}
+        {(statusFilter !== "all" || cityFilter !== "all" || searchQuery !== "") && (
+          <button
+            onClick={resetFilters}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-xs font-bold text-blue-300 transition-colors"
+          >
+            <RotateCcw size={12} />
+            Reset
+          </button>
+        )}
       </div>
 
-      <div className="glass-panel overflow-hidden">
-        <div className="hidden sm:grid grid-cols-[1fr_auto_1.5fr_auto_auto] gap-4 px-6 py-3 border-b border-white/5 bg-white/5 backdrop-blur-sm">
-          {["Service", "Status", "Address", "Preferred Time", "Date"].map((h) => (
-            <span key={h} className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{h}</span>
+      {/* Main Table */}
+      <div className="glass-panel overflow-hidden border border-blue-500/20 rounded-2xl shadow-xl">
+        <div className="hidden sm:grid grid-cols-[1.2fr_1.5fr_1fr_1fr_1.2fr] gap-4 px-6 py-3.5 border-b border-blue-500/20 bg-blue-950/30 backdrop-blur-sm">
+          {["Service & Description", "Address", "Preferred Time", "Status", "Manage Status"].map((h) => (
+            <span key={h} className="text-[10px] font-bold uppercase tracking-widest text-blue-300/80">
+              {h}
+            </span>
           ))}
         </div>
 
         {filtered.length === 0 ? (
-          <div className="px-6 py-12 text-center text-sm text-zinc-500">No jobs found.</div>
+          <div className="px-6 py-16 text-center space-y-3">
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+              <AlertCircle size={24} />
+            </div>
+            <p className="text-sm font-semibold text-zinc-300">No matching jobs found</p>
+            <p className="text-xs text-zinc-500">Try adjusting your search keywords or clearing active filters.</p>
+            <button
+              onClick={resetFilters}
+              className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 text-white text-xs font-bold shadow-md hover:bg-blue-500 transition-colors"
+            >
+              <RotateCcw size={13} /> Clear All Filters
+            </button>
+          </div>
         ) : (
           <div className="divide-y divide-white/5">
-            {filtered.map((job, i) => {
-              const st = STATUS_LABELS[job.status ?? "pending"] ?? STATUS_LABELS.pending;
-              return (
-                <motion.div
-                  key={job.id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: i * 0.01 }}
-                  className="grid sm:grid-cols-[1fr_auto_1.5fr_auto_auto] gap-4 px-6 py-4 items-center"
-                >
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">{job.service_type}</p>
-                    <p className="text-xs text-zinc-500 truncate max-w-[200px]">{job.description}</p>
-                  </div>
-                  <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest whitespace-nowrap ${st.cls}`}>
-                    {st.label}
-                  </span>
-                  <p className="text-xs text-zinc-500 truncate">{job.address}</p>
-                  <p className="text-xs text-zinc-500 whitespace-nowrap">
-                    {job.preferred_time ? new Date(job.preferred_time).toLocaleDateString("en-NG", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "Flexible"}
-                  </p>
-                  <p className="text-xs text-zinc-400 whitespace-nowrap">
-                    {new Date(job.created_at).toLocaleDateString("en-NG", { day: "numeric", month: "short" })}
-                  </p>
-                </motion.div>
-              );
-            })}
+            <AnimatePresence>
+              {filtered.map((job, i) => {
+                const currentStatus = job.status ?? "pending";
+                const st = STATUS_LABELS[currentStatus] ?? STATUS_LABELS.pending;
+                const isUpdating = updatingId === job.id;
+
+                return (
+                  <motion.div
+                    key={job.id}
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ delay: Math.min(i * 0.02, 0.2) }}
+                    className="grid sm:grid-cols-[1.2fr_1.5fr_1fr_1fr_1.2fr] gap-4 px-6 py-4 items-center hover:bg-blue-600/[0.03] transition-colors"
+                  >
+                    {/* Service & Details */}
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-foreground">{job.service_type}</span>
+                        <span className="text-[10px] font-mono text-zinc-500">#{job.id.slice(0, 6)}</span>
+                      </div>
+                      <p className="text-xs text-zinc-400 line-clamp-2 mt-0.5" title={job.description}>
+                        {job.description || "No specific details provided."}
+                      </p>
+                    </div>
+
+                    {/* Address */}
+                    <div>
+                      <p className="text-xs text-zinc-300 font-medium line-clamp-2" title={job.address}>
+                        {job.address}
+                      </p>
+                      <p className="text-[10px] text-zinc-500 mt-0.5">
+                        Created {new Date(job.created_at).toLocaleDateString("en-NG", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                    </div>
+
+                    {/* Preferred Time */}
+                    <div>
+                      <p className="text-xs text-zinc-400 font-medium">
+                        {job.preferred_time
+                          ? new Date(job.preferred_time).toLocaleDateString("en-NG", {
+                              day: "numeric",
+                              month: "short",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : "Flexible / ASAP"}
+                      </p>
+                    </div>
+
+                    {/* Status Badge */}
+                    <div>
+                      <span
+                        className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider whitespace-nowrap ${st.cls}`}
+                      >
+                        {st.label}
+                      </span>
+                    </div>
+
+                    {/* Status Actions */}
+                    <div>
+                      <select
+                        disabled={isUpdating}
+                        value={currentStatus}
+                        onChange={(e) => handleStatusChange(job.id, e.target.value)}
+                        className="w-full text-xs font-semibold rounded-xl bg-slate-900 border border-blue-500/30 text-blue-200 px-3 py-1.5 outline-none focus:border-blue-400 hover:border-blue-400/60 transition-all cursor-pointer disabled:opacity-50 shadow-sm"
+                      >
+                        <option value="pending" className="bg-slate-900 text-amber-400">Mark: Pending</option>
+                        <option value="matched" className="bg-slate-900 text-blue-400">Mark: Matched</option>
+                        <option value="completed" className="bg-slate-900 text-emerald-400">Mark: Completed</option>
+                        <option value="cancelled" className="bg-slate-900 text-rose-400">Mark: Cancelled</option>
+                      </select>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
           </div>
         )}
 
-        <div className="px-6 py-3 border-t border-white/5 bg-white/5 backdrop-blur-sm text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-          {filtered.length} <span className="text-brand-primary">job{filtered.length !== 1 ? "s" : ""}</span>
+        <div className="px-6 py-3.5 border-t border-blue-500/20 bg-blue-950/20 backdrop-blur-sm flex items-center justify-between text-[11px] font-bold uppercase tracking-widest text-zinc-400">
+          <div>
+            Showing <span className="text-blue-400 font-extrabold">{filtered.length}</span> of {jobs.length} jobs
+          </div>
+          <div className="flex gap-4">
+            <span className="text-amber-400">{jobs.filter((j) => (j.status ?? "pending") === "pending").length} pending</span>
+            <span className="text-emerald-400">{jobs.filter((j) => j.status === "completed").length} completed</span>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+
