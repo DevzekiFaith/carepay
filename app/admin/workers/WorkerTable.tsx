@@ -92,77 +92,83 @@ export default function WorkerTable({ initialWorkers }: { initialWorkers: Worker
   return (
     <div className="space-y-6">
       {/* Search & Filter Toolbar */}
-      <div className="p-4 rounded-2xl bg-blue-950/20 border border-blue-500/20 backdrop-blur-md flex flex-wrap items-center gap-3">
+      <div className="p-4 rounded-2xl bg-blue-950/40 border-2 border-blue-500/30 backdrop-blur-md flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shadow-lg">
         {/* Search input */}
-        <div className="relative flex-1 min-w-[240px]">
-          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-blue-400" />
+        <div className="relative flex-1 min-w-0">
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-cyan-300 font-bold" />
           <input
             type="text"
             placeholder="Search worker name, skill, phone, NIN..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-900/80 border border-blue-500/20 text-xs text-foreground placeholder:text-zinc-500 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 transition-all"
+            className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-slate-900 border-2 border-blue-400/50 text-sm font-semibold text-white placeholder:text-slate-200 focus:outline-none focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/30 transition-all"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white text-xs"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white text-xs font-bold"
             >
               ✕
             </button>
           )}
         </div>
 
-        {/* Verification Status Filter */}
-        <div className="flex items-center gap-2">
-          <Filter size={13} className="text-blue-400" />
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-xl border border-blue-500/30 bg-slate-900/90 px-3.5 py-2 text-xs font-semibold text-blue-100 outline-none focus:border-blue-400 transition-colors cursor-pointer"
-          >
-            <option value="all">All Statuses ({workers.length})</option>
-            <option value="verified">Verified ({workers.filter((w) => w.is_verified).length})</option>
-            <option value="unverified">Unverified ({workers.filter((w) => !w.is_verified).length})</option>
-            <option value="ai_verified">AI Verified ({workers.filter((w) => w.ai_verified).length})</option>
-          </select>
+        {/* Filters Group */}
+        <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+          {/* Verification Status Filter */}
+          <div className="flex-1 sm:flex-none min-w-[140px]">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full rounded-xl border-2 border-blue-400/50 bg-slate-900 px-3.5 py-2.5 text-xs font-bold text-white outline-none focus:border-cyan-300 transition-colors cursor-pointer shadow-sm"
+            >
+              <option value="all">All Statuses ({workers.length})</option>
+              <option value="verified">Verified ({workers.filter((w) => w.is_verified).length})</option>
+              <option value="unverified">Unverified ({workers.filter((w) => !w.is_verified).length})</option>
+              <option value="ai_verified">AI Verified ({workers.filter((w) => w.ai_verified).length})</option>
+            </select>
+          </div>
+
+          {/* Skill Filter */}
+          <div className="flex-1 sm:flex-none min-w-[130px]">
+            <select
+              value={skillFilter}
+              onChange={(e) => setSkillFilter(e.target.value)}
+              className="w-full rounded-xl border-2 border-blue-400/50 bg-slate-900 px-3.5 py-2.5 text-xs font-bold text-white outline-none focus:border-cyan-300 transition-colors cursor-pointer shadow-sm"
+            >
+              <option value="all">All Skills</option>
+              {availableSkills.map((sk) => (
+                <option key={sk} value={sk}>
+                  {sk}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Reset Filter Button */}
+          {(statusFilter !== "all" || skillFilter !== "all" || searchQuery !== "") && (
+            <button
+              onClick={resetFilters}
+              className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 border border-blue-300 text-xs font-black text-white transition-all shadow-md cursor-pointer shrink-0"
+            >
+              <RotateCcw size={13} />
+              Reset
+            </button>
+          )}
         </div>
-
-        {/* Skill Filter */}
-        <select
-          value={skillFilter}
-          onChange={(e) => setSkillFilter(e.target.value)}
-          className="rounded-xl border border-blue-500/30 bg-slate-900/90 px-3.5 py-2 text-xs font-semibold text-blue-100 outline-none focus:border-blue-400 transition-colors cursor-pointer"
-        >
-          <option value="all">All Skills</option>
-          {availableSkills.map((sk) => (
-            <option key={sk} value={sk}>
-              {sk}
-            </option>
-          ))}
-        </select>
-
-        {/* Reset Filter Button */}
-        {(statusFilter !== "all" || skillFilter !== "all" || searchQuery !== "") && (
-          <button
-            onClick={resetFilters}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-xs font-bold text-blue-300 transition-colors"
-          >
-            <RotateCcw size={12} />
-            Reset
-          </button>
-        )}
       </div>
 
-      {/* Main Table */}
+      {/* Main Table with Responsive Horizontal Scroll */}
       <div className="glass-panel overflow-hidden border-2 border-blue-500/30 rounded-2xl shadow-2xl bg-slate-950/80">
-        <div className="hidden lg:grid grid-cols-[1.5fr_auto_auto_auto_auto_auto] gap-4 px-6 py-4 border-b-2 border-blue-500/40 bg-blue-900/40 backdrop-blur-md">
-          {["Name & Skill", "Phone", "NIN", "AI Check", "Status", "Action"].map((h) => (
-            <span key={h} className="text-xs font-black uppercase tracking-wider text-white drop-shadow-sm">
-              {h}
-            </span>
-          ))}
-        </div>
+        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-blue-500/30">
+          <div className="min-w-[760px]">
+            <div className="grid grid-cols-[1.5fr_auto_auto_auto_auto_auto] gap-4 px-6 py-4 border-b-2 border-blue-500/40 bg-blue-900/40 backdrop-blur-md">
+              {["Name & Skill", "Phone", "NIN", "AI Check", "Status", "Action"].map((h) => (
+                <span key={h} className="text-xs font-black uppercase tracking-wider text-white drop-shadow-sm">
+                  {h}
+                </span>
+              ))}
+            </div>
 
         {filtered.length === 0 ? (
           <div className="px-6 py-16 text-center space-y-3">
@@ -269,12 +275,14 @@ export default function WorkerTable({ initialWorkers }: { initialWorkers: Worker
             </AnimatePresence>
           </div>
         )}
+          </div>
+        </div>
 
-        <div className="px-6 py-4 border-t-2 border-blue-500/30 bg-blue-950/40 backdrop-blur-sm flex items-center justify-between text-xs font-black uppercase tracking-wider text-white">
+        <div className="px-6 py-4 border-t-2 border-blue-500/30 bg-blue-950/40 backdrop-blur-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-black uppercase tracking-wider text-white">
           <div>
             Showing <span className="text-cyan-300 font-black text-sm">{filtered.length}</span> of {workers.length} workers
           </div>
-          <div className="flex gap-4">
+          <div className="flex gap-4 flex-wrap">
             <span className="text-emerald-300 font-black">{workers.filter((w) => w.is_verified).length} verified</span>
             <span className="text-amber-300 font-black">{workers.filter((w) => !w.is_verified).length} pending verification</span>
           </div>

@@ -230,23 +230,23 @@ export default function AdminDashboard() {
               <p className="text-xs text-zinc-500 mt-1 uppercase tracking-widest font-bold">Management & Fulfillment Control</p>
             </div>
             <div className="flex items-center gap-3 w-full sm:w-auto">
-              <div className="relative flex-1 sm:w-72">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-blue-400" size={15} />
+              <div className="relative flex-1 sm:w-80">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-cyan-300 font-bold" size={16} />
                 <input 
                   type="text"
                   placeholder="Search ref, customer, address..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-slate-900/90 border border-blue-500/30 rounded-xl py-2 pl-10 pr-8 text-xs text-foreground placeholder:text-zinc-500 focus:border-blue-400 focus:ring-1 focus:ring-blue-400 transition-all outline-none"
+                  className="w-full bg-slate-900 border-2 border-blue-400/50 rounded-xl py-2 pl-10 pr-9 text-xs font-semibold text-white placeholder:text-slate-200 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/30 transition-all outline-none"
                 />
                 {searchTerm && (
-                  <button onClick={() => setSearchTerm("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white text-xs">✕</button>
+                  <button onClick={() => setSearchTerm("")} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white text-xs font-bold">✕</button>
                 )}
               </div>
               <button 
                 onClick={fetchData}
                 title="Refresh Data"
-                className="h-9 w-9 flex items-center justify-center rounded-xl bg-blue-600/20 border border-blue-500/30 hover:bg-blue-600/30 text-blue-300 transition-all cursor-pointer shadow-sm"
+                className="h-9 w-9 flex items-center justify-center rounded-xl bg-blue-600 hover:bg-blue-500 border border-blue-300 text-white transition-all cursor-pointer shadow-md shrink-0"
               >
                 <RefreshCw size={15} />
               </button>
@@ -397,64 +397,66 @@ export default function AdminDashboard() {
 
                 {/* Orders Table */}
                 <div className="glass-panel overflow-hidden border-2 border-blue-500/30 rounded-2xl shadow-2xl bg-slate-950/80">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                      <thead>
-                        <tr className="border-b-2 border-blue-500/40 bg-blue-900/40 backdrop-blur-md">
-                          <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Order Ref</th>
-                          <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Customer</th>
-                          <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Total</th>
-                          <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Status</th>
-                          <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Update Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-blue-500/15">
-                        {filteredOrders.length === 0 ? (
-                          <tr>
-                            <td colSpan={5} className="px-6 py-12 text-center text-zinc-300 text-xs font-bold">
-                              No orders found matching the filter criteria.
-                            </td>
+                  <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-blue-500/30">
+                    <div className="min-w-[720px]">
+                      <table className="w-full text-left">
+                        <thead>
+                          <tr className="border-b-2 border-blue-500/40 bg-blue-900/40 backdrop-blur-md">
+                            <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Order Ref</th>
+                            <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Customer</th>
+                            <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Total</th>
+                            <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Status</th>
+                            <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Update Status</th>
                           </tr>
-                        ) : (
-                          filteredOrders.map((order) => (
-                            <tr key={order.id} className="hover:bg-blue-600/10 transition-colors">
-                              <td className="px-6 py-4.5 font-mono text-xs font-black text-cyan-300 bg-cyan-950/60 border border-cyan-500/30 rounded px-2 py-1">{order.order_ref}</td>
-                              <td className="px-6 py-4.5">
-                                <div className="text-xs font-black text-white">{order.customer_name}</div>
-                                <div className="text-[11px] text-zinc-300 mt-0.5 font-medium">
-                                  {order.delivery_address || (Array.isArray(order.items) ? `${order.items.length} items` : "Order")}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4.5 text-xs font-black text-amber-300">₦{(order.total || 0).toLocaleString()}</td>
-                              <td className="px-6 py-4.5">
-                                <span className={`inline-flex items-center rounded-full border-2 px-3 py-1 text-[10px] font-black uppercase tracking-wider ${
-                                  order.status === 'delivered' ? 'border-purple-400 bg-purple-500/20 text-purple-300' :
-                                  order.status === 'shipped' ? 'border-sky-400 bg-sky-500/20 text-sky-200' :
-                                  order.status === 'processing' || order.status === 'paid' ? 'border-emerald-400 bg-emerald-500/20 text-emerald-300' :
-                                  'border-amber-400 bg-amber-500/20 text-amber-300'
-                                }`}>
-                                  {order.status.replace('_', ' ')}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4.5">
-                                <select 
-                                  disabled={updatingId === order.id}
-                                  value={order.status}
-                                  onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                                  className="bg-slate-900 border-2 border-blue-400/60 rounded-xl px-3 py-1.5 text-xs font-bold text-white outline-none focus:border-cyan-300 cursor-pointer shadow-md"
-                                >
-                                  <option value="pending_payment" className="bg-slate-900 text-amber-300 font-bold">Pending Payment</option>
-                                  <option value="processing" className="bg-slate-900 text-emerald-300 font-bold">Processing (Paid)</option>
-                                  <option value="shipped" className="bg-slate-900 text-sky-300 font-bold">Shipped</option>
-                                  <option value="delivered" className="bg-slate-900 text-purple-300 font-bold">Delivered</option>
-                                  <option value="cancelled" className="bg-slate-900 text-rose-300 font-bold">Cancelled</option>
-                                </select>
+                        </thead>
+                        <tbody className="divide-y divide-blue-500/15">
+                          {filteredOrders.length === 0 ? (
+                            <tr>
+                              <td colSpan={5} className="px-6 py-12 text-center text-zinc-300 text-xs font-bold">
+                                No orders found matching the filter criteria.
                               </td>
                             </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </table>
+                          ) : (
+                            filteredOrders.map((order) => (
+                              <tr key={order.id} className="hover:bg-blue-600/10 transition-colors">
+                                <td className="px-6 py-4.5 font-mono text-xs font-black text-cyan-300 bg-cyan-950/60 border border-cyan-500/30 rounded px-2 py-1">{order.order_ref}</td>
+                                <td className="px-6 py-4.5">
+                                  <div className="text-xs font-black text-white">{order.customer_name}</div>
+                                  <div className="text-[11px] text-zinc-300 mt-0.5 font-medium">
+                                    {order.delivery_address || (Array.isArray(order.items) ? `${order.items.length} items` : "Order")}
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4.5 text-xs font-black text-amber-300">₦{(order.total || 0).toLocaleString()}</td>
+                                <td className="px-6 py-4.5">
+                                  <span className={`inline-flex items-center rounded-full border-2 px-3 py-1 text-[10px] font-black uppercase tracking-wider ${
+                                    order.status === 'delivered' ? 'border-purple-400 bg-purple-500/20 text-purple-300' :
+                                    order.status === 'shipped' ? 'border-sky-400 bg-sky-500/20 text-sky-200' :
+                                    order.status === 'processing' || order.status === 'paid' ? 'border-emerald-400 bg-emerald-500/20 text-emerald-300' :
+                                    'border-amber-400 bg-amber-500/20 text-amber-300'
+                                  }`}>
+                                    {order.status.replace('_', ' ')}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4.5">
+                                  <select 
+                                    disabled={updatingId === order.id}
+                                    value={order.status}
+                                    onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                                    className="bg-slate-900 border-2 border-blue-400/60 rounded-xl px-3 py-1.5 text-xs font-bold text-white outline-none focus:border-cyan-300 cursor-pointer shadow-md"
+                                  >
+                                    <option value="pending_payment" className="bg-slate-900 text-amber-300 font-bold">Pending Payment</option>
+                                    <option value="processing" className="bg-slate-900 text-emerald-300 font-bold">Processing (Paid)</option>
+                                    <option value="shipped" className="bg-slate-900 text-sky-300 font-bold">Shipped</option>
+                                    <option value="delivered" className="bg-slate-900 text-purple-300 font-bold">Delivered</option>
+                                    <option value="cancelled" className="bg-slate-900 text-rose-300 font-bold">Cancelled</option>
+                                  </select>
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -497,62 +499,64 @@ export default function AdminDashboard() {
 
                 {/* Service Requests Table */}
                 <div className="glass-panel overflow-hidden border-2 border-blue-500/30 rounded-2xl shadow-2xl bg-slate-950/80">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                      <thead>
-                        <tr className="border-b-2 border-blue-500/40 bg-blue-900/40 backdrop-blur-md">
-                          <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Service</th>
-                          <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Address</th>
-                          <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Date</th>
-                          <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Status</th>
-                          <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-blue-500/15">
-                        {filteredRequests.length === 0 ? (
-                          <tr>
-                            <td colSpan={5} className="px-6 py-12 text-center text-zinc-300 text-xs font-bold">
-                              No service requests found.
-                            </td>
+                  <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-blue-500/30">
+                    <div className="min-w-[720px]">
+                      <table className="w-full text-left">
+                        <thead>
+                          <tr className="border-b-2 border-blue-500/40 bg-blue-900/40 backdrop-blur-md">
+                            <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Service</th>
+                            <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Address</th>
+                            <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Date</th>
+                            <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Status</th>
+                            <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Action</th>
                           </tr>
-                        ) : (
-                          filteredRequests.map((req) => (
-                            <tr key={req.id} className="hover:bg-blue-600/10 transition-colors">
-                              <td className="px-6 py-4.5 text-xs font-black text-white flex items-center gap-2.5">
-                                <div className="h-7 w-7 rounded-lg bg-blue-600/30 border border-blue-400/40 flex items-center justify-center text-cyan-300">
-                                  <Wrench size={14} />
-                                </div>
-                                <span>{req.service_type}</span>
-                              </td>
-                              <td className="px-6 py-4.5 text-xs text-white font-bold max-w-[220px] truncate">{req.address}</td>
-                              <td className="px-6 py-4.5 text-xs font-bold text-cyan-300">📅 {new Date(req.created_at).toLocaleDateString()}</td>
-                              <td className="px-6 py-4.5">
-                                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border-2 ${
-                                  req.status === 'pending' ? 'border-amber-400 bg-amber-500/20 text-amber-300' : 
-                                  req.status === 'matched' ? 'border-sky-400 bg-sky-500/20 text-sky-200' : 
-                                  'border-emerald-400 bg-emerald-500/20 text-emerald-300'
-                                }`}>
-                                  {req.status}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4.5">
-                                <select 
-                                  disabled={updatingId === req.id}
-                                  value={req.status || 'pending'}
-                                  onChange={(e) => updateRequestStatus(req.id, e.target.value)}
-                                  className="bg-slate-900 border-2 border-blue-400/60 rounded-xl px-3 py-1.5 text-xs font-bold text-white outline-none focus:border-cyan-300 cursor-pointer shadow-md"
-                                >
-                                  <option value="pending" className="bg-slate-900 text-amber-300 font-bold">Mark: Pending</option>
-                                  <option value="matched" className="bg-slate-900 text-sky-300 font-bold">Mark: Matched</option>
-                                  <option value="completed" className="bg-slate-900 text-emerald-300 font-bold">Mark: Completed</option>
-                                  <option value="cancelled" className="bg-slate-900 text-rose-300 font-bold">Mark: Cancelled</option>
-                                </select>
+                        </thead>
+                        <tbody className="divide-y divide-blue-500/15">
+                          {filteredRequests.length === 0 ? (
+                            <tr>
+                              <td colSpan={5} className="px-6 py-12 text-center text-zinc-300 text-xs font-bold">
+                                No service requests found.
                               </td>
                             </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </table>
+                          ) : (
+                            filteredRequests.map((req) => (
+                              <tr key={req.id} className="hover:bg-blue-600/10 transition-colors">
+                                <td className="px-6 py-4.5 text-xs font-black text-white flex items-center gap-2.5">
+                                  <div className="h-7 w-7 rounded-lg bg-blue-600/30 border border-blue-400/40 flex items-center justify-center text-cyan-300">
+                                    <Wrench size={14} />
+                                  </div>
+                                  <span>{req.service_type}</span>
+                                </td>
+                                <td className="px-6 py-4.5 text-xs text-white font-bold max-w-[220px] truncate">{req.address}</td>
+                                <td className="px-6 py-4.5 text-xs font-bold text-cyan-300">📅 {new Date(req.created_at).toLocaleDateString()}</td>
+                                <td className="px-6 py-4.5">
+                                  <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border-2 ${
+                                    req.status === 'pending' ? 'border-amber-400 bg-amber-500/20 text-amber-300' : 
+                                    req.status === 'matched' ? 'border-sky-400 bg-sky-500/20 text-sky-200' : 
+                                    'border-emerald-400 bg-emerald-500/20 text-emerald-300'
+                                  }`}>
+                                    {req.status}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4.5">
+                                  <select 
+                                    disabled={updatingId === req.id}
+                                    value={req.status || 'pending'}
+                                    onChange={(e) => updateRequestStatus(req.id, e.target.value)}
+                                    className="bg-slate-900 border-2 border-blue-400/60 rounded-xl px-3 py-1.5 text-xs font-bold text-white outline-none focus:border-cyan-300 cursor-pointer shadow-md"
+                                  >
+                                    <option value="pending" className="bg-slate-900 text-amber-300 font-bold">Mark: Pending</option>
+                                    <option value="matched" className="bg-slate-900 text-sky-300 font-bold">Mark: Matched</option>
+                                    <option value="completed" className="bg-slate-900 text-emerald-300 font-bold">Mark: Completed</option>
+                                    <option value="cancelled" className="bg-slate-900 text-rose-300 font-bold">Mark: Cancelled</option>
+                                  </select>
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </motion.div>

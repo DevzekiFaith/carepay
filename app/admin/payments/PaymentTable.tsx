@@ -88,72 +88,72 @@ export default function PaymentTable({ initialPayments }: { initialPayments: Pay
 
   if (payments.length === 0) {
     return (
-      <div className="py-20 text-center text-zinc-500 glass-panel">
-        <p className="text-sm font-bold">No payments to review</p>
-        <p className="text-xs mt-1">Pending bank transfers will appear here.</p>
+      <div className="py-20 text-center text-zinc-300 glass-panel border-2 border-blue-500/30 rounded-2xl bg-slate-950/80 shadow-xl">
+        <p className="text-base font-black text-white">No payments to review</p>
+        <p className="text-xs mt-1 text-zinc-400">Pending bank transfers and manual receipts will appear here.</p>
       </div>
     );
   }
 
   return (
     <div className="grid gap-4">
-      {payments.map(p => (
+      {payments.map((p) => (
         <motion.div 
           key={p.id} 
           initial={{ opacity: 0, scale: 0.98 }} 
           animate={{ opacity: 1, scale: 1 }}
-          className={`glass-panel p-6 border transition-all ${
-            p.status === 'approved' ? 'border-emerald-500/30 bg-emerald-50/50' : 
-            p.status === 'rejected' ? 'border-red-500/30 bg-red-50/50' : 
-            'border-slate-200 bg-white shadow-sm'
+          className={`glass-panel p-6 border-2 rounded-2xl transition-all shadow-xl ${
+            p.status === 'approved' ? 'border-emerald-500/50 bg-emerald-950/20' : 
+            p.status === 'rejected' ? 'border-rose-500/50 bg-rose-950/20' : 
+            'border-blue-500/40 bg-slate-950/80'
           }`}
         >
-          <div className="flex flex-col md:flex-row gap-6">
+          <div className="flex flex-col sm:flex-row gap-6 items-start">
             {/* Receipt Preview */}
-            <div className="relative w-full md:w-40 aspect-video md:aspect-[3/4] rounded-xl overflow-hidden bg-black/40 border border-white/10 group shrink-0">
+            <div className="relative w-full sm:w-44 aspect-video sm:aspect-[3/4] rounded-xl overflow-hidden bg-slate-900 border-2 border-blue-500/30 group shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={p.receipt_url} alt="Receipt" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
+              <img src={p.receipt_url} alt="Receipt" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
               <a href={p.receipt_url} target="_blank" rel="noopener noreferrer" className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity">
-                <ExternalLink size={20} className="text-white" />
+                <ExternalLink size={22} className="text-cyan-300" />
               </a>
             </div>
 
             {/* Details */}
-            <div className="flex-1 space-y-4">
-              <div className="flex justify-between items-start">
+            <div className="flex-1 space-y-4 w-full">
+              <div className="flex justify-between items-start flex-wrap gap-2">
                 <div>
-                  <p className="text-lg font-heading font-bold text-foreground">₦{Number(p.amount).toLocaleString()}</p>
-                  <p className="text-xs text-zinc-500 font-medium">{p.sender_name}</p>
+                  <p className="text-xl font-heading font-black text-amber-300">₦{Number(p.amount).toLocaleString()}</p>
+                  <p className="text-xs text-white font-bold mt-0.5">{p.sender_name}</p>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest border ${
-                  p.status === 'approved' ? 'border-emerald-500/30 text-emerald-500' : 
-                  p.status === 'rejected' ? 'border-red-500/30 text-red-500' : 
-                  'border-amber-500/30 text-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.2)]'
+                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border-2 ${
+                  p.status === 'approved' ? 'border-emerald-400 bg-emerald-500/20 text-emerald-300' : 
+                  p.status === 'rejected' ? 'border-rose-400 bg-rose-500/20 text-rose-300' : 
+                  'border-amber-400 bg-amber-500/20 text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.3)]'
                 }`}>
                   {p.status}
                 </span>
               </div>
               
-              <div className="flex items-center gap-4 text-xs text-zinc-500">
-                <div className="flex items-center gap-1.5"><Clock size={12} /> {new Date(p.created_at).toLocaleDateString()}</div>
-                <div className="flex items-center gap-1.5"><Building2 size={12} /> FirstBank Transfer</div>
+              <div className="flex flex-wrap items-center gap-4 text-xs text-zinc-300 font-semibold">
+                <div className="flex items-center gap-1.5 text-cyan-300"><Clock size={13} /> {new Date(p.created_at).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</div>
+                <div className="flex items-center gap-1.5 text-white"><Building2 size={13} className="text-blue-400" /> Bank Transfer</div>
               </div>
 
               {p.status === 'pending' && (
-                <div className="flex gap-2 pt-2">
+                <div className="flex flex-wrap gap-2.5 pt-2">
                   <button 
                     disabled={!!processing}
                     onClick={() => handleApprove(p)}
-                    className="bg-sky-600 hover:bg-sky-700 text-white transition-all rounded-lg px-6 h-10 text-[10px] font-bold uppercase tracking-[0.1em] flex items-center gap-2 shadow-md hover:scale-102 cursor-pointer"
+                    className="bg-blue-600 hover:bg-blue-500 text-white transition-all rounded-xl px-6 h-10 text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-md hover:shadow-blue-500/30 cursor-pointer disabled:opacity-50"
                   >
-                    {processing === p.id ? <Loader2 className="animate-spin" size={14} /> : <Check size={14} />} Approve
+                    {processing === p.id ? <Loader2 className="animate-spin" size={14} /> : <Check size={15} />} Approve & Credit Wallet
                   </button>
                   <button 
                     disabled={!!processing}
                     onClick={() => handleReject(p.id)}
-                    className="bg-red-600 hover:bg-red-700 text-white transition-all rounded-lg px-6 h-10 text-[10px] font-bold uppercase tracking-[0.1em] flex items-center gap-2 shadow-md hover:scale-102 cursor-pointer"
+                    className="bg-rose-600/80 hover:bg-rose-600 text-white border border-rose-400/50 transition-all rounded-xl px-5 h-10 text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-md cursor-pointer disabled:opacity-50"
                   >
-                    <X size={14} /> Reject
+                    <X size={15} /> Reject
                   </button>
                 </div>
               )}

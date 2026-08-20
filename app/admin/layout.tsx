@@ -101,25 +101,25 @@ export default function AdminLayout({
 
       <div className="mx-auto flex max-w-7xl gap-0 lg:gap-8 px-6 py-8 lg:flex-row flex-col">
         {/* Sidebar nav with vibrant Blue Buttons */}
-        <nav className="flex-shrink-0 w-full lg:w-56 mb-8 lg:mb-0">
-          <div className="p-2 rounded-2xl bg-blue-950/20 border border-blue-500/20 backdrop-blur-md">
-            <p className="px-3 py-2 text-[10px] font-extrabold uppercase tracking-widest text-blue-400/70">
+        <nav className="flex-shrink-0 w-full lg:w-60 mb-6 lg:mb-0">
+          <div className="p-3 rounded-2xl bg-blue-950/40 border-2 border-blue-500/30 backdrop-blur-md shadow-xl">
+            <p className="hidden lg:block px-3 py-1.5 text-xs font-black uppercase tracking-widest text-cyan-300 mb-2">
               Navigation
             </p>
-            <ul className="flex lg:flex-col gap-1.5 flex-wrap">
+            <ul className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible pb-1 lg:pb-0 scrollbar-none">
               {NAV.map(({ href, label, icon: Icon }) => {
                 const active = pathname === href;
                 return (
-                  <li key={href} className="flex-1 lg:flex-none">
+                  <li key={href} className="shrink-0 lg:shrink lg:w-full">
                     <Link
                       href={href}
-                      className={`flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-200 shadow-sm ${
+                      className={`flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-xs uppercase tracking-wider whitespace-nowrap transition-all duration-200 shadow-sm ${
                         active
-                          ? "bg-blue-600 text-white shadow-[0_4px_20px_rgba(37,99,235,0.45)] border border-blue-400/50 font-extrabold translate-x-0.5"
-                          : "bg-blue-950/40 text-blue-200/90 hover:bg-blue-600/30 hover:text-white border border-blue-500/20 hover:border-blue-400/40"
+                          ? "bg-blue-600 text-white shadow-[0_4px_20px_rgba(37,99,235,0.45)] border-2 border-blue-300 font-black scale-[1.02]"
+                          : "bg-blue-950/60 text-blue-100 font-bold hover:bg-blue-600/30 hover:text-white border border-blue-500/30 hover:border-blue-400"
                       }`}
                     >
-                      <Icon size={15} className={active ? "text-white" : "text-blue-400 opacity-90"} />
+                      <Icon size={16} className={active ? "text-white" : "text-cyan-300"} />
                       <span>{label}</span>
                     </Link>
                   </li>
