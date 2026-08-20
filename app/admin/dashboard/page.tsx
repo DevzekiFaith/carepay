@@ -26,7 +26,9 @@ interface Order {
   total: number;
   status: string;
   created_at: string;
-  items: { product_id: string; quantity: number; price: number }[];
+  items: any[];
+  delivery_address?: string;
+  notes?: string;
 }
 
 interface ServiceRequest {
@@ -219,7 +221,9 @@ export default function AdminDashboard() {
                             </div>
                             <div>
                               <p className="text-sm font-bold">{order.customer_name}</p>
-                              <p className="text-[10px] text-zinc-500 font-mono">{order.order_ref}</p>
+                              <p className="text-[10px] text-zinc-500 font-mono">
+                                {order.order_ref} {order.order_ref.startsWith("INSP-") ? "· 🔍 Inspection" : ""}
+                              </p>
                             </div>
                           </div>
                           <div className="text-right">
@@ -299,8 +303,24 @@ export default function AdminDashboard() {
                     <tbody className="divide-y divide-white/5">
                       {orders.map((order) => (
                         <tr key={order.id} className="hover:bg-white/[0.02] transition-colors group">
-                          <td className="px-8 py-6 font-mono text-sm font-bold text-brand-primary">{order.order_ref}</td>
-                          <td className="px-8 py-6 text-sm font-bold">{order.customer_name}</td>
+                           <td className="px-8 py-6 font-mono text-sm font-bold text-brand-primary">{order.order_ref}</td>
+                           <td className="px-8 py-6 text-sm font-bold">
+                            <div>{order.customer_name}</div>
+                            <div className="text-[10px] text-zinc-500 font-normal mt-1.5 leading-relaxed max-w-[250px] whitespace-normal">
+                              {order.order_ref.startsWith("INSP-") ? (
+                                <span className="block text-zinc-400">
+                                  📍 Address: {order.delivery_address || "N/A"}<br />
+                                  📅 {order.notes}
+                                </span>
+                              ) : (
+                                <span className="block text-zinc-500">
+                                  📦 {Array.isArray(order.items) 
+                                    ? order.items.map((i: any) => `${i.quantity}x ${i.name || i.product?.name || "Appliance"}`).join(", ") 
+                                    : "Store Order"}
+                                </span>
+                              )}
+                            </div>
+                           </td>
                           <td className="px-8 py-6 text-sm font-extrabold">₦{order.total.toLocaleString()}</td>
                           <td className="px-8 py-6">
                             <select 

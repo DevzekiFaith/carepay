@@ -9,10 +9,8 @@ import ModernDatePicker from "@/app/components/ModernDatePicker";
 import { createClient } from "@/lib/supabase/client";
 
 const PRICING = {
-  apartment: 50000,
-  duplex: 150000,
-  mansion: 300000,
-  commercial: 200000,
+  bungalow: 50000,
+  duplex: 100000,
 } as const;
 
 type PropertyType = keyof typeof PRICING | "";
@@ -20,7 +18,7 @@ type PropertyType = keyof typeof PRICING | "";
 export default function PropertyInspectionPage() {
   const [appointmentDate, setAppointmentDate] = useState<Date | null>(new Date());
   const [appointmentTime, setAppointmentTime] = useState("10:00");
-  const [propertyType, setPropertyType] = useState<PropertyType>("apartment");
+  const [propertyType, setPropertyType] = useState<PropertyType>("bungalow");
   const [submitting, setSubmitting] = useState(false);
   const [address, setAddress] = useState("");
   const [contactName, setContactName] = useState("");
@@ -47,6 +45,34 @@ export default function PropertyInspectionPage() {
 
       const orderRef = `INSP-${Date.now().toString(36).toUpperCase()}`;
 
+      // 1. Insert inspection order into store_orders to anchor in the admin dashboard
+      const { error: dbError } = await supabase.from("store_orders").insert({
+        order_ref: orderRef,
+        customer_name: contactName || user?.user_metadata?.full_name || "Property Inspection Customer",
+        customer_email: contactEmail || user?.email || "customer@homecare.ng",
+        customer_phone: contactPhone || user?.user_metadata?.phone || "08000000000",
+        delivery_address: address,
+        notes: `Preferred Date: ${appointmentDate ? appointmentDate.toLocaleDateString() : 'N/A'}, Time: ${appointmentTime}`,
+        items: [{
+          id: propertyType,
+          name: `Property Inspection (${propertyType === 'bungalow' ? 'Bungalow' : 'Duplex'})`,
+          price: totalFee,
+          quantity: 1,
+          image: "/hclogo.png",
+        }],
+        subtotal: totalFee,
+        delivery_fee: 0,
+        total: totalFee,
+        status: "pending_payment",
+        user_id: user?.id || null,
+      });
+
+      if (dbError) {
+        console.error("Failed to insert inspection order:", dbError);
+        throw new Error(dbError.message);
+      }
+
+      // 2. Initialize Flutterwave payment
       const res = await fetch("/api/payment/flutterwave/initialize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -57,7 +83,7 @@ export default function PropertyInspectionPage() {
           name: contactName || user?.user_metadata?.full_name || "Property Inspection Customer",
           phone: contactPhone || user?.user_metadata?.phone || "08000000000",
           title: "HomeCare Engineering Property Inspection",
-          description: `Comprehensive ${propertyType} inspection audit at ${address.slice(0, 30)}`,
+          description: `Comprehensive ${propertyType === 'bungalow' ? 'Bungalow' : 'Duplex'} inspection audit at ${address.slice(0, 30)}`,
           type: "inspection",
           userId: user?.id || null,
         }),
@@ -183,10 +209,8 @@ export default function PropertyInspectionPage() {
                     onChange={(e) => setPropertyType(e.target.value as PropertyType)}
                     className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-4 py-3 text-sm font-medium text-slate-900 outline-none focus:border-sky-500 focus:bg-white transition-all cursor-pointer"
                   >
-                    <option value="apartment">Apartment / Flat (₦50,000)</option>
-                    <option value="duplex">Standard Duplex 2+ Floors (₦150,000)</option>
-                    <option value="mansion">Luxury Mansion / Detached (₦300,000)</option>
-                    <option value="commercial">Commercial / Office Space (₦200,000)</option>
+                    <option value="bungalow">Bungalow (₦50,000)</option>
+                    <option value="duplex">Duplex (₦100,000)</option>
                   </select>
                 </div>
               </div>

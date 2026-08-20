@@ -110,9 +110,16 @@ export async function GET(req: Request) {
       return NextResponse.redirect(`${origin}/customer/dashboard?payment=success&service=${encodeURIComponent(resolvedOrderRef)}`);
     }
 
-    if (paymentType === "inspection") {
+    if (paymentType === "inspection" && resolvedOrderRef) {
+      await supabase
+        .from("store_orders")
+        .update({
+          status: "paid",
+        })
+        .eq("order_ref", resolvedOrderRef);
+
       return NextResponse.redirect(
-        `${origin}/customer/dashboard?inspection=success&ref=${encodeURIComponent(resolvedOrderRef || "")}&amount=${verifiedAmount}`
+        `${origin}/customer/dashboard?inspection=success&ref=${encodeURIComponent(resolvedOrderRef)}&amount=${verifiedAmount}`
       );
     }
 
