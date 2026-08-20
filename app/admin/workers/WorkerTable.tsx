@@ -155,10 +155,10 @@ export default function WorkerTable({ initialWorkers }: { initialWorkers: Worker
       </div>
 
       {/* Main Table */}
-      <div className="glass-panel overflow-hidden border border-blue-500/20 rounded-2xl shadow-xl">
-        <div className="hidden lg:grid grid-cols-[1.5fr_auto_auto_auto_auto_auto] gap-4 px-6 py-3.5 border-b border-blue-500/20 bg-blue-950/30 backdrop-blur-sm">
+      <div className="glass-panel overflow-hidden border-2 border-blue-500/30 rounded-2xl shadow-2xl bg-slate-950/80">
+        <div className="hidden lg:grid grid-cols-[1.5fr_auto_auto_auto_auto_auto] gap-4 px-6 py-4 border-b-2 border-blue-500/40 bg-blue-900/40 backdrop-blur-md">
           {["Name & Skill", "Phone", "NIN", "AI Check", "Status", "Action"].map((h) => (
-            <span key={h} className="text-[10px] font-bold uppercase tracking-widest text-blue-300/80">
+            <span key={h} className="text-xs font-black uppercase tracking-wider text-white drop-shadow-sm">
               {h}
             </span>
           ))}
@@ -166,11 +166,11 @@ export default function WorkerTable({ initialWorkers }: { initialWorkers: Worker
 
         {filtered.length === 0 ? (
           <div className="px-6 py-16 text-center space-y-3">
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/20 text-cyan-300 border border-blue-400/40">
               <AlertCircle size={24} />
             </div>
-            <p className="text-sm font-semibold text-zinc-300">No matching workers found</p>
-            <p className="text-xs text-zinc-500">Try adjusting your filters or search terms.</p>
+            <p className="text-sm font-bold text-white">No matching workers found</p>
+            <p className="text-xs text-zinc-300">Try adjusting your filters or search terms.</p>
             <button
               onClick={resetFilters}
               className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 text-white text-xs font-bold shadow-md hover:bg-blue-500 transition-colors"
@@ -179,7 +179,7 @@ export default function WorkerTable({ initialWorkers }: { initialWorkers: Worker
             </button>
           </div>
         ) : (
-          <div className="divide-y divide-white/5">
+          <div className="divide-y divide-blue-500/15">
             <AnimatePresence>
               {filtered.map((worker, i) => (
                 <motion.div
@@ -188,57 +188,57 @@ export default function WorkerTable({ initialWorkers }: { initialWorkers: Worker
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
                   transition={{ delay: Math.min(i * 0.02, 0.2) }}
-                  className="grid lg:grid-cols-[1.5fr_auto_auto_auto_auto_auto] gap-4 px-6 py-4 items-center hover:bg-blue-600/[0.03] transition-colors"
+                  className="grid lg:grid-cols-[1.5fr_auto_auto_auto_auto_auto] gap-4 px-6 py-4.5 items-center hover:bg-blue-600/10 transition-colors"
                 >
                   {/* Name */}
                   <div>
-                    <p className="text-sm font-bold text-foreground">{worker.full_name}</p>
-                    <p className="text-xs text-blue-400 font-medium">{worker.primary_skill}</p>
+                    <p className="text-sm font-black text-white">{worker.full_name}</p>
+                    <p className="text-xs text-cyan-300 font-bold mt-0.5">{worker.primary_skill}</p>
                   </div>
 
                   {/* Phone */}
-                  <p className="text-xs text-zinc-400 font-mono flex items-center gap-1">
-                    <Phone size={11} className="text-zinc-500" />
+                  <p className="text-xs text-white font-mono font-bold flex items-center gap-1">
+                    <Phone size={12} className="text-cyan-400" />
                     {worker.phone || "N/A"}
                   </p>
 
                   {/* NIN */}
-                  <p className="text-xs font-mono text-zinc-400">
+                  <p className="text-xs font-mono font-bold text-zinc-200">
                     {worker.nin ? `${worker.nin.slice(0, 4)}•••••${worker.nin.slice(-2)}` : "—"}
                   </p>
 
                   {/* AI Check */}
                   <span
-                    className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest whitespace-nowrap ${
-                      worker.ai_verified ? "text-emerald-400" : "text-amber-400"
+                    className={`inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest whitespace-nowrap ${
+                      worker.ai_verified ? "text-emerald-300" : "text-amber-300"
                     }`}
                   >
                     {worker.ai_verified ? (
                       <>
-                        <CheckCircle2 size={12} /> AI Verified
+                        <CheckCircle2 size={13} className="text-emerald-400" /> AI Verified
                       </>
                     ) : (
                       <>
-                        <Clock size={12} /> Pending AI
+                        <Clock size={13} className="text-amber-400" /> Pending AI
                       </>
                     )}
                   </span>
 
                   {/* Verified Status */}
                   <span
-                    className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest whitespace-nowrap ${
+                    className={`inline-flex items-center gap-1.5 rounded-full border-2 px-3 py-1 text-[11px] font-black uppercase tracking-widest whitespace-nowrap ${
                       worker.is_verified
-                        ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-400"
-                        : "border-amber-500/40 bg-amber-500/15 text-amber-400"
+                        ? "border-emerald-400/80 bg-emerald-500/25 text-emerald-300 shadow-[0_0_12px_rgba(52,211,153,0.25)]"
+                        : "border-amber-400/80 bg-amber-500/25 text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.25)]"
                     }`}
                   >
                     {worker.is_verified ? (
                       <>
-                        <CheckCircle2 size={11} /> Verified
+                        <CheckCircle2 size={12} /> Verified
                       </>
                     ) : (
                       <>
-                        <Clock size={11} /> Unverified
+                        <Clock size={12} /> Unverified
                       </>
                     )}
                   </span>
@@ -249,7 +249,7 @@ export default function WorkerTable({ initialWorkers }: { initialWorkers: Worker
                       <button
                         onClick={() => handleVerify(worker.id, true)}
                         disabled={verifyingId === worker.id}
-                        className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-wider shadow-md hover:shadow-blue-500/20 transition-all disabled:opacity-50 cursor-pointer"
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 text-xs font-black uppercase tracking-wider shadow-md hover:shadow-blue-500/30 transition-all disabled:opacity-50 cursor-pointer"
                       >
                         {verifyingId === worker.id ? "…" : "Approve"}
                       </button>
@@ -257,9 +257,9 @@ export default function WorkerTable({ initialWorkers }: { initialWorkers: Worker
                       <button
                         onClick={() => handleVerify(worker.id, false)}
                         disabled={verifyingId === worker.id}
-                        className="inline-flex items-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider transition-all disabled:opacity-50 cursor-pointer"
+                        className="inline-flex items-center gap-1.5 rounded-xl border-2 border-rose-400/80 bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 px-3.5 py-1.5 text-xs font-black uppercase tracking-wider transition-all disabled:opacity-50 cursor-pointer"
                       >
-                        <XCircle size={12} />
+                        <XCircle size={13} />
                         Revoke
                       </button>
                     )}
@@ -270,17 +270,18 @@ export default function WorkerTable({ initialWorkers }: { initialWorkers: Worker
           </div>
         )}
 
-        <div className="px-6 py-3.5 border-t border-blue-500/20 bg-blue-950/20 backdrop-blur-sm flex items-center justify-between text-[11px] font-bold uppercase tracking-widest text-zinc-400">
+        <div className="px-6 py-4 border-t-2 border-blue-500/30 bg-blue-950/40 backdrop-blur-sm flex items-center justify-between text-xs font-black uppercase tracking-wider text-white">
           <div>
-            Showing <span className="text-blue-400 font-extrabold">{filtered.length}</span> of {workers.length} workers
+            Showing <span className="text-cyan-300 font-black text-sm">{filtered.length}</span> of {workers.length} workers
           </div>
           <div className="flex gap-4">
-            <span className="text-emerald-400">{workers.filter((w) => w.is_verified).length} verified</span>
-            <span className="text-amber-400">{workers.filter((w) => !w.is_verified).length} pending verification</span>
+            <span className="text-emerald-300 font-black">{workers.filter((w) => w.is_verified).length} verified</span>
+            <span className="text-amber-300 font-black">{workers.filter((w) => !w.is_verified).length} pending verification</span>
           </div>
         </div>
       </div>
     </div>
   );
 }
+
 

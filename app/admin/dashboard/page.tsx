@@ -396,58 +396,58 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Orders Table */}
-                <div className="glass-panel overflow-hidden border border-blue-500/20 rounded-2xl shadow-xl">
+                <div className="glass-panel overflow-hidden border-2 border-blue-500/30 rounded-2xl shadow-2xl bg-slate-950/80">
                   <div className="overflow-x-auto">
                     <table className="w-full text-left">
                       <thead>
-                        <tr className="border-b border-blue-500/20 bg-blue-950/30 backdrop-blur-sm">
-                          <th className="px-6 py-3.5 text-[10px] font-bold uppercase tracking-widest text-blue-300/80">Order Ref</th>
-                          <th className="px-6 py-3.5 text-[10px] font-bold uppercase tracking-widest text-blue-300/80">Customer</th>
-                          <th className="px-6 py-3.5 text-[10px] font-bold uppercase tracking-widest text-blue-300/80">Total</th>
-                          <th className="px-6 py-3.5 text-[10px] font-bold uppercase tracking-widest text-blue-300/80">Status</th>
-                          <th className="px-6 py-3.5 text-[10px] font-bold uppercase tracking-widest text-blue-300/80">Update Status</th>
+                        <tr className="border-b-2 border-blue-500/40 bg-blue-900/40 backdrop-blur-md">
+                          <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Order Ref</th>
+                          <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Customer</th>
+                          <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Total</th>
+                          <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Status</th>
+                          <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Update Status</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-white/5">
+                      <tbody className="divide-y divide-blue-500/15">
                         {filteredOrders.length === 0 ? (
                           <tr>
-                            <td colSpan={5} className="px-6 py-12 text-center text-zinc-400 text-xs">
+                            <td colSpan={5} className="px-6 py-12 text-center text-zinc-300 text-xs font-bold">
                               No orders found matching the filter criteria.
                             </td>
                           </tr>
                         ) : (
                           filteredOrders.map((order) => (
-                            <tr key={order.id} className="hover:bg-blue-600/[0.03] transition-colors">
-                              <td className="px-6 py-4 font-mono text-xs font-bold text-blue-400">{order.order_ref}</td>
-                              <td className="px-6 py-4">
-                                <div className="text-xs font-bold text-foreground">{order.customer_name}</div>
-                                <div className="text-[10px] text-zinc-400 mt-0.5">
+                            <tr key={order.id} className="hover:bg-blue-600/10 transition-colors">
+                              <td className="px-6 py-4.5 font-mono text-xs font-black text-cyan-300 bg-cyan-950/60 border border-cyan-500/30 rounded px-2 py-1">{order.order_ref}</td>
+                              <td className="px-6 py-4.5">
+                                <div className="text-xs font-black text-white">{order.customer_name}</div>
+                                <div className="text-[11px] text-zinc-300 mt-0.5 font-medium">
                                   {order.delivery_address || (Array.isArray(order.items) ? `${order.items.length} items` : "Order")}
                                 </div>
                               </td>
-                              <td className="px-6 py-4 text-xs font-extrabold text-brand-primary">₦{(order.total || 0).toLocaleString()}</td>
-                              <td className="px-6 py-4">
-                                <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-                                  order.status === 'delivered' ? 'border-purple-500/30 bg-purple-500/10 text-purple-400' :
-                                  order.status === 'shipped' ? 'border-blue-500/30 bg-blue-500/10 text-blue-400' :
-                                  order.status === 'processing' || order.status === 'paid' ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400' :
-                                  'border-amber-500/30 bg-amber-500/10 text-amber-400'
+                              <td className="px-6 py-4.5 text-xs font-black text-amber-300">₦{(order.total || 0).toLocaleString()}</td>
+                              <td className="px-6 py-4.5">
+                                <span className={`inline-flex items-center rounded-full border-2 px-3 py-1 text-[10px] font-black uppercase tracking-wider ${
+                                  order.status === 'delivered' ? 'border-purple-400 bg-purple-500/20 text-purple-300' :
+                                  order.status === 'shipped' ? 'border-sky-400 bg-sky-500/20 text-sky-200' :
+                                  order.status === 'processing' || order.status === 'paid' ? 'border-emerald-400 bg-emerald-500/20 text-emerald-300' :
+                                  'border-amber-400 bg-amber-500/20 text-amber-300'
                                 }`}>
                                   {order.status.replace('_', ' ')}
                                 </span>
                               </td>
-                              <td className="px-6 py-4">
+                              <td className="px-6 py-4.5">
                                 <select 
                                   disabled={updatingId === order.id}
                                   value={order.status}
                                   onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                                  className="bg-slate-900 border border-blue-500/30 rounded-xl px-2.5 py-1 text-xs font-semibold text-blue-200 outline-none focus:border-blue-400 cursor-pointer"
+                                  className="bg-slate-900 border-2 border-blue-400/60 rounded-xl px-3 py-1.5 text-xs font-bold text-white outline-none focus:border-cyan-300 cursor-pointer shadow-md"
                                 >
-                                  <option value="pending_payment" className="bg-slate-900 text-amber-400">Pending Payment</option>
-                                  <option value="processing" className="bg-slate-900 text-emerald-400">Processing (Paid)</option>
-                                  <option value="shipped" className="bg-slate-900 text-blue-400">Shipped</option>
-                                  <option value="delivered" className="bg-slate-900 text-purple-400">Delivered</option>
-                                  <option value="cancelled" className="bg-slate-900 text-rose-400">Cancelled</option>
+                                  <option value="pending_payment" className="bg-slate-900 text-amber-300 font-bold">Pending Payment</option>
+                                  <option value="processing" className="bg-slate-900 text-emerald-300 font-bold">Processing (Paid)</option>
+                                  <option value="shipped" className="bg-slate-900 text-sky-300 font-bold">Shipped</option>
+                                  <option value="delivered" className="bg-slate-900 text-purple-300 font-bold">Delivered</option>
+                                  <option value="cancelled" className="bg-slate-900 text-rose-300 font-bold">Cancelled</option>
                                 </select>
                               </td>
                             </tr>
@@ -468,14 +468,14 @@ export default function AdminDashboard() {
                 className="space-y-6"
               >
                 {/* Requests Toolbar with Filter */}
-                <div className="p-4 rounded-2xl bg-blue-950/20 border border-blue-500/20 flex flex-wrap items-center justify-between gap-3">
+                <div className="p-4 rounded-2xl bg-blue-950/40 border-2 border-blue-500/30 flex flex-wrap items-center justify-between gap-3 shadow-lg">
                   <div className="flex items-center gap-2">
-                    <Filter size={14} className="text-blue-400" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-blue-300">Filter Status:</span>
+                    <Filter size={15} className="text-cyan-300 font-bold" />
+                    <span className="text-xs font-black uppercase tracking-wider text-white">Filter Status:</span>
                     <select
                       value={reqStatusFilter}
                       onChange={(e) => setReqStatusFilter(e.target.value)}
-                      className="rounded-xl border border-blue-500/30 bg-slate-900 px-3.5 py-1.5 text-xs font-semibold text-blue-100 outline-none focus:border-blue-400 cursor-pointer"
+                      className="rounded-xl border-2 border-blue-400/50 bg-slate-900 px-3.5 py-2 text-xs font-bold text-white outline-none focus:border-cyan-300 cursor-pointer"
                     >
                       <option value="all">All Requests ({requests.length})</option>
                       <option value="pending">Pending ({requests.filter(r => r.status === 'pending').length})</option>
@@ -488,7 +488,7 @@ export default function AdminDashboard() {
                   {(reqStatusFilter !== "all" || searchTerm !== "") && (
                     <button
                       onClick={() => { setReqStatusFilter("all"); setSearchTerm(""); }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-xs font-bold text-blue-300 transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 border border-blue-300 text-xs font-black text-white transition-colors"
                     >
                       <RotateCcw size={12} /> Clear Filter
                     </button>
@@ -496,56 +496,56 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Service Requests Table */}
-                <div className="glass-panel overflow-hidden border border-blue-500/20 rounded-2xl shadow-xl">
+                <div className="glass-panel overflow-hidden border-2 border-blue-500/30 rounded-2xl shadow-2xl bg-slate-950/80">
                   <div className="overflow-x-auto">
                     <table className="w-full text-left">
                       <thead>
-                        <tr className="border-b border-blue-500/20 bg-blue-950/30 backdrop-blur-sm">
-                          <th className="px-6 py-3.5 text-[10px] font-bold uppercase tracking-widest text-blue-300/80">Service</th>
-                          <th className="px-6 py-3.5 text-[10px] font-bold uppercase tracking-widest text-blue-300/80">Address</th>
-                          <th className="px-6 py-3.5 text-[10px] font-bold uppercase tracking-widest text-blue-300/80">Date</th>
-                          <th className="px-6 py-3.5 text-[10px] font-bold uppercase tracking-widest text-blue-300/80">Status</th>
-                          <th className="px-6 py-3.5 text-[10px] font-bold uppercase tracking-widest text-blue-300/80">Action</th>
+                        <tr className="border-b-2 border-blue-500/40 bg-blue-900/40 backdrop-blur-md">
+                          <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Service</th>
+                          <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Address</th>
+                          <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Date</th>
+                          <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Status</th>
+                          <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Action</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-white/5">
+                      <tbody className="divide-y divide-blue-500/15">
                         {filteredRequests.length === 0 ? (
                           <tr>
-                            <td colSpan={5} className="px-6 py-12 text-center text-zinc-400 text-xs">
+                            <td colSpan={5} className="px-6 py-12 text-center text-zinc-300 text-xs font-bold">
                               No service requests found.
                             </td>
                           </tr>
                         ) : (
                           filteredRequests.map((req) => (
-                            <tr key={req.id} className="hover:bg-blue-600/[0.03] transition-colors">
-                              <td className="px-6 py-4 text-xs font-bold flex items-center gap-2.5">
-                                <div className="h-7 w-7 rounded-lg bg-blue-600/20 flex items-center justify-center text-blue-400">
+                            <tr key={req.id} className="hover:bg-blue-600/10 transition-colors">
+                              <td className="px-6 py-4.5 text-xs font-black text-white flex items-center gap-2.5">
+                                <div className="h-7 w-7 rounded-lg bg-blue-600/30 border border-blue-400/40 flex items-center justify-center text-cyan-300">
                                   <Wrench size={14} />
                                 </div>
                                 <span>{req.service_type}</span>
                               </td>
-                              <td className="px-6 py-4 text-xs text-zinc-400 font-medium max-w-[200px] truncate">{req.address}</td>
-                              <td className="px-6 py-4 text-xs font-mono text-zinc-500">{new Date(req.created_at).toLocaleDateString()}</td>
-                              <td className="px-6 py-4">
-                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest ${
-                                  req.status === 'pending' ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30' : 
-                                  req.status === 'matched' ? 'bg-blue-500/15 text-blue-400 border border-blue-500/30' : 
-                                  'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                              <td className="px-6 py-4.5 text-xs text-white font-bold max-w-[220px] truncate">{req.address}</td>
+                              <td className="px-6 py-4.5 text-xs font-bold text-cyan-300">📅 {new Date(req.created_at).toLocaleDateString()}</td>
+                              <td className="px-6 py-4.5">
+                                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border-2 ${
+                                  req.status === 'pending' ? 'border-amber-400 bg-amber-500/20 text-amber-300' : 
+                                  req.status === 'matched' ? 'border-sky-400 bg-sky-500/20 text-sky-200' : 
+                                  'border-emerald-400 bg-emerald-500/20 text-emerald-300'
                                 }`}>
                                   {req.status}
                                 </span>
                               </td>
-                              <td className="px-6 py-4">
+                              <td className="px-6 py-4.5">
                                 <select 
                                   disabled={updatingId === req.id}
                                   value={req.status || 'pending'}
                                   onChange={(e) => updateRequestStatus(req.id, e.target.value)}
-                                  className="bg-slate-900 border border-blue-500/30 rounded-xl px-2.5 py-1 text-xs font-semibold text-blue-200 outline-none focus:border-blue-400 cursor-pointer"
+                                  className="bg-slate-900 border-2 border-blue-400/60 rounded-xl px-3 py-1.5 text-xs font-bold text-white outline-none focus:border-cyan-300 cursor-pointer shadow-md"
                                 >
-                                  <option value="pending" className="bg-slate-900 text-amber-400">Mark: Pending</option>
-                                  <option value="matched" className="bg-slate-900 text-blue-400">Mark: Matched</option>
-                                  <option value="completed" className="bg-slate-900 text-emerald-400">Mark: Completed</option>
-                                  <option value="cancelled" className="bg-slate-900 text-rose-400">Mark: Cancelled</option>
+                                  <option value="pending" className="bg-slate-900 text-amber-300 font-bold">Mark: Pending</option>
+                                  <option value="matched" className="bg-slate-900 text-sky-300 font-bold">Mark: Matched</option>
+                                  <option value="completed" className="bg-slate-900 text-emerald-300 font-bold">Mark: Completed</option>
+                                  <option value="cancelled" className="bg-slate-900 text-rose-300 font-bold">Mark: Cancelled</option>
                                 </select>
                               </td>
                             </tr>
