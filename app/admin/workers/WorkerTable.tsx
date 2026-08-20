@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -236,14 +237,12 @@ export default function WorkerTable({ initialWorkers }: { initialWorkers: Worker
                     <p className="text-xs text-slate-500 max-w-md mx-auto">
                       Technicians who register via the technician onboarding portal will appear here live in real-time for verification and background screening.
                     </p>
-                    <a
-                      href="/worker/register"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <Link
+                      href="/auth/worker/register"
                       className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-600 text-white text-xs font-bold uppercase tracking-wider shadow-md hover:bg-sky-500 transition-colors cursor-pointer"
                     >
                       <UserCheck size={14} /> Open Technician Onboarding
-                    </a>
+                    </Link>
                   </>
                 ) : (
                   <>

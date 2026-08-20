@@ -23,8 +23,7 @@ export default async function AdminWorkersPage() {
           </p>
         </div>
         <Link
-          href="/worker/register"
-          target="_blank"
+          href="/auth/worker/register"
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold uppercase tracking-wider shadow-sm transition-all cursor-pointer shrink-0 self-start sm:self-auto"
         >
           <UserPlus size={14} /> Technician Onboarding Portal
