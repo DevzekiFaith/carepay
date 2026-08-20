@@ -103,9 +103,9 @@ export default function PaymentTable({ initialPayments }: { initialPayments: Pay
           initial={{ opacity: 0, scale: 0.98 }} 
           animate={{ opacity: 1, scale: 1 }}
           className={`glass-panel p-6 border transition-all ${
-            p.status === 'approved' ? 'border-emerald-500/20 bg-emerald-500/5' : 
-            p.status === 'rejected' ? 'border-red-500/20 bg-red-500/5' : 
-            'border-white/10 bg-white/5'
+            p.status === 'approved' ? 'border-emerald-500/30 bg-emerald-50/50' : 
+            p.status === 'rejected' ? 'border-red-500/30 bg-red-50/50' : 
+            'border-slate-200 bg-white shadow-sm'
           }`}
         >
           <div className="flex flex-col md:flex-row gap-6">
@@ -144,14 +144,14 @@ export default function PaymentTable({ initialPayments }: { initialPayments: Pay
                   <button 
                     disabled={!!processing}
                     onClick={() => handleApprove(p)}
-                    className="btn-minimal bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500 hover:text-white transition-all rounded-lg px-6 h-10 text-[10px] font-bold uppercase tracking-[0.1em] flex items-center gap-2"
+                    className="bg-sky-600 hover:bg-sky-700 text-white transition-all rounded-lg px-6 h-10 text-[10px] font-bold uppercase tracking-[0.1em] flex items-center gap-2 shadow-md hover:scale-102 cursor-pointer"
                   >
                     {processing === p.id ? <Loader2 className="animate-spin" size={14} /> : <Check size={14} />} Approve
                   </button>
                   <button 
                     disabled={!!processing}
                     onClick={() => handleReject(p.id)}
-                    className="rounded-lg border border-red-500/20 bg-red-500/10 hover:bg-red-500 hover:text-white transition-all px-6 h-10 text-[10px] font-bold uppercase tracking-[0.1em] text-red-400 flex items-center gap-2"
+                    className="bg-red-600 hover:bg-red-700 text-white transition-all rounded-lg px-6 h-10 text-[10px] font-bold uppercase tracking-[0.1em] flex items-center gap-2 shadow-md hover:scale-102 cursor-pointer"
                   >
                     <X size={14} /> Reject
                   </button>
