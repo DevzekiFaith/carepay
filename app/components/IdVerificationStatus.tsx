@@ -20,29 +20,29 @@ export default function IdVerificationStatus({
 
   const configs = {
     checking: {
-      icon: <span className="h-3 w-3 animate-spin rounded-full border-2 border-zinc-400 border-t-zinc-700" />,
-      pill: "border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-zinc-500",
+      icon: <span className="h-3 w-3 animate-spin rounded-full border-2 border-sky-600 border-t-transparent" />,
+      pill: "border-sky-300 bg-sky-50 text-sky-800 font-bold",
       label: "Analysing photo…",
     },
     verified: {
-      icon: <CheckCircle2 size={12} className="text-emerald-600 dark:text-emerald-400" />,
-      pill: "border-emerald-200 dark:border-emerald-800/40 bg-emerald-50 dark:bg-emerald-900/10 text-emerald-700 dark:text-emerald-400",
-      label: confidence === "high" ? "AI Verified — Clear photo" : "AI Verified",
+      icon: <CheckCircle2 size={13} className="text-emerald-600" />,
+      pill: "border-emerald-300 bg-emerald-50 text-emerald-800 font-bold",
+      label: confidence === "high" ? "AI Verified — Clear Photo" : "AI Verified",
     },
     rejected: {
-      icon: <XCircle size={12} className="text-red-600 dark:text-red-400" />,
-      pill: "border-red-200 dark:border-red-800/40 bg-red-50 dark:bg-red-900/10 text-red-700 dark:text-red-400",
-      label: "Photo issue detected",
+      icon: <XCircle size={13} className="text-rose-600" />,
+      pill: "border-rose-300 bg-rose-50 text-rose-800 font-bold",
+      label: "Photo Issue Detected",
     },
     pending_manual: {
-      icon: <Clock size={12} className="text-amber-600 dark:text-amber-400" />,
-      pill: "border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-900/10 text-amber-700 dark:text-amber-400",
+      icon: <Clock size={13} className="text-amber-600" />,
+      pill: "border-amber-300 bg-amber-50 text-amber-800 font-bold",
       label: "Pending Manual Review",
     },
     error: {
-      icon: <AlertTriangle size={12} className="text-zinc-500" />,
-      pill: "border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-zinc-500",
-      label: "Verification unavailable",
+      icon: <AlertTriangle size={13} className="text-slate-600" />,
+      pill: "border-slate-300 bg-slate-100 text-slate-700 font-bold",
+      label: "Verification Unavailable",
     },
   };
 
@@ -55,16 +55,17 @@ export default function IdVerificationStatus({
       className="mt-3 space-y-1.5"
     >
       <span
-        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-widest ${cfg.pill}`}
+        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs uppercase tracking-wider ${cfg.pill}`}
       >
         {cfg.icon}
         {cfg.label}
       </span>
       {reason && status !== "checking" && (
-        <p className="text-[10px] text-zinc-500 leading-relaxed pl-1">
+        <p className="text-xs text-slate-600 leading-relaxed pl-1 font-medium">
           {reason}
         </p>
       )}
     </motion.div>
   );
 }
+

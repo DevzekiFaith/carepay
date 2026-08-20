@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CheckCircle2, XCircle, User, Calendar, ShieldCheck } from "lucide-react";
+import { CheckCircle2, XCircle, User, Calendar, ShieldCheck, Loader2 } from "lucide-react";
 
 export interface NinDetails {
   fullName: string;
@@ -21,9 +21,9 @@ export default function NinVerificationCard({ status, details, reason }: NinVeri
 
   if (status === 'verifying') {
     return (
-      <div className="mt-4 p-6 rounded-2xl border border-white/10 bg-white/5 animate-pulse flex flex-col items-center justify-center gap-3">
-        <div className="h-10 w-10 rounded-full border-2 border-brand-primary border-t-transparent animate-spin" />
-        <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Connecting to National Database...</p>
+      <div className="mt-4 p-5 rounded-2xl border border-sky-200 bg-sky-50 flex items-center justify-center gap-3">
+        <Loader2 className="animate-spin text-sky-600" size={20} />
+        <p className="text-xs font-black uppercase tracking-wider text-sky-800">Verifying with NIMC Database...</p>
       </div>
     );
   }
@@ -31,16 +31,16 @@ export default function NinVerificationCard({ status, details, reason }: NinVeri
   if (status === 'error' || status === 'rejected') {
     return (
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
+        initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="mt-4 p-4 rounded-2xl border border-red-500/20 bg-red-500/5 flex gap-4 items-start"
+        className="mt-4 p-4 rounded-2xl border border-rose-200 bg-rose-50 flex gap-3.5 items-start"
       >
-        <div className="shrink-0 p-2 rounded-full bg-red-500/10 text-red-500">
-          <XCircle size={20} />
+        <div className="shrink-0 p-1.5 rounded-full bg-rose-100 text-rose-600 mt-0.5">
+          <XCircle size={18} />
         </div>
         <div>
-          <p className="text-xs font-bold text-red-500 uppercase tracking-widest mb-1">Verification Failed</p>
-          <p className="text-xs text-zinc-400 font-medium leading-relaxed">{reason || "Could not verify this NIN. Please double-check the digits."}</p>
+          <p className="text-xs font-black text-rose-800 uppercase tracking-wider mb-0.5">NIN Verification Failed</p>
+          <p className="text-xs text-rose-700 font-medium leading-relaxed">{reason || "Could not verify this NIN. Please check the 11 digits and try again."}</p>
         </div>
       </motion.div>
     );
@@ -49,39 +49,32 @@ export default function NinVerificationCard({ status, details, reason }: NinVeri
   if (status === 'verified' && details) {
     return (
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
+        initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="mt-4 overflow-hidden rounded-2xl border border-emerald-500/30 bg-emerald-500/5 shadow-[0_0_30px_rgba(16,185,129,0.05)]"
+        className="mt-4 overflow-hidden rounded-2xl border border-emerald-300 bg-white shadow-xs"
       >
-        <div className="bg-emerald-500/10 px-4 py-2 flex items-center justify-between border-b border-emerald-500/20">
-          <div className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-emerald-500">
-            <CheckCircle2 size={12} /> Identity Confirmed
+        <div className="bg-emerald-50 px-4 py-2.5 flex items-center justify-between border-b border-emerald-200">
+          <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-emerald-800">
+            <CheckCircle2 size={15} className="text-emerald-600" /> Identity Confirmed
           </div>
-          <ShieldCheck size={14} className="text-emerald-500/50" />
+          <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">NIMC Verified</span>
         </div>
         
-        <div className="p-5 flex gap-5 items-center">
-          {details.photo ? (
-            <div className="shrink-0 h-16 w-16 rounded-xl border border-emerald-500/20 overflow-hidden bg-white/5">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={details.photo} alt="Identity" className="h-full w-full object-cover" />
-            </div>
-          ) : (
-             <div className="shrink-0 h-16 w-16 rounded-xl border border-emerald-500/20 flex items-center justify-center bg-white/5 text-emerald-500/50">
-               <User size={32} />
-             </div>
-          )}
+        <div className="p-4 flex gap-4 items-center">
+          <div className="shrink-0 h-14 w-14 rounded-xl border border-emerald-200 flex items-center justify-center bg-emerald-50 text-emerald-700 font-black text-xl shadow-2xs">
+            {details.fullName ? details.fullName.charAt(0) : "W"}
+          </div>
           
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1">Authenticated Name</p>
-            <p className="text-lg font-heading font-black tracking-tight text-foreground truncate">{details.fullName}</p>
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Authenticated Name</p>
+            <p className="text-base font-black text-slate-900 truncate">{details.fullName}</p>
             
-            <div className="mt-3 flex gap-4">
-              <div className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-zinc-500">
-                <Calendar size={12} /> {details.dob}
+            <div className="mt-2 flex gap-4 flex-wrap">
+              <div className="flex items-center gap-1 text-xs font-bold text-slate-700">
+                <Calendar size={13} className="text-sky-600" /> {details.dob}
               </div>
-              <div className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-zinc-500">
-                <User size={12} className="opacity-70" /> {details.gender}
+              <div className="flex items-center gap-1 text-xs font-bold text-slate-700">
+                <User size={13} className="text-sky-600" /> {details.gender}
               </div>
             </div>
           </div>
@@ -92,3 +85,4 @@ export default function NinVerificationCard({ status, details, reason }: NinVeri
 
   return null;
 }
+
