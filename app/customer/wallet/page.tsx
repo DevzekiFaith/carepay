@@ -67,23 +67,16 @@ export default function CustomerWalletPage() {
         return;
       }
 
-      // 2. Fetch Wallet and Transactions in parallel
-      const [walletRes, txRes] = await Promise.all([
-        supabase
-          .from('wallets')
-          .select('*')
-          .eq('user_id', user.id)
-          .maybeSingle(),
-        supabase
-          .from('transactions')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-      ]);
+      // 2. Fetch Wallet
+      const walletRes = await supabase
+        .from('wallets')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
 
       let wallet = walletRes.data;
 
-      // If wallet is missing, initialize it in background
+      // If wallet is missing, initialize it
       if (!wallet && !walletRes.error) {
         const { data: newWallet } = await supabase
           .from('wallets')
@@ -97,7 +90,18 @@ export default function CustomerWalletPage() {
         setBalance(Number(wallet.balance) || 0);
       }
 
-      setTransactions(txRes.data || []);
+      // 3. Fetch Transactions using the wallet ID
+      let txData = [];
+      if (wallet) {
+        const txRes = await supabase
+          .from('transactions')
+          .select('*')
+          .eq('wallet_id', wallet.id)
+          .order('created_at', { ascending: false });
+        txData = txRes.data || [];
+      }
+
+      setTransactions(txData);
 
     } catch (err: unknown) {
       console.error(err);

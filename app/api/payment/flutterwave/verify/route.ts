@@ -86,12 +86,12 @@ export async function GET(req: Request) {
           .update({ balance: newBalance })
           .eq("id", wallet.id);
 
-        await supabase.from("wallet_transactions").insert({
+        await supabase.from("transactions").insert({
           wallet_id: wallet.id,
           amount: verifiedAmount,
-          type: "credit",
+          transaction_type: "credit",
           description: `Flutterwave Instant Top-up (Ref: ${transactionId})`,
-          reference: txRef || String(transactionId),
+          status: "success"
         });
       }
 
