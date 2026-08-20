@@ -326,16 +326,16 @@ export default function AdminDashboard() {
                             <select 
                               value={order.status}
                               onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                              className={`bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold outline-none focus:border-brand-primary/50 transition-all ${
+                              className={`bg-zinc-900 border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold outline-none focus:border-brand-primary/50 transition-all ${
                                 order.status === 'delivered' ? 'text-emerald-500' : 
                                 order.status === 'shipped' ? 'text-blue-500' : 'text-orange-500'
                               }`}
                             >
-                              <option value="pending_payment">Pending Payment</option>
-                              <option value="processing">Processing</option>
-                              <option value="shipped">Shipped</option>
-                              <option value="delivered">Delivered</option>
-                              <option value="cancelled">Cancelled</option>
+                              <option value="pending_payment" className="bg-zinc-900 text-zinc-300">Pending Payment</option>
+                              <option value="processing" className="bg-zinc-900 text-zinc-300">Processing</option>
+                              <option value="shipped" className="bg-zinc-900 text-zinc-300">Shipped</option>
+                              <option value="delivered" className="bg-zinc-900 text-zinc-300">Delivered</option>
+                              <option value="cancelled" className="bg-zinc-900 text-zinc-300">Cancelled</option>
                             </select>
                           </td>
                           <td className="px-8 py-6 text-right">

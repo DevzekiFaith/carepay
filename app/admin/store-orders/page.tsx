@@ -90,13 +90,13 @@ export default async function AdminStoreOrdersPage() {
                         <select
                           name="status"
                           defaultValue={order.status}
-                          className="text-xs bg-white/5 border border-white/10 rounded px-2 py-1 text-foreground outline-none focus:border-brand-primary cursor-pointer"
+                          className="text-xs bg-white border border-slate-200 rounded px-2 py-1 text-slate-800 outline-none focus:border-brand-primary cursor-pointer shadow-sm"
                         >
-                          <option value="pending_payment">Pending Payment</option>
-                          <option value="processing">Processing (Paid)</option>
-                          <option value="shipped">Shipped</option>
-                          <option value="delivered">Delivered</option>
-                          <option value="cancelled">Cancelled</option>
+                          <option value="pending_payment" className="bg-white text-slate-800">Pending Payment</option>
+                          <option value="processing" className="bg-white text-slate-800">Processing (Paid)</option>
+                          <option value="shipped" className="bg-white text-slate-800">Shipped</option>
+                          <option value="delivered" className="bg-white text-slate-800">Delivered</option>
+                          <option value="cancelled" className="bg-white text-slate-800">Cancelled</option>
                         </select>
                         <button
                           type="submit"

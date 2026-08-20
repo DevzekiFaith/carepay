@@ -27,7 +27,7 @@ export default function CheckoutPage() {
   const supabase = createClient();
   const [user, setUser] = useState<User | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"flutterwave" | "transfer">("flutterwave");
+
   const orderPlacedRef = useRef(false);
   const [offlineOrder, setOfflineOrder] = useState<{
     ref: string;
@@ -121,38 +121,33 @@ export default function CheckoutPage() {
       orderPlacedRef.current = true;
       clearCart();
 
-      // 2. Route based on selected payment method
-      if (paymentMethod === "flutterwave") {
-        toast.loading("Opening Flutterwave Secure Checkout...");
-        
-        const initRes = await fetch("/api/payment/flutterwave/initialize", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            orderRef,
-            amount: grandTotal,
-            email: formData.email,
-            name: formData.fullName,
-            phone: formData.phone,
-            title: "HomeCare Smart Appliances Store",
-            description: `Payment for Order ${orderRef} (${cartCount} items)`,
-            type: "store_order",
-            userId: user?.id || null,
-          }),
-        });
+      // 2. Route to Flutterwave Secure Checkout
+      toast.loading("Opening Flutterwave Secure Checkout...");
+      
+      const initRes = await fetch("/api/payment/flutterwave/initialize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderRef,
+          amount: grandTotal,
+          email: formData.email,
+          name: formData.fullName,
+          phone: formData.phone,
+          title: "HomeCare Smart Appliances Store",
+          description: `Payment for Order ${orderRef} (${cartCount} items)`,
+          type: "store_order",
+          userId: user?.id || null,
+        }),
+      });
 
-        const initData = await initRes.json();
+      const initData = await initRes.json();
 
-        if (initData.success && initData.paymentUrl) {
-          window.location.href = initData.paymentUrl;
-          return;
-        } else {
-          toast.error("Flutterwave Gateway notice: " + (initData.error || "Falling back to order confirmation"));
-          router.push(`/store/order-confirmation?ref=${orderRef}&total=${grandTotal}`);
-        }
+      if (initData.success && initData.paymentUrl) {
+        window.location.href = initData.paymentUrl;
+        return;
       } else {
-        // Globus Bank transfer fallback
-        router.push(`/store/order-confirmation?ref=${orderRef}&total=${grandTotal}`);
+        toast.error("Flutterwave Gateway notice: " + (initData.error || "Failed to initialize payment gateway"));
+        setSubmitting(false);
       }
     } catch (err: unknown) {
       console.error("Checkout error:", err);
@@ -315,80 +310,34 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* Payment Method Selector (Flutterwave Primary 90% vs Globus Bank Secondary) */}
+              {/* Payment Method Selector */}
               <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xs font-extrabold uppercase tracking-widest text-slate-400">
-                    2. Select Payment Method
+                    2. Payment Method
                   </h2>
                   <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
                     🔒 256-bit Encrypted
                   </span>
                 </div>
 
-                <div className="space-y-3 pt-1">
-                  {/* Option A: Flutterwave (Primary 90%) */}
-                  <label
-                    onClick={() => setPaymentMethod("flutterwave")}
-                    className={`flex items-start justify-between p-5 rounded-2xl border-2 transition-all cursor-pointer ${
-                      paymentMethod === "flutterwave"
-                        ? "border-sky-600 bg-sky-50/70 shadow-sm"
-                        : "border-slate-200 bg-white hover:border-slate-300"
-                    }`}
-                  >
-                    <div className="flex items-start gap-3.5">
-                      <input
-                        type="radio"
-                        name="payment_choice"
-                        checked={paymentMethod === "flutterwave"}
-                        onChange={() => setPaymentMethod("flutterwave")}
-                        className="mt-1 accent-sky-600 h-4 w-4"
-                      />
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-extrabold text-sm text-slate-900">
-                            Flutterwave Online Checkout
-                          </span>
-                          <span className="text-[9px] font-black uppercase tracking-widest bg-sky-600 text-white px-2 py-0.5 rounded-full">
-                            Recommended · Instant
-                          </span>
-                        </div>
-                        <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                          Pay instantly via <strong>MasterCard, Visa, Verve, USSD (*737#, *901#), Bank Transfer, or Apple Pay</strong>. Zero transaction delay.
-                        </p>
-                      </div>
-                    </div>
-                    <Zap size={20} className="text-amber-500 shrink-0 ml-2 mt-0.5" />
-                  </label>
-
-                  {/* Option B: Globus Bank Transfer (Substitute 10%) */}
-                  <label
-                    onClick={() => setPaymentMethod("transfer")}
-                    className={`flex items-start justify-between p-4 rounded-2xl border transition-all cursor-pointer ${
-                      paymentMethod === "transfer"
-                        ? "border-sky-600 bg-sky-50/50 shadow-sm"
-                        : "border-slate-200 bg-white hover:border-slate-300 opacity-80"
-                    }`}
-                  >
-                    <div className="flex items-start gap-3.5">
-                      <input
-                        type="radio"
-                        name="payment_choice"
-                        checked={paymentMethod === "transfer"}
-                        onChange={() => setPaymentMethod("transfer")}
-                        className="mt-1 accent-sky-600 h-4 w-4"
-                      />
-                      <div>
-                        <span className="font-bold text-sm text-slate-800">
-                          Direct Bank Transfer (Globus Bank Alternative)
+                <div className="p-5 rounded-2xl border-2 border-sky-600 bg-sky-50/70 shadow-sm flex items-start justify-between">
+                  <div className="flex items-start gap-3.5">
+                    <Zap size={20} className="text-amber-500 shrink-0 mt-0.5 animate-pulse" />
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-extrabold text-sm text-slate-900">
+                          Flutterwave Online Checkout
                         </span>
-                        <p className="text-xs text-slate-500 mt-0.5">
-                          Manual bank deposit to {PAYMENT_ACCOUNT.bankName} ({PAYMENT_ACCOUNT.accountNumber}). Confirmation takes 10-20 mins.
-                        </p>
+                        <span className="text-[9px] font-black uppercase tracking-widest bg-sky-600 text-white px-2 py-0.5 rounded-full">
+                          Instant Activation
+                        </span>
                       </div>
+                      <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                        Pay securely with your **Debit/Credit Card, Bank Transfer, USSD (*737#, *901#), or Apple Pay** via Flutterwave.
+                      </p>
                     </div>
-                    <Building2 size={18} className="text-slate-400 shrink-0 ml-2 mt-0.5" />
-                  </label>
+                  </div>
                 </div>
               </div>
 
@@ -461,15 +410,10 @@ export default function CheckoutPage() {
                       <Loader2 size={16} className="animate-spin" />
                       <span>Processing Payment...</span>
                     </>
-                  ) : paymentMethod === "flutterwave" ? (
-                    <>
-                      <Zap size={16} className="text-cyan-200 fill-cyan-200" />
-                      <span>Pay with Flutterwave · ₦{grandTotal.toLocaleString()}</span>
-                    </>
                   ) : (
                     <>
-                      <ShieldCheck size={16} />
-                      <span>Place Order (Bank Transfer)</span>
+                      <Zap size={16} className="text-cyan-200 fill-cyan-200" />
+                      <span>Pay Securely · ₦{grandTotal.toLocaleString()}</span>
                     </>
                   )}
                 </button>

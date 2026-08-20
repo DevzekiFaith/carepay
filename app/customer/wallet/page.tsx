@@ -37,10 +37,7 @@ export default function CustomerWalletPage() {
   const [funding, setFunding] = useState(false);
   const [amount, setAmount] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [showTransferForm, setShowTransferForm] = useState(false);
-  const [senderName, setSenderName] = useState("");
-  const [receiptFile, setReceiptFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
+
   const isFetchingRef = useRef(false);
 
   const supabase = useMemo(() => createClient(), []);
@@ -164,62 +161,7 @@ export default function CustomerWalletPage() {
     }
   };
 
-  const handleTransferSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!receiptFile || !amount || !senderName) {
-      toast.error("Please fill all fields and upload a receipt.");
-      return;
-    }
 
-    try {
-      setUploading(true);
-      const { data } = await supabase.auth.getUser();
-      const user = data.user;
-      if (!user) throw new Error("Not authenticated");
-
-      // 1. Upload Receipt to Storage
-      const fileExt = receiptFile.name.split('.').pop();
-      const fileName = `${user.id}-${typeof window !== 'undefined' ? Date.now() : 'receipt'}.${fileExt}`;
-      const filePath = `receipts/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('job-photos') // Reusing job-photos for simplicity, or payment-receipts if created
-        .upload(filePath, receiptFile);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('job-photos')
-        .getPublicUrl(filePath);
-
-      // 2. Insert into payment_verifications
-      const { error: insertError } = await supabase
-        .from('payment_verifications')
-        .insert({
-          user_id: user.id,
-          amount: parseFloat(amount),
-          sender_name: senderName,
-          receipt_url: publicUrl,
-          status: 'pending'
-        });
-
-      if (insertError) throw insertError;
-
-      toast.success("Payment Notified!", {
-        description: "Admin will verify and credit your wallet shortly."
-      });
-      setShowTransferForm(false);
-      setAmount("");
-      setSenderName("");
-      setReceiptFile(null);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Submission failed";
-      setError(`Submission failed: ${msg}`);
-      toast.error(`Submission failed: ${msg}`);
-    } finally {
-      setUploading(false);
-    }
-  };
 
   if (loading && !funding) {
     return (
@@ -280,22 +222,14 @@ export default function CustomerWalletPage() {
             </p>
             
             <div className="mt-8 space-y-4">
-              {!funding && !showTransferForm ? (
-                <div className="flex flex-wrap gap-3">
-                  <button 
-                    onClick={() => setFunding(true)} 
-                    className="btn-minimal rounded-full px-8 h-12 flex-1 sm:flex-none text-xs font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2"
-                  >
-                    <Plus size={14} /> Instant Fund
-                  </button>
-                  <button 
-                    onClick={() => setShowTransferForm(true)} 
-                    className="rounded-full border border-white/10 bg-white/5 hover:bg-white/10 px-8 h-12 flex-1 sm:flex-none text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 hover:text-foreground transition-all flex items-center justify-center gap-2"
-                  >
-                    <Building2 size={14} /> Bank Transfer
-                  </button>
-                </div>
-              ) : funding ? (
+              {!funding ? (
+                <button 
+                  onClick={() => setFunding(true)} 
+                  className="btn-minimal rounded-full px-8 h-12 w-full sm:w-auto text-xs font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2"
+                >
+                  <Plus size={14} /> Instant Fund (via Flutterwave)
+                </button>
+              ) : (
                 <form onSubmit={handleFund} className="flex flex-col sm:flex-row gap-3">
                   <div className="relative flex-1 w-full sm:max-w-xs">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 font-bold">₦</span>
@@ -326,90 +260,11 @@ export default function CustomerWalletPage() {
                     </button>
                   </div>
                 </form>
-              ) : (
-                <form onSubmit={handleTransferSubmit} className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-300">
-                  <div className="flex flex-col sm:flex-row gap-6 p-6 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10">
-                     <div className="flex-1 space-y-4">
-                        <div className="space-y-1">
-                           <p className="text-[9px] uppercase tracking-widest font-bold text-zinc-500">Beneficiary Bank</p>
-                           <p className="text-sm font-bold text-foreground">{PAYMENT_ACCOUNT.bankName}</p>
-                        </div>
-                        <div className="space-y-1">
-                           <p className="text-[9px] uppercase tracking-widest font-bold text-zinc-500">Account Number</p>
-                           <p className="text-lg font-heading font-extrabold text-brand-primary tracking-widest font-mono">{PAYMENT_ACCOUNT.accountNumber}</p>
-                        </div>
-                        <div className="space-y-1">
-                           <p className="text-[9px] uppercase tracking-widest font-bold text-zinc-500">Account Name</p>
-                           <p className="text-sm font-bold text-foreground">{PAYMENT_ACCOUNT.accountName}</p>
-                        </div>
-                     </div>
-                     <div className="flex-1 space-y-4">
-                        <div className="space-y-1">
-                           <p className="text-[9px] uppercase tracking-widest font-bold text-zinc-400">Transfer Amount</p>
-                           <input 
-                              type="number" required placeholder="₦0.00" 
-                              value={amount} onChange={e => setAmount(e.target.value)}
-                              className="w-full bg-transparent border-b border-zinc-200 dark:border-white/10 py-2 text-xl font-heading font-extrabold text-foreground focus:border-brand-primary outline-none transition-colors"
-                           />
-                        </div>
-                        <div className="space-y-1">
-                           <p className="text-[9px] uppercase tracking-widest font-bold text-zinc-400">Sender Name</p>
-                           <input 
-                              type="text" required placeholder="As seen on your bank app" 
-                              value={senderName} onChange={e => setSenderName(e.target.value)}
-                              className="w-full bg-transparent border-b border-zinc-200 dark:border-white/10 py-2 text-sm font-medium text-foreground focus:border-brand-primary outline-none transition-colors"
-                           />
-                        </div>
-                     </div>
-                  </div>
-
-                  <div className="space-y-2">
-                     <p className="text-[10px] uppercase tracking-widest font-bold text-zinc-500 pl-1">Upload Receipt</p>
-                     <label className="flex flex-col items-center justify-center gap-2 p-8 rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 hover:bg-zinc-100 dark:hover:bg-white/10 hover:border-brand-primary/30 transition-all cursor-pointer group">
-                        {receiptFile ? (
-                           <div className="flex items-center gap-3">
-                              <CheckCircle2 className="text-emerald-500" size={24} />
-                              <div>
-                                 <p className="text-xs font-bold text-foreground">{receiptFile.name}</p>
-                                 <p className="text-[10px] text-zinc-500">Click to change file</p>
-                              </div>
-                           </div>
-                        ) : (
-                           <>
-                              <Upload className="text-zinc-500 group-hover:text-brand-primary transition-colors" size={24} />
-                              <p className="text-xs font-bold text-zinc-400">Drag or tap to upload receipt image</p>
-                           </>
-                        )}
-                        <input 
-                           type="file" accept="image/*" className="hidden" 
-                           onChange={e => setReceiptFile(e.target.files?.[0] || null)}
-                        />
-                     </label>
-                  </div>
-
-                  <div className="flex gap-3">
-                     <button 
-                        type="submit" 
-                        disabled={uploading}
-                        className="btn-minimal flex-1 h-12 rounded-full text-xs font-bold uppercase tracking-widest disabled:opacity-50"
-                     >
-                        {uploading ? <Loader2 className="animate-spin" size={16} /> : "Notify HomeCare Admin"}
-                     </button>
-                     <button 
-                        type="button" 
-                        onClick={() => setShowTransferForm(false)} 
-                        className="flex-1 h-12 rounded-full border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 text-xs font-bold uppercase tracking-widest text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all"
-                     >
-                        Cancel
-                     </button>
-                  </div>
-                </form>
               )}
             </div>
           </motion.section>
 
-          {/* Pending Verifications */}
-          <PendingVerifications />
+
 
           {/* Transactions */}
           <motion.section variants={itemVariants} className="glass-panel p-4 sm:p-6 shadow-premium">
@@ -447,60 +302,4 @@ export default function CustomerWalletPage() {
   );
 }
 
-function PendingVerifications() {
-  const [pending, setPending] = useState<PaymentVerification[]>([]);
-  const supabase = createClient();
 
-  useEffect(() => {
-    const fetchPending = async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      const user = userData.user;
-      if (!user) return;
-      
-      const { data } = await supabase
-        .from('payment_verifications')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('status', 'pending')
-        .order('created_at', { ascending: false });
-      
-      setPending(data || []);
-    };
-    fetchPending();
-    
-    const interval = setInterval(fetchPending, 10000); 
-    return () => clearInterval(interval);
-  }, [supabase]);
-
-  if (pending.length === 0) return null;
-
-  return (
-    <motion.section variants={itemVariants} className="glass-panel p-4 sm:p-6 shadow-premium border-amber-500/20 bg-amber-500/5">
-      <div className="mb-4 flex items-center justify-between border-b border-amber-500/10 pb-4">
-        <div className="flex items-center gap-2">
-          <Loader2 size={12} className="text-amber-500 animate-spin" />
-          <h2 className="text-[9px] sm:text-[10px] uppercase tracking-widest font-bold text-amber-500/80">Pending Verifications</h2>
-        </div>
-      </div>
-      <div className="space-y-3">
-        {pending.map(p => (
-          <div key={p.id} className="flex items-center justify-between p-3 rounded-xl bg-black/10 dark:bg-black/20 border border-zinc-200 dark:border-white/5">
-             <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-lg bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-amber-500 border border-amber-500/20">
-                   <Building2 size={14} />
-                </div>
-                <div>
-                   <p className="text-xs font-bold text-foreground">₦{Number(p.amount).toLocaleString()}</p>
-                   <p className="text-[9px] text-zinc-500 uppercase tracking-widest">{new Date(p.created_at).toLocaleDateString()}</p>
-                </div>
-             </div>
-             <div className="text-right">
-                <p className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">Pending</p>
-                <p className="text-[9px] text-zinc-500">Ref: {p.id.slice(0, 8)}</p>
-             </div>
-          </div>
-        ))}
-      </div>
-    </motion.section>
-  );
-}
