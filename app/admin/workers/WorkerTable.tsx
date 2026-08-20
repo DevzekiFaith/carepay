@@ -3,7 +3,20 @@
 import { useState, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, XCircle, Clock, Search, Filter, RotateCcw, AlertCircle, Phone, UserCheck, Shield } from "lucide-react";
+import { 
+  CheckCircle2, 
+  XCircle, 
+  Clock, 
+  Search, 
+  Filter, 
+  RotateCcw, 
+  AlertCircle, 
+  Phone, 
+  UserCheck, 
+  ShieldCheck, 
+  User,
+  Sparkles
+} from "lucide-react";
 import { toast } from "sonner";
 
 export type Worker = {
@@ -89,8 +102,48 @@ export default function WorkerTable({ initialWorkers }: { initialWorkers: Worker
     setSkillFilter("all");
   };
 
+  const stats = useMemo(() => {
+    return {
+      total: workers.length,
+      verified: workers.filter((w) => w.is_verified).length,
+      unverified: workers.filter((w) => !w.is_verified).length,
+      ai_verified: workers.filter((w) => w.ai_verified).length,
+    };
+  }, [workers]);
+
   return (
     <div className="space-y-6">
+      {/* Quick KPI Filter Tabs */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          { id: "all", label: "Total Workers", count: stats.total, color: "text-slate-900", bg: "bg-slate-100" },
+          { id: "verified", label: "Verified Pros", count: stats.verified, color: "text-emerald-700", bg: "bg-emerald-100" },
+          { id: "unverified", label: "Pending Verification", count: stats.unverified, color: "text-amber-700", bg: "bg-amber-100" },
+          { id: "ai_verified", label: "AI Screened", count: stats.ai_verified, color: "text-sky-700", bg: "bg-sky-100" },
+        ].map((tab) => {
+          const active = statusFilter === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setStatusFilter(tab.id)}
+              className={`p-4 rounded-2xl border transition-all text-left cursor-pointer flex items-center justify-between ${
+                active
+                  ? "bg-white border-sky-500 shadow-md ring-2 ring-sky-500/20"
+                  : "bg-white border-slate-200 hover:border-slate-300 shadow-xs"
+              }`}
+            >
+              <div>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">{tab.label}</p>
+                <p className={`text-2xl font-black mt-1 ${tab.color}`}>{tab.count}</p>
+              </div>
+              <div className={`h-8 w-8 rounded-xl ${tab.bg} flex items-center justify-center font-bold text-xs ${tab.color}`}>
+                {tab.count}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
       {/* Search & Filter Toolbar */}
       <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         {/* Search input */}
@@ -101,12 +154,12 @@ export default function WorkerTable({ initialWorkers }: { initialWorkers: Worker
             placeholder="Search worker name, skill, phone, NIN..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition-all"
+            className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition-all"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-xs font-bold"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-xs font-bold cursor-pointer"
             >
               ✕
             </button>
@@ -116,25 +169,25 @@ export default function WorkerTable({ initialWorkers }: { initialWorkers: Worker
         {/* Filters Group */}
         <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
           {/* Verification Status Filter */}
-          <div className="flex-1 sm:flex-none min-w-[140px]">
+          <div className="flex-1 sm:flex-none min-w-[150px]">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full rounded-xl border border-slate-300 bg-slate-50 hover:bg-white px-3.5 py-2.5 text-xs font-bold text-slate-800 outline-none focus:border-sky-500 transition-colors cursor-pointer shadow-xs"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 hover:bg-white px-3.5 py-2.5 text-xs font-bold text-slate-800 outline-none focus:border-sky-500 transition-colors cursor-pointer shadow-xs"
             >
               <option value="all">All Statuses ({workers.length})</option>
-              <option value="verified">Verified ({workers.filter((w) => w.is_verified).length})</option>
-              <option value="unverified">Unverified ({workers.filter((w) => !w.is_verified).length})</option>
-              <option value="ai_verified">AI Verified ({workers.filter((w) => w.ai_verified).length})</option>
+              <option value="verified">Verified ({stats.verified})</option>
+              <option value="unverified">Unverified ({stats.unverified})</option>
+              <option value="ai_verified">AI Verified ({stats.ai_verified})</option>
             </select>
           </div>
 
           {/* Skill Filter */}
-          <div className="flex-1 sm:flex-none min-w-[130px]">
+          <div className="flex-1 sm:flex-none min-w-[140px]">
             <select
               value={skillFilter}
               onChange={(e) => setSkillFilter(e.target.value)}
-              className="w-full rounded-xl border border-slate-300 bg-slate-50 hover:bg-white px-3.5 py-2.5 text-xs font-bold text-slate-800 outline-none focus:border-sky-500 transition-colors cursor-pointer shadow-xs"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 hover:bg-white px-3.5 py-2.5 text-xs font-bold text-slate-800 outline-none focus:border-sky-500 transition-colors cursor-pointer shadow-xs"
             >
               <option value="all">All Skills</option>
               {availableSkills.map((sk) => (
@@ -149,7 +202,7 @@ export default function WorkerTable({ initialWorkers }: { initialWorkers: Worker
           {(statusFilter !== "all" || skillFilter !== "all" || searchQuery !== "") && (
             <button
               onClick={resetFilters}
-              className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-xs font-bold text-slate-700 transition-all shadow-xs cursor-pointer shrink-0"
+              className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-xs font-bold text-slate-700 transition-all shadow-xs cursor-pointer shrink-0"
             >
               <RotateCcw size={13} />
               Reset
@@ -158,16 +211,18 @@ export default function WorkerTable({ initialWorkers }: { initialWorkers: Worker
         </div>
       </div>
 
-      {/* Main Table with Responsive Horizontal Scroll */}
+      {/* Main Table */}
       <div className="overflow-hidden border border-slate-200 rounded-2xl shadow-sm bg-white">
         <div className="overflow-x-auto scrollbar-thin">
-          <div className="min-w-[760px]">
-            <div className="grid grid-cols-[1.5fr_auto_auto_auto_auto_auto] gap-4 px-6 py-4 border-b border-slate-200 bg-slate-900 text-white">
-              {["Name & Skill", "Phone", "NIN", "AI Check", "Status", "Action"].map((h) => (
-                <span key={h} className="text-xs font-black uppercase tracking-wider text-white">
-                  {h}
-                </span>
-              ))}
+          <div className="min-w-[800px]">
+            {/* Table Header */}
+            <div className="grid grid-cols-[1.6fr_1.1fr_1fr_1fr_1fr_1fr] gap-4 px-6 py-3.5 border-b border-slate-200 bg-slate-50 text-slate-700">
+              <span className="text-xs font-black uppercase tracking-wider text-slate-700">Professional & Skill</span>
+              <span className="text-xs font-black uppercase tracking-wider text-slate-700">Phone</span>
+              <span className="text-xs font-black uppercase tracking-wider text-slate-700">NIN Status</span>
+              <span className="text-xs font-black uppercase tracking-wider text-slate-700">AI Background</span>
+              <span className="text-xs font-black uppercase tracking-wider text-slate-700">Status</span>
+              <span className="text-xs font-black uppercase tracking-wider text-slate-700">Actions</span>
             </div>
 
             {filtered.length === 0 ? (
@@ -175,7 +230,7 @@ export default function WorkerTable({ initialWorkers }: { initialWorkers: Worker
                 <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600 border border-sky-200">
                   <AlertCircle size={24} />
                 </div>
-                <p className="text-sm font-bold text-slate-900">No matching workers found</p>
+                <p className="text-sm font-bold text-slate-900">No matching professionals found</p>
                 <p className="text-xs text-slate-500">Try adjusting your filters or search terms.</p>
                 <button
                   onClick={resetFilters}
@@ -194,60 +249,68 @@ export default function WorkerTable({ initialWorkers }: { initialWorkers: Worker
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
                       transition={{ delay: Math.min(i * 0.02, 0.2) }}
-                      className="grid grid-cols-[1.5fr_auto_auto_auto_auto_auto] gap-4 px-6 py-4.5 items-center hover:bg-sky-50/50 transition-colors"
+                      className="grid grid-cols-[1.6fr_1.1fr_1fr_1fr_1fr_1fr] gap-4 px-6 py-4 items-center hover:bg-sky-50/40 transition-colors"
                     >
-                      {/* Name */}
-                      <div>
-                        <p className="text-sm font-black text-slate-900">{worker.full_name}</p>
-                        <p className="text-xs text-sky-700 font-bold mt-0.5">{worker.primary_skill}</p>
+                      {/* Name & Skill with Avatar */}
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="h-10 w-10 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-700 font-black text-sm shrink-0 shadow-2xs">
+                          {worker.full_name?.charAt(0)?.toUpperCase() || "W"}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-black text-slate-900 truncate">{worker.full_name}</p>
+                          <p className="text-xs text-sky-700 font-bold mt-0.5">{worker.primary_skill || "General"}</p>
+                        </div>
                       </div>
 
                       {/* Phone */}
-                      <p className="text-xs text-slate-700 font-mono font-bold flex items-center gap-1">
-                        <Phone size={12} className="text-sky-600" />
-                        {worker.phone || "N/A"}
-                      </p>
+                      <div className="flex items-center gap-1.5 text-xs text-slate-800 font-mono font-bold">
+                        <Phone size={13} className="text-sky-600 shrink-0" />
+                        <span>{worker.phone || "N/A"}</span>
+                      </div>
 
                       {/* NIN */}
-                      <p className="text-xs font-mono font-bold text-slate-600">
-                        {worker.nin ? `${worker.nin.slice(0, 4)}•••••${worker.nin.slice(-2)}` : "—"}
-                      </p>
+                      <div className="text-xs font-mono font-bold text-slate-600">
+                        {worker.nin ? (
+                          <span className="bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                            {worker.nin.slice(0, 4)}•••••{worker.nin.slice(-2)}
+                          </span>
+                        ) : (
+                          <span className="text-slate-400">Not provided</span>
+                        )}
+                      </div>
 
                       {/* AI Check */}
-                      <span
-                        className={`inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider whitespace-nowrap ${
-                          worker.ai_verified ? "text-emerald-700" : "text-amber-700"
-                        }`}
-                      >
-                        {worker.ai_verified ? (
-                          <>
-                            <CheckCircle2 size={14} className="text-emerald-600" /> AI Verified
-                          </>
-                        ) : (
-                          <>
-                            <Clock size={14} className="text-amber-600" /> Pending AI
-                          </>
-                        )}
-                      </span>
+                      <div>
+                        <span
+                          className={`inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider whitespace-nowrap ${
+                            worker.ai_verified ? "text-emerald-700" : "text-amber-700"
+                          }`}
+                        >
+                          {worker.ai_verified ? (
+                            <>
+                              <CheckCircle2 size={14} className="text-emerald-600" /> AI Screened
+                            </>
+                          ) : (
+                            <>
+                              <Clock size={14} className="text-amber-600" /> Pending AI
+                            </>
+                          )}
+                        </span>
+                      </div>
 
-                      {/* Verified Status */}
-                      <span
-                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider whitespace-nowrap ${
-                          worker.is_verified
-                            ? "border border-emerald-300 bg-emerald-50 text-emerald-800"
-                            : "border border-amber-300 bg-amber-50 text-amber-800"
-                        }`}
-                      >
-                        {worker.is_verified ? (
-                          <>
-                            <CheckCircle2 size={12} /> Verified
-                          </>
-                        ) : (
-                          <>
-                            <Clock size={12} /> Unverified
-                          </>
-                        )}
-                      </span>
+                      {/* Verified Status Badge */}
+                      <div>
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wider whitespace-nowrap ${
+                            worker.is_verified
+                              ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                              : "border-amber-200 bg-amber-50 text-amber-800"
+                          }`}
+                        >
+                          <span className={`h-1.5 w-1.5 rounded-full ${worker.is_verified ? "bg-emerald-500" : "bg-amber-500"}`} />
+                          {worker.is_verified ? "Verified" : "Unverified"}
+                        </span>
+                      </div>
 
                       {/* Actions */}
                       <div className="flex items-center gap-2">
@@ -255,7 +318,7 @@ export default function WorkerTable({ initialWorkers }: { initialWorkers: Worker
                           <button
                             onClick={() => handleVerify(worker.id, true)}
                             disabled={verifyingId === worker.id}
-                            className="inline-flex items-center gap-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 text-xs font-bold uppercase tracking-wider shadow-sm transition-all disabled:opacity-50 cursor-pointer"
+                            className="inline-flex items-center justify-center rounded-xl bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 text-xs font-bold uppercase tracking-wider shadow-sm transition-all disabled:opacity-50 cursor-pointer"
                           >
                             {verifyingId === worker.id ? "…" : "Approve"}
                           </button>
@@ -263,7 +326,7 @@ export default function WorkerTable({ initialWorkers }: { initialWorkers: Worker
                           <button
                             onClick={() => handleVerify(worker.id, false)}
                             disabled={verifyingId === worker.id}
-                            className="inline-flex items-center gap-1.5 rounded-xl border border-rose-300 bg-rose-50 hover:bg-rose-100 text-rose-700 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all disabled:opacity-50 cursor-pointer"
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all disabled:opacity-50 cursor-pointer"
                           >
                             <XCircle size={13} />
                             Revoke
@@ -280,17 +343,18 @@ export default function WorkerTable({ initialWorkers }: { initialWorkers: Worker
 
         <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-black uppercase tracking-wider text-slate-700">
           <div>
-            Showing <span className="text-sky-600 font-black text-sm">{filtered.length}</span> of {workers.length} workers
+            Showing <span className="text-sky-600 font-black text-sm">{filtered.length}</span> of {workers.length} registered professionals
           </div>
           <div className="flex gap-4 flex-wrap">
-            <span className="text-emerald-700 font-bold">{workers.filter((w) => w.is_verified).length} verified</span>
-            <span className="text-amber-700 font-bold">{workers.filter((w) => !w.is_verified).length} pending verification</span>
+            <span className="text-emerald-700 font-bold">{stats.verified} verified</span>
+            <span className="text-amber-700 font-bold">{stats.unverified} pending verification</span>
           </div>
         </div>
       </div>
     </div>
   );
 }
+
 
 
 
