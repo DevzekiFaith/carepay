@@ -84,7 +84,7 @@ export default function WalletEscrowSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="text-zinc-400 text-base leading-relaxed mb-8"
+            className="text-slate-600 text-base leading-relaxed mb-8"
           >
             With our integrated Escrow Wallet system, you can fund your balance and book services without risk. Your payment is held securely and only released to the professional when you explicitly confirm the job is done perfectly.
           </motion.p>

@@ -358,7 +358,7 @@ function OrderConfirmationContent() {
               }
               setShowReceipt(true);
             }}
-            className="flex items-center justify-center gap-2 h-14 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 hover:bg-zinc-100 dark:hover:bg-white/10 text-[11px] font-bold uppercase tracking-[0.15em] text-zinc-600 dark:text-zinc-300 transition-all"
+            className="flex items-center justify-center gap-2 h-14 rounded-xl bg-brand-primary text-white text-[11px] font-bold uppercase tracking-[0.15em] hover:bg-brand-primary-hover hover:scale-102 transition-all shadow-md"
           >
             <Download size={16} />
             Download Receipt
@@ -372,7 +372,7 @@ function OrderConfirmationContent() {
           </Link>
           <Link
             href="/store"
-            className="flex items-center justify-center gap-2 h-14 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 hover:bg-zinc-100 dark:hover:bg-white/10 text-[11px] font-bold uppercase tracking-[0.15em] text-zinc-600 dark:text-zinc-300 transition-all"
+            className="flex items-center justify-center gap-2 h-14 rounded-xl bg-brand-primary text-white text-[11px] font-bold uppercase tracking-[0.15em] hover:bg-brand-primary-hover hover:scale-102 transition-all shadow-md"
           >
             <ShoppingBag size={16} />
             Continue Shopping

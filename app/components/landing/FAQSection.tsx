@@ -30,7 +30,7 @@ export default function FAQSection() {
     <section className="py-24 px-6 relative z-10 max-w-4xl mx-auto">
       <div className="text-center mb-16">
         <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Got Questions?</h2>
-        <p className="text-zinc-400 max-w-xl mx-auto text-sm md:text-base">Everything you need to know about HomeCare.</p>
+        <p className="text-slate-500 max-w-xl mx-auto text-sm md:text-base">Everything you need to know about HomeCare.</p>
       </div>
 
       <div className="space-y-4">
@@ -41,15 +41,15 @@ export default function FAQSection() {
             viewport={{ once: true }}
             transition={{ delay: index * 0.1 }}
             key={index} 
-            className="border border-white/10 bg-white/5 rounded-2xl overflow-hidden"
+            className="border border-slate-200 bg-white rounded-2xl overflow-hidden shadow-2xs"
           >
             <button 
               onClick={() => setOpenIndex(openIndex === index ? null : index)}
               className="w-full px-6 py-6 flex items-center justify-between text-left focus:outline-none"
             >
-              <span className="font-bold text-foreground pr-8">{faq.q}</span>
+              <span className="font-bold text-slate-800 pr-8">{faq.q}</span>
               <ChevronDown 
-                className={`text-zinc-500 transition-transform ${openIndex === index ? 'rotate-180' : ''}`}
+                className={`text-slate-500 transition-transform ${openIndex === index ? 'rotate-180' : ''}`}
                 size={20} 
               />
             </button>
@@ -59,7 +59,7 @@ export default function FAQSection() {
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
-                  className="px-6 pb-6 text-zinc-400 text-sm leading-relaxed"
+                  className="px-6 pb-6 text-slate-600 text-sm leading-relaxed"
                 >
                   {faq.a}
                 </motion.div>

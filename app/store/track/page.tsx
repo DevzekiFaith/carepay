@@ -238,7 +238,7 @@ export function OrderTrackingContent() {
                         </div>
                         <button 
                           onClick={() => setShowReceipt(true)}
-                          className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 hover:text-brand-primary transition-all"
+                          className="flex items-center gap-2 px-4 py-2 rounded-full bg-brand-primary text-white text-[10px] font-bold uppercase tracking-widest hover:bg-brand-primary-hover hover:scale-102 transition-all shadow-md"
                         >
                           <Download size={12} /> View Receipt
                         </button>
