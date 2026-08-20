@@ -124,15 +124,15 @@ export default function StorePage() {
       </section>
 
       {/* Main Store Catalog Content */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 py-10 relative z-10">
+      <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-12 py-8 sm:py-10 pb-36 relative z-10 space-y-6">
           {/* Category pills + Sort */}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <div className="flex flex-wrap gap-2">
+            <div className="flex overflow-x-auto pb-2 sm:pb-0 sm:flex-wrap gap-2 scrollbar-none">
               {categories.map((category) => (
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
-                  className={`px-5 py-2.5 rounded-full text-[11px] font-extrabold uppercase tracking-widest transition-all ${
+                  className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest transition-all shrink-0 cursor-pointer ${
                     selectedCategory === category
                       ? "bg-sky-600 text-white shadow-md shadow-sky-600/25 scale-105"
                       : "bg-white text-slate-600 border border-slate-200 hover:border-sky-300 hover:bg-sky-50 shadow-xs"
@@ -143,9 +143,9 @@ export default function StorePage() {
               ))}
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 shrink-0">
               {/* Sort */}
-              <div className="relative">
+              <div className="relative w-full sm:w-auto">
                 <div className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-slate-200 bg-white text-[11px] font-bold uppercase tracking-widest text-slate-700 shadow-xs">
                   <ArrowUpDown size={13} className="text-sky-600" />
                   <select
@@ -172,15 +172,15 @@ export default function StorePage() {
             />
             <input
               type="text"
-              placeholder="Search fittings, pipes, cables, tools..."
+              placeholder="Search smart locks, fans, bulbs, switches..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-full border border-slate-200 bg-white pl-12 pr-6 py-3.5 text-sm text-slate-800 outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 shadow-xs transition-all"
+              className="w-full rounded-full border border-slate-200 bg-white pl-12 pr-6 py-3 sm:py-3.5 text-sm text-slate-800 outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 shadow-xs transition-all"
             />
           </div>
 
         {/* Product Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
           {filteredProducts.map((product, index) => (
             <ProductCard key={product.id} product={product} priority={index < 12} />
           ))}

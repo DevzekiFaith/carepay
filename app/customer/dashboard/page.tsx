@@ -241,7 +241,7 @@ export default function CustomerDashboardPage() {
       </section>
 
       {/* Main Dashboard Content */}
-      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-10 relative z-10">
+      <div className="mx-auto max-w-5xl px-3 sm:px-6 lg:px-8 py-8 sm:py-10 pb-36 relative z-10">
         <motion.main
           variants={containerVariants}
           initial="hidden"

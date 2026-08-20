@@ -222,7 +222,7 @@ export default function CheckoutPage() {
       </section>
 
       {/* Main Form & Summary Grid */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 py-10 relative z-10">
+      <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-12 py-8 sm:py-10 pb-36 relative z-10">
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
             

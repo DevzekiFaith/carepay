@@ -37,7 +37,7 @@ export default function HomeClient() {
         onSelectService={setSelectedService}
       />
 
-      <section className="py-24 relative bg-background border-t border-zinc-200/50 dark:border-zinc-800/50">
+      <section className="pt-16 sm:pt-24 pb-36 relative bg-background border-t border-zinc-200/50 dark:border-zinc-800/50">
         {/* Subtle orange glow overlay for layout integration */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-brand-primary/5 to-transparent pointer-events-none" />
         

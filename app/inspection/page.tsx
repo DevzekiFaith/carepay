@@ -134,7 +134,7 @@ export default function PropertyInspectionPage() {
       </section>
 
       {/* Main Content */}
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10 relative z-10 grid gap-10 lg:gap-12 lg:grid-cols-2 lg:items-start">
+      <div className="mx-auto max-w-6xl px-3 sm:px-6 lg:px-8 py-8 sm:py-10 pb-36 relative z-10 grid gap-8 lg:gap-12 lg:grid-cols-2 lg:items-start">
         
         {/* Left: Value Prop */}
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="bg-white rounded-3xl p-8 border border-slate-200 shadow-xs space-y-6">
