@@ -7,6 +7,7 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import * as SiteConfig from "@/lib/site";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -85,6 +86,7 @@ export default function RootLayout({
           <MobileBottomNav />
         </CartProvider>
         <Toaster position="top-center" richColors />
+        <Analytics />
         {/* PWA service worker registration */}
         <script
           dangerouslySetInnerHTML={{
