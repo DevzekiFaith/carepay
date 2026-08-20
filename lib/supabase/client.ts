@@ -4,8 +4,8 @@ import { createBrowserClient } from '@supabase/ssr'
 let supabaseClient: ReturnType<typeof createBrowserClient> | null = null
 
 export function createClient() {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()
 
     // If environment variables are missing during SSR or hydration, return a safe proxy
     // that effectively "does nothing" but prevents the application from crashing.
