@@ -20,19 +20,19 @@ export type Job = {
 const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
   pending: { 
     label: "Pending", 
-    cls: "border-amber-400/80 bg-amber-500/25 text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.25)] font-black" 
+    cls: "border border-amber-300 bg-amber-50 text-amber-800 font-extrabold" 
   },
   matched: { 
     label: "Matched", 
-    cls: "border-sky-400/80 bg-sky-500/25 text-sky-200 shadow-[0_0_12px_rgba(56,189,248,0.25)] font-black" 
+    cls: "border border-sky-300 bg-sky-50 text-sky-800 font-extrabold" 
   },
   completed: { 
     label: "Completed", 
-    cls: "border-emerald-400/80 bg-emerald-500/25 text-emerald-300 shadow-[0_0_12px_rgba(52,211,153,0.25)] font-black" 
+    cls: "border border-emerald-300 bg-emerald-50 text-emerald-800 font-extrabold" 
   },
   cancelled: { 
     label: "Cancelled", 
-    cls: "border-rose-400/80 bg-rose-500/25 text-rose-300 shadow-[0_0_12px_rgba(244,63,94,0.25)] font-black" 
+    cls: "border border-rose-300 bg-rose-50 text-rose-800 font-extrabold" 
   },
 };
 
@@ -78,26 +78,30 @@ export default function JobTable({ initialJobs }: { initialJobs: Job[] }) {
 
       // City filter matching: checks if address contains city name or city areas
       if (cityFilter !== "all") {
-        const targetCity = CITIES.find((c) => c.id === cityFilter);
-        if (targetCity) {
+        const selCity = CITIES.find((c) => c.id === cityFilter);
+        if (selCity) {
           const addr = (j.address || "").toLowerCase();
-          const cityName = targetCity.name.toLowerCase();
-          const matchesCity = addr.includes(cityName);
-          const matchesArea = targetCity.areas.some((area) =>
+          const cityName = selCity.name.toLowerCase();
+          const hasCityName = addr.includes(cityName);
+          const hasAreaName = (selCity.areas || []).some((area) =>
             addr.includes(area.toLowerCase())
           );
-          if (!matchesCity && !matchesArea) return false;
+          if (!hasCityName && !hasAreaName) {
+            return false;
+          }
         }
       }
 
-      // Text search query matching
+      // Search query matching: search in service_type, description, address, or ID
       if (searchQuery.trim() !== "") {
-        const query = searchQuery.toLowerCase();
-        const matchesService = (j.service_type || "").toLowerCase().includes(query);
-        const matchesDesc = (j.description || "").toLowerCase().includes(query);
-        const matchesAddr = (j.address || "").toLowerCase().includes(query);
-        const matchesId = j.id.toLowerCase().includes(query);
-        if (!matchesService && !matchesDesc && !matchesAddr && !matchesId) return false;
+        const q = searchQuery.toLowerCase();
+        const matchesService = (j.service_type || "").toLowerCase().includes(q);
+        const matchesDesc = (j.description || "").toLowerCase().includes(q);
+        const matchesAddr = (j.address || "").toLowerCase().includes(q);
+        const matchesId = (j.id || "").toLowerCase().includes(q);
+        if (!matchesService && !matchesDesc && !matchesAddr && !matchesId) {
+          return false;
+        }
       }
 
       return true;
@@ -113,21 +117,21 @@ export default function JobTable({ initialJobs }: { initialJobs: Job[] }) {
   return (
     <div className="space-y-6">
       {/* Search & Filter Toolbar */}
-      <div className="p-4 rounded-2xl bg-blue-950/40 border-2 border-blue-500/30 backdrop-blur-md flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shadow-lg">
+      <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         {/* Search input */}
         <div className="relative flex-1 min-w-0">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-cyan-300 font-bold" />
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sky-600 font-bold" />
           <input
             type="text"
             placeholder="Search service, address, description..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-slate-900 border-2 border-blue-400/50 text-sm font-semibold text-white placeholder:text-slate-200 focus:outline-none focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/30 transition-all"
+            className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition-all"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white text-xs font-bold"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-xs font-bold"
             >
               ✕
             </button>
@@ -141,7 +145,7 @@ export default function JobTable({ initialJobs }: { initialJobs: Job[] }) {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full rounded-xl border-2 border-blue-400/50 bg-slate-900 px-3.5 py-2.5 text-xs font-bold text-white outline-none focus:border-cyan-300 transition-colors cursor-pointer shadow-sm"
+              className="w-full rounded-xl border border-slate-300 bg-slate-50 hover:bg-white px-3.5 py-2.5 text-xs font-bold text-slate-800 outline-none focus:border-sky-500 transition-colors cursor-pointer shadow-xs"
             >
               <option value="all">All Statuses ({jobs.length})</option>
               <option value="pending">Pending ({jobs.filter((j) => (j.status ?? "pending") === "pending").length})</option>
@@ -156,7 +160,7 @@ export default function JobTable({ initialJobs }: { initialJobs: Job[] }) {
             <select
               value={cityFilter}
               onChange={(e) => setCityFilter(e.target.value)}
-              className="w-full rounded-xl border-2 border-blue-400/50 bg-slate-900 px-3.5 py-2.5 text-xs font-bold text-white outline-none focus:border-cyan-300 transition-colors cursor-pointer shadow-sm"
+              className="w-full rounded-xl border border-slate-300 bg-slate-50 hover:bg-white px-3.5 py-2.5 text-xs font-bold text-slate-800 outline-none focus:border-sky-500 transition-colors cursor-pointer shadow-xs"
             >
               <option value="all">All Cities</option>
               {CITIES.map((c) => (
@@ -171,7 +175,7 @@ export default function JobTable({ initialJobs }: { initialJobs: Job[] }) {
           {(statusFilter !== "all" || cityFilter !== "all" || searchQuery !== "") && (
             <button
               onClick={resetFilters}
-              className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 border border-blue-300 text-xs font-black text-white transition-all shadow-md cursor-pointer shrink-0"
+              className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-xs font-bold text-slate-700 transition-all shadow-xs cursor-pointer shrink-0"
             >
               <RotateCcw size={13} />
               Reset
@@ -181,19 +185,19 @@ export default function JobTable({ initialJobs }: { initialJobs: Job[] }) {
       </div>
 
       {/* Main Table with Responsive Horizontal Scroll */}
-      <div className="glass-panel overflow-hidden border-2 border-blue-500/30 rounded-2xl shadow-2xl bg-slate-950/80">
-        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-blue-500/30">
+      <div className="overflow-hidden border border-slate-200 rounded-2xl shadow-sm bg-white">
+        <div className="overflow-x-auto scrollbar-thin">
           <div className="min-w-[760px]">
             {/* Table Header */}
-            <div className="grid grid-cols-[1.3fr_1.5fr_1fr_1fr_1.2fr] gap-4 px-6 py-4 border-b-2 border-blue-500/40 bg-blue-900/40 backdrop-blur-md">
+            <div className="grid grid-cols-[1.3fr_1.5fr_1fr_1fr_1.2fr] gap-4 px-6 py-4 border-b border-slate-200 bg-slate-900 text-white">
               {[
-                { label: "Service & Description", color: "text-white" },
-                { label: "Address", color: "text-white" },
-                { label: "Preferred Time", color: "text-white" },
-                { label: "Status", color: "text-white" },
-                { label: "Manage Status", color: "text-white" },
+                { label: "Service & Description" },
+                { label: "Address" },
+                { label: "Preferred Time" },
+                { label: "Status" },
+                { label: "Manage Status" },
               ].map((h) => (
-                <span key={h.label} className={`text-xs font-black uppercase tracking-wider ${h.color} drop-shadow-sm`}>
+                <span key={h.label} className="text-xs font-black uppercase tracking-wider text-white">
                   {h.label}
                 </span>
               ))}
@@ -201,20 +205,20 @@ export default function JobTable({ initialJobs }: { initialJobs: Job[] }) {
 
             {filtered.length === 0 ? (
               <div className="px-6 py-16 text-center space-y-3">
-                <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/20 text-cyan-300 border border-blue-400/40">
+                <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600 border border-sky-200">
                   <AlertCircle size={24} />
                 </div>
-                <p className="text-sm font-bold text-white">No matching jobs found</p>
-                <p className="text-xs text-zinc-300">Try adjusting your search keywords or clearing active filters.</p>
+                <p className="text-sm font-bold text-slate-900">No matching jobs found</p>
+                <p className="text-xs text-slate-500">Try adjusting your search keywords or clearing active filters.</p>
                 <button
                   onClick={resetFilters}
-                  className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 text-white text-xs font-bold shadow-md hover:bg-blue-500 transition-colors"
+                  className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-600 text-white text-xs font-bold shadow-md hover:bg-sky-500 transition-colors cursor-pointer"
                 >
                   <RotateCcw size={13} /> Clear All Filters
                 </button>
               </div>
             ) : (
-              <div className="divide-y divide-blue-500/15">
+              <div className="divide-y divide-slate-100">
                 <AnimatePresence>
                   {filtered.map((job, i) => {
                     const currentStatus = job.status ?? "pending";
@@ -228,34 +232,34 @@ export default function JobTable({ initialJobs }: { initialJobs: Job[] }) {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0 }}
                         transition={{ delay: Math.min(i * 0.02, 0.2) }}
-                        className="grid grid-cols-[1.3fr_1.5fr_1fr_1fr_1.2fr] gap-4 px-6 py-4.5 items-center hover:bg-blue-600/10 transition-colors"
+                        className="grid grid-cols-[1.3fr_1.5fr_1fr_1fr_1.2fr] gap-4 px-6 py-4.5 items-center hover:bg-sky-50/50 transition-colors"
                       >
                         {/* Service & Details */}
                         <div>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-sm font-black text-white">{job.service_type}</span>
-                            <span className="text-[10px] font-mono font-bold text-cyan-300 bg-cyan-950/70 border border-cyan-500/40 px-1.5 py-0.5 rounded">
+                            <span className="text-sm font-black text-slate-900">{job.service_type}</span>
+                            <span className="text-xs font-mono font-bold text-sky-700 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded-md">
                               #{job.id.slice(0, 6)}
                             </span>
                           </div>
-                          <p className="text-xs text-zinc-300 font-medium line-clamp-2 mt-1" title={job.description}>
+                          <p className="text-xs text-slate-600 font-medium line-clamp-2 mt-1" title={job.description}>
                             {job.description || "No specific details provided."}
                           </p>
                         </div>
 
                         {/* Address */}
                         <div>
-                          <p className="text-xs text-white font-bold line-clamp-2" title={job.address}>
+                          <p className="text-xs text-slate-800 font-bold line-clamp-2" title={job.address}>
                             {job.address}
                           </p>
-                          <p className="text-[11px] text-cyan-300/90 font-semibold mt-1">
+                          <p className="text-xs text-slate-500 font-semibold mt-1">
                             📅 {new Date(job.created_at).toLocaleDateString("en-NG", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                           </p>
                         </div>
 
                         {/* Preferred Time */}
                         <div>
-                          <p className="text-xs text-white font-bold">
+                          <p className="text-xs text-slate-800 font-bold">
                             {job.preferred_time
                               ? new Date(job.preferred_time).toLocaleDateString("en-NG", {
                                   day: "numeric",
@@ -270,7 +274,7 @@ export default function JobTable({ initialJobs }: { initialJobs: Job[] }) {
                         {/* Status Badge */}
                         <div>
                           <span
-                            className={`inline-flex items-center rounded-full border-2 px-3 py-1 text-[11px] font-black uppercase tracking-wider whitespace-nowrap ${st.cls}`}
+                            className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider whitespace-nowrap ${st.cls}`}
                           >
                             {st.label}
                           </span>
@@ -282,12 +286,12 @@ export default function JobTable({ initialJobs }: { initialJobs: Job[] }) {
                             disabled={isUpdating}
                             value={currentStatus}
                             onChange={(e) => handleStatusChange(job.id, e.target.value)}
-                            className="w-full text-xs font-bold rounded-xl bg-slate-900 border-2 border-blue-400/60 text-white px-3 py-2 outline-none focus:border-cyan-300 hover:border-cyan-400 transition-all cursor-pointer disabled:opacity-50 shadow-md"
+                            className="w-full text-xs font-bold rounded-xl bg-white border border-slate-300 text-slate-800 px-3 py-2 outline-none focus:border-sky-500 hover:border-slate-400 transition-all cursor-pointer disabled:opacity-50 shadow-xs"
                           >
-                            <option value="pending" className="bg-slate-900 text-amber-300 font-bold">Mark: Pending</option>
-                            <option value="matched" className="bg-slate-900 text-sky-300 font-bold">Mark: Matched</option>
-                            <option value="completed" className="bg-slate-900 text-emerald-300 font-bold">Mark: Completed</option>
-                            <option value="cancelled" className="bg-slate-900 text-rose-300 font-bold">Mark: Cancelled</option>
+                            <option value="pending" className="font-bold text-amber-700">Mark: Pending</option>
+                            <option value="matched" className="font-bold text-sky-700">Mark: Matched</option>
+                            <option value="completed" className="font-bold text-emerald-700">Mark: Completed</option>
+                            <option value="cancelled" className="font-bold text-rose-700">Mark: Cancelled</option>
                           </select>
                         </div>
                       </motion.div>
@@ -300,18 +304,16 @@ export default function JobTable({ initialJobs }: { initialJobs: Job[] }) {
         </div>
 
         {/* Footer Statistics */}
-        <div className="px-6 py-4 border-t-2 border-blue-500/30 bg-blue-950/40 backdrop-blur-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-black uppercase tracking-wider text-white">
+        <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-black uppercase tracking-wider text-slate-700">
           <div>
-            Showing <span className="text-cyan-300 font-black text-sm">{filtered.length}</span> of {jobs.length} jobs
+            Showing <span className="text-sky-600 font-black text-sm">{filtered.length}</span> of {jobs.length} jobs
           </div>
           <div className="flex gap-4 flex-wrap">
-            <span className="text-amber-300 font-black">{jobs.filter((j) => (j.status ?? "pending") === "pending").length} pending</span>
-            <span className="text-emerald-300 font-black">{jobs.filter((j) => j.status === "completed").length} completed</span>
+            <span className="text-amber-700 font-bold">{jobs.filter((j) => (j.status ?? "pending") === "pending").length} pending</span>
+            <span className="text-emerald-700 font-bold">{jobs.filter((j) => j.status === "completed").length} completed</span>
           </div>
         </div>
       </div>
     </div>
   );
 }
-
-

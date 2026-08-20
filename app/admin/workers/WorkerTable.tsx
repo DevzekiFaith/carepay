@@ -92,21 +92,21 @@ export default function WorkerTable({ initialWorkers }: { initialWorkers: Worker
   return (
     <div className="space-y-6">
       {/* Search & Filter Toolbar */}
-      <div className="p-4 rounded-2xl bg-blue-950/40 border-2 border-blue-500/30 backdrop-blur-md flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shadow-lg">
+      <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         {/* Search input */}
         <div className="relative flex-1 min-w-0">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-cyan-300 font-bold" />
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sky-600 font-bold" />
           <input
             type="text"
             placeholder="Search worker name, skill, phone, NIN..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-slate-900 border-2 border-blue-400/50 text-sm font-semibold text-white placeholder:text-slate-200 focus:outline-none focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/30 transition-all"
+            className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition-all"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white text-xs font-bold"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-xs font-bold"
             >
               ✕
             </button>
@@ -120,7 +120,7 @@ export default function WorkerTable({ initialWorkers }: { initialWorkers: Worker
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full rounded-xl border-2 border-blue-400/50 bg-slate-900 px-3.5 py-2.5 text-xs font-bold text-white outline-none focus:border-cyan-300 transition-colors cursor-pointer shadow-sm"
+              className="w-full rounded-xl border border-slate-300 bg-slate-50 hover:bg-white px-3.5 py-2.5 text-xs font-bold text-slate-800 outline-none focus:border-sky-500 transition-colors cursor-pointer shadow-xs"
             >
               <option value="all">All Statuses ({workers.length})</option>
               <option value="verified">Verified ({workers.filter((w) => w.is_verified).length})</option>
@@ -134,7 +134,7 @@ export default function WorkerTable({ initialWorkers }: { initialWorkers: Worker
             <select
               value={skillFilter}
               onChange={(e) => setSkillFilter(e.target.value)}
-              className="w-full rounded-xl border-2 border-blue-400/50 bg-slate-900 px-3.5 py-2.5 text-xs font-bold text-white outline-none focus:border-cyan-300 transition-colors cursor-pointer shadow-sm"
+              className="w-full rounded-xl border border-slate-300 bg-slate-50 hover:bg-white px-3.5 py-2.5 text-xs font-bold text-slate-800 outline-none focus:border-sky-500 transition-colors cursor-pointer shadow-xs"
             >
               <option value="all">All Skills</option>
               {availableSkills.map((sk) => (
@@ -149,7 +149,7 @@ export default function WorkerTable({ initialWorkers }: { initialWorkers: Worker
           {(statusFilter !== "all" || skillFilter !== "all" || searchQuery !== "") && (
             <button
               onClick={resetFilters}
-              className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 border border-blue-300 text-xs font-black text-white transition-all shadow-md cursor-pointer shrink-0"
+              className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-xs font-bold text-slate-700 transition-all shadow-xs cursor-pointer shrink-0"
             >
               <RotateCcw size={13} />
               Reset
@@ -159,137 +159,138 @@ export default function WorkerTable({ initialWorkers }: { initialWorkers: Worker
       </div>
 
       {/* Main Table with Responsive Horizontal Scroll */}
-      <div className="glass-panel overflow-hidden border-2 border-blue-500/30 rounded-2xl shadow-2xl bg-slate-950/80">
-        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-blue-500/30">
+      <div className="overflow-hidden border border-slate-200 rounded-2xl shadow-sm bg-white">
+        <div className="overflow-x-auto scrollbar-thin">
           <div className="min-w-[760px]">
-            <div className="grid grid-cols-[1.5fr_auto_auto_auto_auto_auto] gap-4 px-6 py-4 border-b-2 border-blue-500/40 bg-blue-900/40 backdrop-blur-md">
+            <div className="grid grid-cols-[1.5fr_auto_auto_auto_auto_auto] gap-4 px-6 py-4 border-b border-slate-200 bg-slate-900 text-white">
               {["Name & Skill", "Phone", "NIN", "AI Check", "Status", "Action"].map((h) => (
-                <span key={h} className="text-xs font-black uppercase tracking-wider text-white drop-shadow-sm">
+                <span key={h} className="text-xs font-black uppercase tracking-wider text-white">
                   {h}
                 </span>
               ))}
             </div>
 
-        {filtered.length === 0 ? (
-          <div className="px-6 py-16 text-center space-y-3">
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/20 text-cyan-300 border border-blue-400/40">
-              <AlertCircle size={24} />
-            </div>
-            <p className="text-sm font-bold text-white">No matching workers found</p>
-            <p className="text-xs text-zinc-300">Try adjusting your filters or search terms.</p>
-            <button
-              onClick={resetFilters}
-              className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 text-white text-xs font-bold shadow-md hover:bg-blue-500 transition-colors"
-            >
-              <RotateCcw size={13} /> Clear All Filters
-            </button>
-          </div>
-        ) : (
-          <div className="divide-y divide-blue-500/15">
-            <AnimatePresence>
-              {filtered.map((worker, i) => (
-                <motion.div
-                  key={worker.id}
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ delay: Math.min(i * 0.02, 0.2) }}
-                  className="grid lg:grid-cols-[1.5fr_auto_auto_auto_auto_auto] gap-4 px-6 py-4.5 items-center hover:bg-blue-600/10 transition-colors"
+            {filtered.length === 0 ? (
+              <div className="px-6 py-16 text-center space-y-3">
+                <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600 border border-sky-200">
+                  <AlertCircle size={24} />
+                </div>
+                <p className="text-sm font-bold text-slate-900">No matching workers found</p>
+                <p className="text-xs text-slate-500">Try adjusting your filters or search terms.</p>
+                <button
+                  onClick={resetFilters}
+                  className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-600 text-white text-xs font-bold shadow-md hover:bg-sky-500 transition-colors cursor-pointer"
                 >
-                  {/* Name */}
-                  <div>
-                    <p className="text-sm font-black text-white">{worker.full_name}</p>
-                    <p className="text-xs text-cyan-300 font-bold mt-0.5">{worker.primary_skill}</p>
-                  </div>
+                  <RotateCcw size={13} /> Clear All Filters
+                </button>
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                <AnimatePresence>
+                  {filtered.map((worker, i) => (
+                    <motion.div
+                      key={worker.id}
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ delay: Math.min(i * 0.02, 0.2) }}
+                      className="grid grid-cols-[1.5fr_auto_auto_auto_auto_auto] gap-4 px-6 py-4.5 items-center hover:bg-sky-50/50 transition-colors"
+                    >
+                      {/* Name */}
+                      <div>
+                        <p className="text-sm font-black text-slate-900">{worker.full_name}</p>
+                        <p className="text-xs text-sky-700 font-bold mt-0.5">{worker.primary_skill}</p>
+                      </div>
 
-                  {/* Phone */}
-                  <p className="text-xs text-white font-mono font-bold flex items-center gap-1">
-                    <Phone size={12} className="text-cyan-400" />
-                    {worker.phone || "N/A"}
-                  </p>
+                      {/* Phone */}
+                      <p className="text-xs text-slate-700 font-mono font-bold flex items-center gap-1">
+                        <Phone size={12} className="text-sky-600" />
+                        {worker.phone || "N/A"}
+                      </p>
 
-                  {/* NIN */}
-                  <p className="text-xs font-mono font-bold text-zinc-200">
-                    {worker.nin ? `${worker.nin.slice(0, 4)}•••••${worker.nin.slice(-2)}` : "—"}
-                  </p>
+                      {/* NIN */}
+                      <p className="text-xs font-mono font-bold text-slate-600">
+                        {worker.nin ? `${worker.nin.slice(0, 4)}•••••${worker.nin.slice(-2)}` : "—"}
+                      </p>
 
-                  {/* AI Check */}
-                  <span
-                    className={`inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest whitespace-nowrap ${
-                      worker.ai_verified ? "text-emerald-300" : "text-amber-300"
-                    }`}
-                  >
-                    {worker.ai_verified ? (
-                      <>
-                        <CheckCircle2 size={13} className="text-emerald-400" /> AI Verified
-                      </>
-                    ) : (
-                      <>
-                        <Clock size={13} className="text-amber-400" /> Pending AI
-                      </>
-                    )}
-                  </span>
-
-                  {/* Verified Status */}
-                  <span
-                    className={`inline-flex items-center gap-1.5 rounded-full border-2 px-3 py-1 text-[11px] font-black uppercase tracking-widest whitespace-nowrap ${
-                      worker.is_verified
-                        ? "border-emerald-400/80 bg-emerald-500/25 text-emerald-300 shadow-[0_0_12px_rgba(52,211,153,0.25)]"
-                        : "border-amber-400/80 bg-amber-500/25 text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.25)]"
-                    }`}
-                  >
-                    {worker.is_verified ? (
-                      <>
-                        <CheckCircle2 size={12} /> Verified
-                      </>
-                    ) : (
-                      <>
-                        <Clock size={12} /> Unverified
-                      </>
-                    )}
-                  </span>
-
-                  {/* Actions */}
-                  <div className="flex items-center gap-2">
-                    {!worker.is_verified ? (
-                      <button
-                        onClick={() => handleVerify(worker.id, true)}
-                        disabled={verifyingId === worker.id}
-                        className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 text-xs font-black uppercase tracking-wider shadow-md hover:shadow-blue-500/30 transition-all disabled:opacity-50 cursor-pointer"
+                      {/* AI Check */}
+                      <span
+                        className={`inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider whitespace-nowrap ${
+                          worker.ai_verified ? "text-emerald-700" : "text-amber-700"
+                        }`}
                       >
-                        {verifyingId === worker.id ? "…" : "Approve"}
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleVerify(worker.id, false)}
-                        disabled={verifyingId === worker.id}
-                        className="inline-flex items-center gap-1.5 rounded-xl border-2 border-rose-400/80 bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 px-3.5 py-1.5 text-xs font-black uppercase tracking-wider transition-all disabled:opacity-50 cursor-pointer"
+                        {worker.ai_verified ? (
+                          <>
+                            <CheckCircle2 size={14} className="text-emerald-600" /> AI Verified
+                          </>
+                        ) : (
+                          <>
+                            <Clock size={14} className="text-amber-600" /> Pending AI
+                          </>
+                        )}
+                      </span>
+
+                      {/* Verified Status */}
+                      <span
+                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider whitespace-nowrap ${
+                          worker.is_verified
+                            ? "border border-emerald-300 bg-emerald-50 text-emerald-800"
+                            : "border border-amber-300 bg-amber-50 text-amber-800"
+                        }`}
                       >
-                        <XCircle size={13} />
-                        Revoke
-                      </button>
-                    )}
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
-        )}
+                        {worker.is_verified ? (
+                          <>
+                            <CheckCircle2 size={12} /> Verified
+                          </>
+                        ) : (
+                          <>
+                            <Clock size={12} /> Unverified
+                          </>
+                        )}
+                      </span>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-2">
+                        {!worker.is_verified ? (
+                          <button
+                            onClick={() => handleVerify(worker.id, true)}
+                            disabled={verifyingId === worker.id}
+                            className="inline-flex items-center gap-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 text-xs font-bold uppercase tracking-wider shadow-sm transition-all disabled:opacity-50 cursor-pointer"
+                          >
+                            {verifyingId === worker.id ? "…" : "Approve"}
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleVerify(worker.id, false)}
+                            disabled={verifyingId === worker.id}
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-rose-300 bg-rose-50 hover:bg-rose-100 text-rose-700 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all disabled:opacity-50 cursor-pointer"
+                          >
+                            <XCircle size={13} />
+                            Revoke
+                          </button>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="px-6 py-4 border-t-2 border-blue-500/30 bg-blue-950/40 backdrop-blur-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-black uppercase tracking-wider text-white">
+        <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-black uppercase tracking-wider text-slate-700">
           <div>
-            Showing <span className="text-cyan-300 font-black text-sm">{filtered.length}</span> of {workers.length} workers
+            Showing <span className="text-sky-600 font-black text-sm">{filtered.length}</span> of {workers.length} workers
           </div>
           <div className="flex gap-4 flex-wrap">
-            <span className="text-emerald-300 font-black">{workers.filter((w) => w.is_verified).length} verified</span>
-            <span className="text-amber-300 font-black">{workers.filter((w) => !w.is_verified).length} pending verification</span>
+            <span className="text-emerald-700 font-bold">{workers.filter((w) => w.is_verified).length} verified</span>
+            <span className="text-amber-700 font-bold">{workers.filter((w) => !w.is_verified).length} pending verification</span>
           </div>
         </div>
       </div>
     </div>
   );
 }
+
 
 

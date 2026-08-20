@@ -57,42 +57,42 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground antialiased overflow-hidden">
+    <div className="relative min-h-screen bg-slate-50 text-slate-900 antialiased overflow-hidden">
       {/* Biometric & Passcode Lock Guard */}
       {!unlocked && (
         <AdminLockScreen onUnlock={() => setUnlocked(true)} />
       )}
 
-      {/* Background Ambience */}
-      <div className="fixed inset-x-0 -top-[30%] -z-10 h-[80%] w-full rounded-full bg-blue-600/5 opacity-40 blur-[120px] mix-blend-screen pointer-events-none" />
+      {/* Subtle Sky Ambient Glow */}
+      <div className="fixed inset-x-0 -top-[20%] -z-10 h-[60%] w-full rounded-full bg-sky-200/40 opacity-70 blur-[130px] pointer-events-none" />
 
-      {/* Top bar */}
-      <header className="sticky top-0 z-40 border-b border-blue-500/20 bg-slate-950/80 backdrop-blur-xl">
+      {/* Top Header */}
+      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-xs">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
             <Link
               href="/"
-              className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-blue-400 transition-colors"
+              className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-sky-600 transition-colors"
             >
-              <ArrowLeft size={12} />
+              <ArrowLeft size={14} />
               Back to site
             </Link>
-            <span className="text-white/10">|</span>
-            <span className="text-[11px] font-bold uppercase tracking-[0.2em] bg-gradient-to-r from-blue-400 via-indigo-300 to-sky-400 bg-clip-text text-transparent">
-              Admin Panel
+            <span className="text-slate-300 font-bold">|</span>
+            <span className="text-xs font-black uppercase tracking-wider text-sky-600">
+              CarePay Admin Console
             </span>
           </div>
           <div className="flex items-center gap-3">
             <button
               onClick={handleLock}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-blue-500/40 bg-blue-600/20 hover:bg-blue-600/30 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-blue-300 transition-all shadow-sm"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 transition-all shadow-xs cursor-pointer"
               title="Lock Admin Console"
             >
-              <Lock size={12} />
+              <Lock size={13} />
               Lock Console
             </button>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-emerald-700">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               Live
             </span>
           </div>
@@ -100,26 +100,26 @@ export default function AdminLayout({
       </header>
 
       <div className="mx-auto flex max-w-7xl gap-0 lg:gap-8 px-6 py-8 lg:flex-row flex-col">
-        {/* Sidebar nav with vibrant Blue Buttons */}
+        {/* Sidebar nav with brand Blue Buttons */}
         <nav className="flex-shrink-0 w-full lg:w-60 mb-6 lg:mb-0">
-          <div className="p-3 rounded-2xl bg-blue-950/40 border-2 border-blue-500/30 backdrop-blur-md shadow-xl">
-            <p className="hidden lg:block px-3 py-1.5 text-xs font-black uppercase tracking-widest text-cyan-300 mb-2">
+          <div className="p-3 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <p className="hidden lg:block px-3 py-1.5 text-xs font-black uppercase tracking-wider text-slate-400 mb-2">
               Navigation
             </p>
-            <ul className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible pb-1 lg:pb-0 scrollbar-none">
+            <ul className="flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-x-visible pb-1 lg:pb-0 scrollbar-none">
               {NAV.map(({ href, label, icon: Icon }) => {
                 const active = pathname === href;
                 return (
                   <li key={href} className="shrink-0 lg:shrink lg:w-full">
                     <Link
                       href={href}
-                      className={`flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-xs uppercase tracking-wider whitespace-nowrap transition-all duration-200 shadow-sm ${
+                      className={`flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-xs uppercase tracking-wider whitespace-nowrap transition-all duration-200 ${
                         active
-                          ? "bg-blue-600 text-white shadow-[0_4px_20px_rgba(37,99,235,0.45)] border-2 border-blue-300 font-black scale-[1.02]"
-                          : "bg-blue-950/60 text-blue-100 font-bold hover:bg-blue-600/30 hover:text-white border border-blue-500/30 hover:border-blue-400"
+                          ? "bg-sky-600 text-white shadow-md shadow-sky-600/25 font-black"
+                          : "text-slate-700 font-bold hover:bg-sky-50 hover:text-sky-700"
                       }`}
                     >
-                      <Icon size={16} className={active ? "text-white" : "text-cyan-300"} />
+                      <Icon size={16} className={active ? "text-white" : "text-sky-600"} />
                       <span>{label}</span>
                     </Link>
                   </li>
@@ -143,4 +143,5 @@ export default function AdminLayout({
     </div>
   );
 }
+
 

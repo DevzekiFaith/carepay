@@ -53,8 +53,8 @@ h6,
 input::placeholder,
 textarea::placeholder,
 select::placeholder {
-  color: #cbd5e1 !important; /* slate-300 bright high visibility */
-  opacity: 0.95 !important;
+  color: #64748b; /* slate-500 crisp and readable */
+  opacity: 1;
 }
 
 /* Glassmorphism Utilities */

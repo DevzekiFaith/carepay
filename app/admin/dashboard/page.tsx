@@ -180,12 +180,12 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col lg:flex-row">
       {/* Sidebar */}
-      <aside className="w-full lg:w-64 border-r border-blue-500/20 bg-slate-950/90 p-6 flex flex-col gap-8 backdrop-blur-xl">
+      <aside className="w-full lg:w-64 border-r border-slate-200 bg-white p-6 flex flex-col gap-8">
         <Logo href="/admin" />
         
-        <nav className="flex flex-col gap-2">
+        <nav className="flex flex-col gap-1.5">
           {[
             { id: 'overview', icon: LayoutDashboard, label: 'Overview' },
             { id: 'orders', icon: ShoppingBag, label: 'Store Orders' },
@@ -196,8 +196,8 @@ export default function AdminDashboard() {
               onClick={() => setActiveTab(item.id as 'overview' | 'orders' | 'requests')}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
                 activeTab === item.id 
-                  ? 'bg-blue-600 text-white border border-blue-400/50 shadow-[0_4px_20px_rgba(37,99,235,0.45)]' 
-                  : 'bg-blue-950/40 text-blue-200/90 hover:bg-blue-600/30 hover:text-white border border-blue-500/20'
+                  ? 'bg-sky-600 text-white shadow-md shadow-sky-600/25 font-black' 
+                  : 'text-slate-700 hover:bg-sky-50 hover:text-sky-700 font-bold'
               }`}
             >
               <item.icon size={16} />
@@ -206,14 +206,14 @@ export default function AdminDashboard() {
           ))}
         </nav>
 
-        <div className="mt-auto pt-8 border-t border-blue-500/20">
-          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-950/30 border border-blue-500/20">
-            <div className="h-9 w-9 rounded-xl bg-blue-600 flex items-center justify-center font-bold text-white shadow-md">
+        <div className="mt-auto pt-8 border-t border-slate-200">
+          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200">
+            <div className="h-9 w-9 rounded-xl bg-sky-600 flex items-center justify-center font-bold text-white shadow-xs">
               A
             </div>
             <div>
-              <p className="text-xs font-bold text-foreground">Admin Console</p>
-              <p className="text-[10px] text-blue-400 font-bold uppercase tracking-wider">Live Master Access</p>
+              <p className="text-xs font-black text-slate-900">Admin Console</p>
+              <p className="text-[10px] text-sky-600 font-bold uppercase tracking-wider">Live Master Access</p>
             </div>
           </div>
         </div>
@@ -226,27 +226,27 @@ export default function AdminDashboard() {
           {/* Header & Global Search */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h1 className="text-2xl lg:text-3xl font-heading font-extrabold tracking-tight text-foreground">Admin Dashboard</h1>
-              <p className="text-xs text-zinc-500 mt-1 uppercase tracking-widest font-bold">Management & Fulfillment Control</p>
+              <h1 className="text-2xl lg:text-3xl font-heading font-black tracking-tight text-slate-900">Admin Dashboard</h1>
+              <p className="text-xs text-slate-500 mt-1 uppercase tracking-wider font-bold">Management & Fulfillment Control</p>
             </div>
             <div className="flex items-center gap-3 w-full sm:w-auto">
               <div className="relative flex-1 sm:w-80">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-cyan-300 font-bold" size={16} />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sky-600 font-bold" size={16} />
                 <input 
                   type="text"
                   placeholder="Search ref, customer, address..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-slate-900 border-2 border-blue-400/50 rounded-xl py-2 pl-10 pr-9 text-xs font-semibold text-white placeholder:text-slate-200 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/30 transition-all outline-none"
+                  className="w-full bg-white border border-slate-300 rounded-xl py-2.5 pl-10 pr-9 text-xs font-semibold text-slate-900 placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition-all outline-none shadow-xs"
                 />
                 {searchTerm && (
-                  <button onClick={() => setSearchTerm("")} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white text-xs font-bold">✕</button>
+                  <button onClick={() => setSearchTerm("")} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-xs font-bold">✕</button>
                 )}
               </div>
               <button 
                 onClick={fetchData}
                 title="Refresh Data"
-                className="h-9 w-9 flex items-center justify-center rounded-xl bg-blue-600 hover:bg-blue-500 border border-blue-300 text-white transition-all cursor-pointer shadow-md shrink-0"
+                className="h-10 w-10 flex items-center justify-center rounded-xl bg-sky-600 hover:bg-sky-500 text-white transition-all cursor-pointer shadow-sm shrink-0"
               >
                 <RefreshCw size={15} />
               </button>
@@ -265,21 +265,21 @@ export default function AdminDashboard() {
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   {[
-                    { label: 'Total Revenue', value: `₦${stats.totalRevenue.toLocaleString()}`, icon: TrendingUp, color: 'text-emerald-400', bg: 'bg-emerald-500/15 border-emerald-500/30' },
-                    { label: 'Active Orders', value: stats.activeOrders, icon: ShoppingBag, color: 'text-blue-400', bg: 'bg-blue-500/15 border-blue-500/30' },
-                    { label: 'Pending Requests', value: stats.pendingRequests, icon: Clock, color: 'text-amber-400', bg: 'bg-amber-500/15 border-amber-500/30' },
-                    { label: 'Completed Jobs', value: stats.completedJobs, icon: CheckCircle2, color: 'text-purple-400', bg: 'bg-purple-500/15 border-purple-500/30' },
+                    { label: 'Total Revenue', value: `₦${stats.totalRevenue.toLocaleString()}`, icon: TrendingUp, color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-200' },
+                    { label: 'Active Orders', value: stats.activeOrders, icon: ShoppingBag, color: 'text-sky-600', bg: 'bg-sky-50 border-sky-200' },
+                    { label: 'Pending Requests', value: stats.pendingRequests, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200' },
+                    { label: 'Completed Jobs', value: stats.completedJobs, icon: CheckCircle2, color: 'text-indigo-600', bg: 'bg-indigo-50 border-indigo-200' },
                   ].map((stat, idx) => (
                     <motion.div 
                       key={idx} 
                       variants={itemVariants}
-                      className="glass-panel p-6 border border-blue-500/20 rounded-2xl relative overflow-hidden group shadow-lg"
+                      className="p-6 border border-slate-200 bg-white rounded-2xl relative overflow-hidden group shadow-sm"
                     >
                       <div className={`absolute top-0 right-0 p-3.5 ${stat.bg} ${stat.color} border-b border-l rounded-bl-3xl`}>
                         <stat.icon size={18} />
                       </div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-1.5">{stat.label}</p>
-                      <p className="text-2xl font-heading font-extrabold text-foreground">{stat.value}</p>
+                      <p className="text-xs font-black uppercase tracking-wider text-slate-500 mb-1.5">{stat.label}</p>
+                      <p className="text-2xl font-heading font-black text-slate-900">{stat.value}</p>
                     </motion.div>
                   ))}
                 </div>
@@ -287,34 +287,34 @@ export default function AdminDashboard() {
                 {/* Recent Activity */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {/* Recent Orders */}
-                  <div className="glass-panel p-6 rounded-2xl border border-blue-500/20 shadow-lg">
+                  <div className="p-6 rounded-2xl border border-slate-200 bg-white shadow-sm">
                     <div className="flex items-center justify-between mb-6">
-                      <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">Recent Orders</h3>
+                      <h3 className="text-xs font-black uppercase tracking-wider text-slate-800">Recent Orders</h3>
                       <button 
                         onClick={() => setActiveTab('orders')} 
-                        className="text-xs font-bold text-blue-400 hover:text-blue-300 transition-colors"
+                        className="text-xs font-bold text-sky-600 hover:text-sky-700 transition-colors cursor-pointer"
                       >
                         View all ({orders.length}) →
                       </button>
                     </div>
                     <div className="space-y-3">
                       {orders.slice(0, 5).map((order) => (
-                        <div key={order.id} className="flex items-center justify-between p-3.5 rounded-xl bg-slate-900/60 border border-blue-500/15 hover:border-blue-500/30 transition-all">
+                        <div key={order.id} className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-sky-300 transition-all">
                           <div className="flex items-center gap-3">
-                            <div className="h-9 w-9 rounded-xl bg-blue-600/15 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                            <div className="h-9 w-9 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-600">
                               <Package size={16} />
                             </div>
                             <div>
-                              <p className="text-xs font-bold text-foreground">{order.customer_name}</p>
-                              <p className="text-[10px] text-zinc-400 font-mono">
+                              <p className="text-xs font-bold text-slate-900">{order.customer_name}</p>
+                              <p className="text-[11px] text-slate-500 font-mono">
                                 {order.order_ref} {order.order_ref.startsWith("INSP-") ? "· 🔍 Inspection" : ""}
                               </p>
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="text-xs font-extrabold text-brand-primary">₦{(order.total || 0).toLocaleString()}</p>
-                            <span className={`text-[9px] font-extrabold uppercase tracking-widest ${
-                              order.status === 'delivered' ? 'text-emerald-400' : 'text-amber-400'
+                            <p className="text-xs font-black text-sky-700">₦{(order.total || 0).toLocaleString()}</p>
+                            <span className={`text-[10px] font-bold uppercase tracking-wider ${
+                              order.status === 'delivered' ? 'text-emerald-700' : 'text-amber-700'
                             }`}>{order.status.replace('_', ' ')}</span>
                           </div>
                         </div>
@@ -323,33 +323,33 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* New Requests */}
-                  <div className="glass-panel p-6 rounded-2xl border border-blue-500/20 shadow-lg">
+                  <div className="p-6 rounded-2xl border border-slate-200 bg-white shadow-sm">
                     <div className="flex items-center justify-between mb-6">
-                      <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">New Service Requests</h3>
+                      <h3 className="text-xs font-black uppercase tracking-wider text-slate-800">New Service Requests</h3>
                       <button 
                         onClick={() => setActiveTab('requests')} 
-                        className="text-xs font-bold text-blue-400 hover:text-blue-300 transition-colors"
+                        className="text-xs font-bold text-sky-600 hover:text-sky-700 transition-colors cursor-pointer"
                       >
                         View all ({requests.length}) →
                       </button>
                     </div>
                     <div className="space-y-3">
                       {requests.slice(0, 5).map((req) => (
-                        <div key={req.id} className="flex items-center justify-between p-3.5 rounded-xl bg-slate-900/60 border border-blue-500/15 hover:border-blue-500/30 transition-all">
+                        <div key={req.id} className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-sky-300 transition-all">
                           <div className="flex items-center gap-3">
-                            <div className="h-9 w-9 rounded-xl bg-blue-600/15 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                            <div className="h-9 w-9 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-600">
                               <Wrench size={16} />
                             </div>
                             <div>
-                              <p className="text-xs font-bold text-foreground">{req.service_type}</p>
-                              <p className="text-[10px] text-zinc-400 truncate max-w-[160px]">{req.address}</p>
+                              <p className="text-xs font-bold text-slate-900">{req.service_type}</p>
+                              <p className="text-[11px] text-slate-500 truncate max-w-[160px]">{req.address}</p>
                             </div>
                           </div>
                           <div className="text-right">
-                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-widest ${
-                              req.status === 'pending' ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                              req.status === 'pending' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                             }`}>{req.status}</span>
-                            <p className="text-[9px] text-zinc-500 mt-1 font-mono">{new Date(req.created_at).toLocaleDateString()}</p>
+                            <p className="text-[10px] text-slate-400 mt-1 font-semibold">{new Date(req.created_at).toLocaleDateString()}</p>
                           </div>
                         </div>
                       ))}
@@ -367,14 +367,14 @@ export default function AdminDashboard() {
                 className="space-y-6"
               >
                 {/* Orders Toolbar with Working Filter */}
-                <div className="p-4 rounded-2xl bg-blue-950/20 border border-blue-500/20 flex flex-wrap items-center justify-between gap-3">
+                <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
-                    <Filter size={14} className="text-blue-400" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-blue-300">Filter Status:</span>
+                    <Filter size={15} className="text-sky-600" />
+                    <span className="text-xs font-black uppercase tracking-wider text-slate-700">Filter Status:</span>
                     <select
                       value={orderStatusFilter}
                       onChange={(e) => setOrderStatusFilter(e.target.value)}
-                      className="rounded-xl border border-blue-500/30 bg-slate-900 px-3.5 py-1.5 text-xs font-semibold text-blue-100 outline-none focus:border-blue-400 cursor-pointer"
+                      className="rounded-xl border border-slate-300 bg-slate-50 hover:bg-white px-3.5 py-2 text-xs font-bold text-slate-800 outline-none focus:border-sky-500 cursor-pointer shadow-xs"
                     >
                       <option value="all">All Orders ({orders.length})</option>
                       <option value="pending_payment">Pending Payment</option>
@@ -388,20 +388,20 @@ export default function AdminDashboard() {
                   {(orderStatusFilter !== "all" || searchTerm !== "") && (
                     <button
                       onClick={() => { setOrderStatusFilter("all"); setSearchTerm(""); }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-xs font-bold text-blue-300 transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-xs font-bold text-slate-700 transition-colors cursor-pointer"
                     >
-                      <RotateCcw size={12} /> Clear Filter
+                      <RotateCcw size={13} /> Clear Filter
                     </button>
                   )}
                 </div>
 
                 {/* Orders Table */}
-                <div className="glass-panel overflow-hidden border-2 border-blue-500/30 rounded-2xl shadow-2xl bg-slate-950/80">
-                  <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-blue-500/30">
+                <div className="overflow-hidden border border-slate-200 rounded-2xl shadow-sm bg-white">
+                  <div className="overflow-x-auto scrollbar-thin">
                     <div className="min-w-[720px]">
                       <table className="w-full text-left">
                         <thead>
-                          <tr className="border-b-2 border-blue-500/40 bg-blue-900/40 backdrop-blur-md">
+                          <tr className="border-b border-slate-200 bg-slate-900 text-white">
                             <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Order Ref</th>
                             <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Customer</th>
                             <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Total</th>
@@ -409,30 +409,30 @@ export default function AdminDashboard() {
                             <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Update Status</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-blue-500/15">
+                        <tbody className="divide-y divide-slate-100">
                           {filteredOrders.length === 0 ? (
                             <tr>
-                              <td colSpan={5} className="px-6 py-12 text-center text-zinc-300 text-xs font-bold">
+                              <td colSpan={5} className="px-6 py-12 text-center text-slate-500 text-xs font-bold">
                                 No orders found matching the filter criteria.
                               </td>
                             </tr>
                           ) : (
                             filteredOrders.map((order) => (
-                              <tr key={order.id} className="hover:bg-blue-600/10 transition-colors">
-                                <td className="px-6 py-4.5 font-mono text-xs font-black text-cyan-300 bg-cyan-950/60 border border-cyan-500/30 rounded px-2 py-1">{order.order_ref}</td>
+                              <tr key={order.id} className="hover:bg-sky-50/50 transition-colors">
+                                <td className="px-6 py-4.5 font-mono text-xs font-bold text-sky-700 bg-sky-50 border border-sky-200 rounded px-2 py-1">{order.order_ref}</td>
                                 <td className="px-6 py-4.5">
-                                  <div className="text-xs font-black text-white">{order.customer_name}</div>
-                                  <div className="text-[11px] text-zinc-300 mt-0.5 font-medium">
+                                  <div className="text-xs font-black text-slate-900">{order.customer_name}</div>
+                                  <div className="text-xs text-slate-500 mt-0.5 font-medium">
                                     {order.delivery_address || (Array.isArray(order.items) ? `${order.items.length} items` : "Order")}
                                   </div>
                                 </td>
-                                <td className="px-6 py-4.5 text-xs font-black text-amber-300">₦{(order.total || 0).toLocaleString()}</td>
+                                <td className="px-6 py-4.5 text-xs font-black text-sky-700">₦{(order.total || 0).toLocaleString()}</td>
                                 <td className="px-6 py-4.5">
-                                  <span className={`inline-flex items-center rounded-full border-2 px-3 py-1 text-[10px] font-black uppercase tracking-wider ${
-                                    order.status === 'delivered' ? 'border-purple-400 bg-purple-500/20 text-purple-300' :
-                                    order.status === 'shipped' ? 'border-sky-400 bg-sky-500/20 text-sky-200' :
-                                    order.status === 'processing' || order.status === 'paid' ? 'border-emerald-400 bg-emerald-500/20 text-emerald-300' :
-                                    'border-amber-400 bg-amber-500/20 text-amber-300'
+                                  <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${
+                                    order.status === 'delivered' ? 'border border-purple-300 bg-purple-50 text-purple-800' :
+                                    order.status === 'shipped' ? 'border border-sky-300 bg-sky-50 text-sky-800' :
+                                    order.status === 'processing' || order.status === 'paid' ? 'border border-emerald-300 bg-emerald-50 text-emerald-800' :
+                                    'border border-amber-300 bg-amber-50 text-amber-800'
                                   }`}>
                                     {order.status.replace('_', ' ')}
                                   </span>
@@ -442,13 +442,13 @@ export default function AdminDashboard() {
                                     disabled={updatingId === order.id}
                                     value={order.status}
                                     onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                                    className="bg-slate-900 border-2 border-blue-400/60 rounded-xl px-3 py-1.5 text-xs font-bold text-white outline-none focus:border-cyan-300 cursor-pointer shadow-md"
+                                    className="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 outline-none focus:border-sky-500 cursor-pointer shadow-xs"
                                   >
-                                    <option value="pending_payment" className="bg-slate-900 text-amber-300 font-bold">Pending Payment</option>
-                                    <option value="processing" className="bg-slate-900 text-emerald-300 font-bold">Processing (Paid)</option>
-                                    <option value="shipped" className="bg-slate-900 text-sky-300 font-bold">Shipped</option>
-                                    <option value="delivered" className="bg-slate-900 text-purple-300 font-bold">Delivered</option>
-                                    <option value="cancelled" className="bg-slate-900 text-rose-300 font-bold">Cancelled</option>
+                                    <option value="pending_payment" className="font-bold text-amber-700">Pending Payment</option>
+                                    <option value="processing" className="font-bold text-emerald-700">Processing (Paid)</option>
+                                    <option value="shipped" className="font-bold text-sky-700">Shipped</option>
+                                    <option value="delivered" className="font-bold text-purple-700">Delivered</option>
+                                    <option value="cancelled" className="font-bold text-rose-700">Cancelled</option>
                                   </select>
                                 </td>
                               </tr>
@@ -470,14 +470,14 @@ export default function AdminDashboard() {
                 className="space-y-6"
               >
                 {/* Requests Toolbar with Filter */}
-                <div className="p-4 rounded-2xl bg-blue-950/40 border-2 border-blue-500/30 flex flex-wrap items-center justify-between gap-3 shadow-lg">
+                <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
-                    <Filter size={15} className="text-cyan-300 font-bold" />
-                    <span className="text-xs font-black uppercase tracking-wider text-white">Filter Status:</span>
+                    <Filter size={15} className="text-sky-600" />
+                    <span className="text-xs font-black uppercase tracking-wider text-slate-700">Filter Status:</span>
                     <select
                       value={reqStatusFilter}
                       onChange={(e) => setReqStatusFilter(e.target.value)}
-                      className="rounded-xl border-2 border-blue-400/50 bg-slate-900 px-3.5 py-2 text-xs font-bold text-white outline-none focus:border-cyan-300 cursor-pointer"
+                      className="rounded-xl border border-slate-300 bg-slate-50 hover:bg-white px-3.5 py-2 text-xs font-bold text-slate-800 outline-none focus:border-sky-500 cursor-pointer shadow-xs"
                     >
                       <option value="all">All Requests ({requests.length})</option>
                       <option value="pending">Pending ({requests.filter(r => r.status === 'pending').length})</option>
@@ -490,7 +490,7 @@ export default function AdminDashboard() {
                   {(reqStatusFilter !== "all" || searchTerm !== "") && (
                     <button
                       onClick={() => { setReqStatusFilter("all"); setSearchTerm(""); }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 border border-blue-300 text-xs font-black text-white transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-xs font-bold text-slate-700 transition-colors cursor-pointer"
                     >
                       <RotateCcw size={12} /> Clear Filter
                     </button>
@@ -498,12 +498,12 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Service Requests Table */}
-                <div className="glass-panel overflow-hidden border-2 border-blue-500/30 rounded-2xl shadow-2xl bg-slate-950/80">
-                  <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-blue-500/30">
+                <div className="overflow-hidden border border-slate-200 rounded-2xl shadow-sm bg-white">
+                  <div className="overflow-x-auto scrollbar-thin">
                     <div className="min-w-[720px]">
                       <table className="w-full text-left">
                         <thead>
-                          <tr className="border-b-2 border-blue-500/40 bg-blue-900/40 backdrop-blur-md">
+                          <tr className="border-b border-slate-200 bg-slate-900 text-white">
                             <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Service</th>
                             <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Address</th>
                             <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Date</th>
@@ -511,29 +511,29 @@ export default function AdminDashboard() {
                             <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-white">Action</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-blue-500/15">
+                        <tbody className="divide-y divide-slate-100">
                           {filteredRequests.length === 0 ? (
                             <tr>
-                              <td colSpan={5} className="px-6 py-12 text-center text-zinc-300 text-xs font-bold">
+                              <td colSpan={5} className="px-6 py-12 text-center text-slate-500 text-xs font-bold">
                                 No service requests found.
                               </td>
                             </tr>
                           ) : (
                             filteredRequests.map((req) => (
-                              <tr key={req.id} className="hover:bg-blue-600/10 transition-colors">
-                                <td className="px-6 py-4.5 text-xs font-black text-white flex items-center gap-2.5">
-                                  <div className="h-7 w-7 rounded-lg bg-blue-600/30 border border-blue-400/40 flex items-center justify-center text-cyan-300">
+                              <tr key={req.id} className="hover:bg-sky-50/50 transition-colors">
+                                <td className="px-6 py-4.5 text-xs font-black text-slate-900 flex items-center gap-2.5">
+                                  <div className="h-7 w-7 rounded-lg bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-600">
                                     <Wrench size={14} />
                                   </div>
                                   <span>{req.service_type}</span>
                                 </td>
-                                <td className="px-6 py-4.5 text-xs text-white font-bold max-w-[220px] truncate">{req.address}</td>
-                                <td className="px-6 py-4.5 text-xs font-bold text-cyan-300">📅 {new Date(req.created_at).toLocaleDateString()}</td>
+                                <td className="px-6 py-4.5 text-xs text-slate-700 font-bold max-w-[220px] truncate">{req.address}</td>
+                                <td className="px-6 py-4.5 text-xs font-semibold text-slate-500">📅 {new Date(req.created_at).toLocaleDateString()}</td>
                                 <td className="px-6 py-4.5">
-                                  <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border-2 ${
-                                    req.status === 'pending' ? 'border-amber-400 bg-amber-500/20 text-amber-300' : 
-                                    req.status === 'matched' ? 'border-sky-400 bg-sky-500/20 text-sky-200' : 
-                                    'border-emerald-400 bg-emerald-500/20 text-emerald-300'
+                                  <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+                                    req.status === 'pending' ? 'border border-amber-300 bg-amber-50 text-amber-800' : 
+                                    req.status === 'matched' ? 'border border-sky-300 bg-sky-50 text-sky-800' : 
+                                    'border border-emerald-300 bg-emerald-50 text-emerald-800'
                                   }`}>
                                     {req.status}
                                   </span>
@@ -543,12 +543,12 @@ export default function AdminDashboard() {
                                     disabled={updatingId === req.id}
                                     value={req.status || 'pending'}
                                     onChange={(e) => updateRequestStatus(req.id, e.target.value)}
-                                    className="bg-slate-900 border-2 border-blue-400/60 rounded-xl px-3 py-1.5 text-xs font-bold text-white outline-none focus:border-cyan-300 cursor-pointer shadow-md"
+                                    className="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 outline-none focus:border-sky-500 cursor-pointer shadow-xs"
                                   >
-                                    <option value="pending" className="bg-slate-900 text-amber-300 font-bold">Mark: Pending</option>
-                                    <option value="matched" className="bg-slate-900 text-sky-300 font-bold">Mark: Matched</option>
-                                    <option value="completed" className="bg-slate-900 text-emerald-300 font-bold">Mark: Completed</option>
-                                    <option value="cancelled" className="bg-slate-900 text-rose-300 font-bold">Mark: Cancelled</option>
+                                    <option value="pending" className="font-bold text-amber-700">Mark: Pending</option>
+                                    <option value="matched" className="font-bold text-sky-700">Mark: Matched</option>
+                                    <option value="completed" className="font-bold text-emerald-700">Mark: Completed</option>
+                                    <option value="cancelled" className="font-bold text-rose-700">Mark: Cancelled</option>
                                   </select>
                                 </td>
                               </tr>
@@ -567,3 +567,4 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
