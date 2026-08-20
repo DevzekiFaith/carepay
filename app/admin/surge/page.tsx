@@ -17,7 +17,8 @@ import {
   ShieldCheck,
   Percent,
   SlidersHorizontal,
-  Info
+  Info,
+  Loader2
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -37,9 +38,12 @@ function getServiceIcon(type: string) {
 export default function AdminSurgePage() {
   const [currentHour, setCurrentHour] = useState<number>(new Date().getHours());
   const [overrides, setOverrides] = useState<Record<string, number>>({});
+  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [currentTimeStr, setCurrentTimeStr] = useState<string>("");
 
+  // Live real-time clock
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
@@ -53,6 +57,26 @@ export default function AdminSurgePage() {
     return () => clearInterval(interval);
   }, []);
 
+  // Fetch real-time active overrides on mount
+  useEffect(() => {
+    const fetchLiveSurge = async () => {
+      try {
+        const res = await fetch("/api/surge?all=true");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.overrides) {
+            setOverrides(data.overrides);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load real-time surge settings:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchLiveSurge();
+  }, []);
+
   const handleOverride = (service: string, value: string) => {
     const num = parseFloat(value);
     if (isNaN(num) || num < 1 || num > 3) return;
@@ -63,7 +87,7 @@ export default function AdminSurgePage() {
   const applyPreset = (service: string, multiplier: number) => {
     setOverrides((prev) => ({ ...prev, [service]: multiplier }));
     setSaved(false);
-    toast.info(`Applied ${multiplier}× multiplier to ${service}`);
+    toast.info(`Set ${service} to ${multiplier}×. Click "Save Overrides" to publish live.`);
   };
 
   const removeOverride = (service: string) => {
@@ -75,22 +99,55 @@ export default function AdminSurgePage() {
     setSaved(false);
   };
 
-  const handleSave = () => {
-    setSaved(true);
-    toast.success("Surge overrides saved and deployed to live algorithm!");
-    setTimeout(() => setSaved(false), 3000);
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/surge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ overrides }),
+      });
+
+      if (!res.ok) throw new Error("Failed to deploy overrides to server");
+
+      const data = await res.json();
+      setOverrides(data.overrides || overrides);
+      setSaved(true);
+      toast.success("Real-time surge overrides saved & deployed to customer booking engine!");
+      setTimeout(() => setSaved(false), 4000);
+    } catch (err: any) {
+      toast.error("Error saving overrides: " + err.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleResetAll = () => {
-    setOverrides({});
-    setSaved(false);
-    toast.success("All manual overrides cleared. System running on 100% automatic algorithm.");
+  const handleResetAll = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/surge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "clear" }),
+      });
+
+      if (!res.ok) throw new Error("Failed to clear overrides");
+
+      setOverrides({});
+      setSaved(false);
+      toast.success("All manual overrides cleared! System is now 100% autonomous.");
+    } catch (err: any) {
+      toast.error("Error resetting overrides: " + err.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   // Determine current window
   const isNight = currentHour >= 21 || currentHour < 6;
   const isPeak = (currentHour >= 7 && currentHour <= 9) || (currentHour >= 17 && currentHour <= 20);
-  const windowStatus = isNight ? "Night Premium Active (40%)" : isPeak ? "Peak Rush Hour (15-25%)" : "Standard Operating Window";
+  const windowStatus = isNight ? "Night Premium Active (40%)" : isPeak ? "Peak Rush Hour (15–25%)" : "Standard Operating Window";
+  const activeCount = Object.keys(overrides).length;
 
   return (
     <div className="space-y-6">
@@ -99,16 +156,17 @@ export default function AdminSurgePage() {
         <p className="text-xs font-black uppercase tracking-wider text-sky-600 mb-1">Pricing & Algorithms</p>
         <h1 className="text-2xl font-heading font-black tracking-tight text-slate-900">Dynamic Surge Pricing</h1>
         <p className="mt-1 text-xs text-slate-500 font-medium">
-          Live automatic multiplier calculation based on real-time local demand, technician density, and time of day.
+          Real-time multiplier calculation based on live local demand, technician density, and time of day.
         </p>
       </div>
 
-      {/* Live System Status Cards (Replacing clunky slider) */}
+      {/* Live System Telemetry Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* Live Clock Card */}
         <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between">
           <div>
             <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Live System Clock</p>
-            <p className="text-xl font-mono font-black text-slate-900 mt-1">{currentTimeStr || "Loading..."}</p>
+            <p className="text-xl font-mono font-black text-slate-900 mt-1">{currentTimeStr || "Calculating..."}</p>
             <p className="text-[11px] text-sky-700 font-semibold mt-0.5">West Africa Time (WAT)</p>
           </div>
           <div className="h-10 w-10 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600">
@@ -116,6 +174,7 @@ export default function AdminSurgePage() {
           </div>
         </div>
 
+        {/* Live Demand Phase */}
         <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between">
           <div>
             <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Demand Phase</p>
@@ -130,15 +189,16 @@ export default function AdminSurgePage() {
           </div>
         </div>
 
+        {/* Real-time Overrides Counter */}
         <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between">
           <div>
             <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Active Overrides</p>
-            <p className="text-xl font-black text-slate-900 mt-1">{Object.keys(overrides).length}</p>
+            <p className="text-xl font-black text-slate-900 mt-1">{activeCount}</p>
             <p className="text-[11px] text-slate-500 font-semibold mt-0.5">
-              {Object.keys(overrides).length > 0 ? "Custom manual rules active" : "100% Autonomous"}
+              {activeCount > 0 ? `${activeCount} custom rule(s) active` : "100% Autonomous"}
             </p>
           </div>
-          <div className="h-10 w-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
+          <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${activeCount > 0 ? "bg-sky-50 border border-sky-100 text-sky-600" : "bg-emerald-50 border border-emerald-100 text-emerald-600"}`}>
             <SlidersHorizontal size={18} />
           </div>
         </div>
@@ -153,7 +213,7 @@ export default function AdminSurgePage() {
               <span className="text-xs font-black uppercase tracking-wider text-slate-700">Service Category</span>
               <span className="text-xs font-black uppercase tracking-wider text-slate-700">Base Price</span>
               <span className="text-xs font-black uppercase tracking-wider text-slate-700">Auto Surge Multiplier</span>
-              <span className="text-xs font-black uppercase tracking-wider text-slate-700">Calculated Final Price</span>
+              <span className="text-xs font-black uppercase tracking-wider text-slate-700">Live Final Price</span>
               <span className="text-xs font-black uppercase tracking-wider text-slate-700">Manual Multiplier Override</span>
             </div>
 
@@ -180,7 +240,7 @@ export default function AdminSurgePage() {
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-black text-slate-900">{service}</p>
-                        <p className="text-xs text-slate-500 font-medium truncate">{surge.reason}</p>
+                        <p className="text-xs text-slate-500 font-medium truncate">{hasOverride ? "Manual rule set" : surge.reason}</p>
                       </div>
                     </div>
 
@@ -220,7 +280,7 @@ export default function AdminSurgePage() {
                           type="button"
                           onClick={() => applyPreset(service, 1.15)}
                           className="px-2 py-1 text-[11px] font-bold rounded-lg border border-slate-200 bg-white hover:bg-sky-50 hover:border-sky-300 text-slate-700 transition-colors cursor-pointer"
-                          title="Apply +15% surge"
+                          title="Set +15% surge"
                         >
                           1.15×
                         </button>
@@ -228,7 +288,7 @@ export default function AdminSurgePage() {
                           type="button"
                           onClick={() => applyPreset(service, 1.25)}
                           className="px-2 py-1 text-[11px] font-bold rounded-lg border border-slate-200 bg-white hover:bg-sky-50 hover:border-sky-300 text-slate-700 transition-colors cursor-pointer"
-                          title="Apply +25% surge"
+                          title="Set +25% surge"
                         >
                           1.25×
                         </button>
@@ -236,7 +296,7 @@ export default function AdminSurgePage() {
                           type="button"
                           onClick={() => applyPreset(service, 1.40)}
                           className="px-2 py-1 text-[11px] font-bold rounded-lg border border-slate-200 bg-white hover:bg-sky-50 hover:border-sky-300 text-slate-700 transition-colors cursor-pointer"
-                          title="Apply +40% surge"
+                          title="Set +40% surge"
                         >
                           1.40×
                         </button>
@@ -279,31 +339,33 @@ export default function AdminSurgePage() {
         {/* Footer Actions */}
         <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <p className="text-xs text-slate-600 font-semibold">
-            {Object.keys(overrides).length > 0
-              ? `${Object.keys(overrides).length} custom override rule(s) active on this node.`
-              : "All service pricing dynamically guided by demand."}
+            {activeCount > 0
+              ? `${activeCount} custom override rule(s) active on this node.`
+              : "All service pricing dynamically calculated in real-time."}
           </p>
           <div className="flex items-center gap-2.5">
-            {Object.keys(overrides).length > 0 && (
+            {activeCount > 0 && (
               <button
                 type="button"
+                disabled={saving}
                 onClick={handleResetAll}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-2xs"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-2xs disabled:opacity-50"
               >
-                <RotateCcw size={12} /> Clear All Overrides
+                {saving ? <Loader2 size={12} className="animate-spin" /> : <RotateCcw size={12} />} Clear All Overrides
               </button>
             )}
             {saved && (
               <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 font-bold">
-                <CheckCircle2 size={14} /> Deployed
+                <CheckCircle2 size={14} /> Deployed Live
               </span>
             )}
             <button
               type="button"
+              disabled={saving}
               onClick={handleSave}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white px-5 py-2 text-xs font-bold uppercase tracking-wider shadow-sm transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white px-5 py-2 text-xs font-bold uppercase tracking-wider shadow-sm transition-all cursor-pointer disabled:opacity-50"
             >
-              Save Overrides
+              {saving ? <Loader2 size={14} className="animate-spin" /> : null} Save Overrides
             </button>
           </div>
         </div>
@@ -333,5 +395,6 @@ export default function AdminSurgePage() {
     </div>
   );
 }
+
 
 

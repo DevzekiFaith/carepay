@@ -1,7 +1,7 @@
 /**
  * CarePay Surge Pricing Engine
  * Computes a price multiplier based on time of day, day of week, and service type.
- * Admin can override via Supabase `surge_overrides` table.
+ * Admin can override via real-time global settings.
  */
 
 export interface SurgeResult {
@@ -10,6 +10,7 @@ export interface SurgeResult {
   level: 'standard' | 'busy' | 'high';
   label: string;
   reason: string;
+  isOverride?: boolean;
 }
 
 /** Base starting prices per service (in Naira) */
@@ -23,6 +24,28 @@ export const BASE_PRICES: Record<string, number> = {
   'General Handyman': 15000,
 };
 
+// Global in-memory overrides store
+declare global {
+  // eslint-disable-next-line no-var
+  var __carepay_surge_overrides: Record<string, number> | undefined;
+}
+
+if (!globalThis.__carepay_surge_overrides) {
+  globalThis.__carepay_surge_overrides = {};
+}
+
+export function getGlobalOverrides(): Record<string, number> {
+  return globalThis.__carepay_surge_overrides || {};
+}
+
+export function setGlobalOverrides(overrides: Record<string, number>): void {
+  globalThis.__carepay_surge_overrides = { ...overrides };
+}
+
+export function clearGlobalOverrides(): void {
+  globalThis.__carepay_surge_overrides = {};
+}
+
 /**
  * Returns a surge result for the given service, city, and current hour (0–23).
  * If no specific hour is passed it uses the current local hour.
@@ -32,6 +55,29 @@ export function getSurgeResult(
   _city: string,
   hour: number = new Date().getHours()
 ): SurgeResult {
+  const overrides = getGlobalOverrides();
+  
+  // Check for active real-time override
+  if (overrides[service] && typeof overrides[service] === 'number') {
+    const mult = Math.round(overrides[service] * 100) / 100;
+    let level: SurgeResult['level'] = 'standard';
+    let label = 'Standard';
+    if (mult >= 1.25) {
+      level = 'high';
+      label = 'High Demand';
+    } else if (mult >= 1.1) {
+      level = 'busy';
+      label = 'Busy';
+    }
+    return {
+      multiplier: mult,
+      level,
+      label,
+      reason: 'Admin manual override active',
+      isOverride: true,
+    };
+  }
+
   const day = new Date().getDay(); // 0=Sun, 6=Sat
   const isWeekend = day === 0 || day === 6;
   const isMorningPeak = hour >= 7 && hour <= 9;
@@ -75,7 +121,7 @@ export function getSurgeResult(
     label = 'Busy';
   }
 
-  return { multiplier: Math.round(multiplier * 100) / 100, level, label, reason };
+  return { multiplier: Math.round(multiplier * 100) / 100, level, label, reason, isOverride: false };
 }
 
 /** Format a Naira price with the surge multiplier applied */
@@ -84,3 +130,4 @@ export function getSurgePrice(service: string, multiplier: number): string {
   const surged = Math.ceil((base * multiplier) / 500) * 500; // round to nearest ₦500
   return `₦${surged.toLocaleString()}`;
 }
+
