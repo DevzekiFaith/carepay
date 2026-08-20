@@ -210,10 +210,10 @@ export default function SubscriptionPage() {
       </section>
 
       {/* Main Subscription Content */}
-      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-10 relative z-10">
+      <div className="mx-auto max-w-5xl px-3 sm:px-6 lg:px-8 py-8 sm:py-10 pb-36 relative z-10">
 
           {/* Payment Period Selector */}
-          <div className="mt-4 flex flex-wrap justify-center gap-2">
+          <div className="mt-2 flex flex-wrap justify-center gap-2.5">
             {[
               { value: 'monthly' as const, label: 'Monthly', discount: '' },
               { value: 'quarterly' as const, label: 'Quarterly', discount: 'Save 10%' },
@@ -222,15 +222,15 @@ export default function SubscriptionPage() {
               <button
                 key={period.value}
                 onClick={() => setPaymentPeriod(period.value)}
-                className={`px-4 py-2 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all ${
+                className={`px-4 sm:px-5 py-2.5 rounded-full text-xs font-extrabold uppercase tracking-widest transition-all cursor-pointer ${
                   paymentPeriod === period.value
-                    ? 'bg-brand-primary text-background shadow-premium'
-                    : 'bg-white/5 border border-white/10 text-zinc-400 hover:text-foreground hover:border-white/20'
+                    ? 'bg-sky-600 text-white shadow-md shadow-sky-600/30 scale-105'
+                    : 'bg-white border border-slate-200 text-slate-700 hover:text-slate-950 hover:bg-slate-50 shadow-xs'
                 }`}
               >
                 {period.label}
                 {period.discount && (
-                  <span className="ml-1 text-[8px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">
+                  <span className="ml-1.5 text-[9px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-black">
                     {period.discount}
                   </span>
                 )}
@@ -241,20 +241,20 @@ export default function SubscriptionPage() {
         <ErrorAlert 
           error={error} 
           onClear={() => setError(null)} 
-          className="mb-6 sm:mb-8 max-w-xl mx-auto"
+          className="my-6 max-w-xl mx-auto"
         />
 
-        <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid gap-8 md:grid-cols-3 max-w-5xl mx-auto mt-8 sm:mt-12">
+        <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid gap-6 md:gap-8 md:grid-cols-3 max-w-5xl mx-auto mt-6 sm:mt-10 items-stretch">
           
           {/* Plus Tier */}
-          <motion.div variants={itemVariants} className={`glass-panel p-6 sm:p-8 shadow-premium flex flex-col relative ${currentTier === 'plus' ? 'border-brand-primary/20 bg-brand-primary/5' : ''}`}>
-            <h3 className="text-base sm:text-lg font-bold text-foreground">HomeCare Plus</h3>
-            <p className="text-xs sm:text-sm text-zinc-400 mt-1">Essential coverage</p>
-            <div className="my-6">
-              <span className="text-3xl sm:text-4xl font-heading font-extrabold text-foreground tracking-tight">₦{(adjustedPricing.plus / 1000).toFixed(0)}k</span>
-              <span className="text-zinc-500 text-[10px] sm:text-xs">/ {getPeriodLabel()}</span>
+          <motion.div variants={itemVariants} className={`bg-white rounded-3xl p-6 sm:p-8 border-2 border-slate-200/80 shadow-xs hover:border-slate-300 flex flex-col relative ${currentTier === 'plus' ? 'border-sky-500 ring-2 ring-sky-500/20 bg-sky-50/20' : ''}`}>
+            <h3 className="text-lg font-black text-slate-900">HomeCare Plus</h3>
+            <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">Essential coverage</p>
+            <div className="my-5 pb-5 border-b border-slate-100">
+              <span className="text-3xl sm:text-4xl font-heading font-black text-slate-950 tracking-tight">₦{(adjustedPricing.plus / 1000).toFixed(0)}k</span>
+              <span className="text-slate-500 text-xs font-semibold"> / {getPeriodLabel()}</span>
             </div>
-            <ul className="space-y-4 flex-1 mb-8">
+            <ul className="space-y-3.5 flex-1 mb-8">
               {[
                 "Reduced 7.5% convenience fee",
                 "1 Free Routine Call-Out /mo",
@@ -262,8 +262,10 @@ export default function SubscriptionPage() {
                 "Surge pricing capped at 2x",
                 "Priority support",
               ].map((feature, i) => (
-                <li key={i} className="flex gap-3 text-sm text-zinc-400 items-start">
-                  <Check size={16} className="text-zinc-600 shrink-0 mt-0.5" />
+                <li key={i} className="flex gap-3 text-xs sm:text-sm text-slate-800 font-semibold items-start">
+                  <div className="w-5 h-5 rounded-full bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 mt-0.5">
+                    <Check size={13} strokeWidth={3} />
+                  </div>
                   <span>{feature}</span>
                 </li>
               ))}
@@ -271,28 +273,27 @@ export default function SubscriptionPage() {
             <button 
               onClick={() => handleUpgrade('plus')}
               disabled={currentTier === 'plus' || !!upgrading}
-              className={`w-full rounded-full border border-white/10 bg-white/5 hover:bg-white/10 px-6 h-12 text-xs font-bold uppercase tracking-widest text-foreground transition-colors disabled:opacity-50 flex items-center justify-center`}
+              className={`w-full rounded-full border-2 border-slate-300 bg-white hover:bg-slate-100 px-6 h-12 text-xs font-extrabold uppercase tracking-widest text-slate-800 transition-colors disabled:opacity-50 flex items-center justify-center shadow-xs cursor-pointer`}
             >
               {upgrading === 'plus' ? <Loader2 className="animate-spin" size={16} /> : currentTier === 'plus' ? "Current Plan" : "Select Plus"}
             </button>
           </motion.div>
 
           {/* Pro Tier (Popular) */}
-          <motion.div variants={itemVariants} className={`glass-panel p-6 sm:p-8 shadow-[0_0_30px_rgba(249,115,22,0.15)] border-brand-primary/50 relative flex flex-col transform md:-translate-y-4 ${currentTier === 'pro' ? 'border-brand-primary shadow-[0_0_40px_rgba(249,115,22,0.3)] bg-brand-primary/5' : ''}`}>
-            <div className="absolute top-0 right-0 w-full h-full bg-brand-primary/5 blur-xl pointer-events-none" />
+          <motion.div variants={itemVariants} className={`bg-gradient-to-b from-sky-50/70 via-white to-sky-50/40 rounded-3xl p-6 sm:p-8 border-2 border-sky-500 shadow-xl shadow-sky-600/15 relative flex flex-col transform md:-translate-y-3 ${currentTier === 'pro' ? 'ring-4 ring-sky-500/25' : ''}`}>
             <div className="absolute top-0 inset-x-0 transform -translate-y-1/2 flex justify-center z-20">
-              <span className="bg-brand-primary text-background text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] px-4 py-1.5 rounded-full shadow-premium">
+              <span className="bg-sky-600 text-white text-[10px] font-black uppercase tracking-[0.2em] px-4 py-1 rounded-full shadow-md shadow-sky-600/30">
                 Most Popular
               </span>
             </div>
             
-            <h3 className="text-base sm:text-lg font-bold text-brand-primary relative z-10">HomeCare Pro</h3>
-            <p className="text-xs sm:text-sm text-zinc-300 mt-1 relative z-10">For busy professionals</p>
-            <div className="my-6 relative z-10">
-              <span className="text-3xl sm:text-4xl font-heading font-extrabold text-foreground tracking-tight">₦{(adjustedPricing.pro / 1000).toFixed(0)}k</span>
-              <span className="text-zinc-400 text-[10px] sm:text-xs">/ {getPeriodLabel()}</span>
+            <h3 className="text-lg font-black text-sky-800 mt-1">HomeCare Pro</h3>
+            <p className="text-xs sm:text-sm text-slate-600 font-medium mt-0.5">For busy professionals</p>
+            <div className="my-5 pb-5 border-b border-sky-100">
+              <span className="text-3xl sm:text-4xl font-heading font-black text-slate-950 tracking-tight">₦{(adjustedPricing.pro / 1000).toFixed(0)}k</span>
+              <span className="text-slate-500 text-xs font-semibold"> / {getPeriodLabel()}</span>
             </div>
-            <ul className="space-y-4 flex-1 mb-8 relative z-10">
+            <ul className="space-y-3.5 flex-1 mb-8">
               {[
                 { text: "Zero platform convenience fees", icon: Shield },
                 { text: "2 Free Routine Call-Outs /mo", icon: Star },
@@ -300,8 +301,10 @@ export default function SubscriptionPage() {
                 { text: "Surge pricing capped at 1.5x", icon: Zap },
                 { text: "Same-day guarantee for urgent requests", icon: Zap },
               ].map((feature, i) => (
-                <li key={i} className="flex gap-3 text-xs sm:text-sm text-zinc-200 items-start">
-                  <feature.icon size={14} className="text-brand-primary shrink-0 mt-0.5 sm:mt-1 sm:size-4" />
+                <li key={i} className="flex gap-3 text-xs sm:text-sm text-slate-900 font-bold items-start">
+                  <div className="w-5 h-5 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center shrink-0 mt-0.5">
+                    <feature.icon size={13} strokeWidth={2.5} />
+                  </div>
                   <span>{feature.text}</span>
                 </li>
               ))}
@@ -309,21 +312,21 @@ export default function SubscriptionPage() {
             <button 
               onClick={() => handleUpgrade('pro')}
               disabled={currentTier === 'pro' || currentTier === 'elite' || !!upgrading}
-              className={`btn-minimal relative z-10 w-full rounded-full px-6 h-12 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] flex items-center justify-center disabled:opacity-50`}
+              className={`w-full rounded-full bg-sky-600 hover:bg-sky-500 text-white px-6 h-12 text-xs font-extrabold uppercase tracking-widest flex items-center justify-center disabled:opacity-50 shadow-lg shadow-sky-600/30 transition-all hover:scale-[1.02] cursor-pointer`}
             >
               {upgrading === 'pro' ? <Loader2 className="animate-spin" size={16} /> : currentTier === 'pro' ? "Current Plan" : currentTier === 'elite' ? "Included" : "Upgrade to Pro"}
             </button>
           </motion.div>
 
           {/* Elite Tier */}
-          <motion.div variants={itemVariants} className={`glass-panel p-6 sm:p-8 shadow-premium border-white/10 relative flex flex-col ${currentTier === 'elite' ? 'border-brand-primary/50 bg-brand-primary/5 shadow-[0_0_30px_rgba(249,115,22,0.15)]' : ''}`}>
-            <h3 className="text-base sm:text-lg font-bold text-foreground">HomeCare Elite</h3>
-            <p className="text-xs sm:text-sm text-zinc-400 mt-1">Facility management level</p>
-            <div className="my-6">
-              <span className="text-3xl sm:text-4xl font-heading font-extrabold text-foreground tracking-tight">₦{(adjustedPricing.elite / 1000).toFixed(0)}k</span>
-              <span className="text-zinc-500 text-[10px] sm:text-xs">/ {getPeriodLabel()}</span>
+          <motion.div variants={itemVariants} className={`bg-white rounded-3xl p-6 sm:p-8 border-2 border-slate-200/80 shadow-xs hover:border-slate-300 flex flex-col relative ${currentTier === 'elite' ? 'border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/20' : ''}`}>
+            <h3 className="text-lg font-black text-slate-900">HomeCare Elite</h3>
+            <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">Facility management level</p>
+            <div className="my-5 pb-5 border-b border-slate-100">
+              <span className="text-3xl sm:text-4xl font-heading font-black text-slate-950 tracking-tight">₦{(adjustedPricing.elite / 1000).toFixed(0)}k</span>
+              <span className="text-slate-500 text-xs font-semibold"> / {getPeriodLabel()}</span>
             </div>
-            <ul className="space-y-4 flex-1 mb-8">
+            <ul className="space-y-3.5 flex-1 mb-8">
               {[
                 { text: "Zero surge pricing ever", icon: Shield },
                 { text: "Dedicated 24/7 Account Manager", icon: Shield },
@@ -332,8 +335,10 @@ export default function SubscriptionPage() {
                 { text: "Unlimited emergency calls", icon: Zap },
                 { text: "Preferred vendor pricing", icon: Star },
               ].map((feature, i) => (
-                <li key={i} className="flex gap-3 text-xs sm:text-sm text-zinc-400 items-start">
-                  <feature.icon size={14} className="text-zinc-200 shrink-0 mt-0.5 sm:mt-1 sm:size-4" />
+                <li key={i} className="flex gap-3 text-xs sm:text-sm text-slate-800 font-semibold items-start">
+                  <div className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+                    <feature.icon size={13} strokeWidth={2.5} />
+                  </div>
                   <span>{feature.text}</span>
                 </li>
               ))}
@@ -341,7 +346,7 @@ export default function SubscriptionPage() {
             <button 
               onClick={() => handleUpgrade('elite')}
               disabled={currentTier === 'elite' || !!upgrading}
-              className={`w-full rounded-full border border-white/20 bg-white/10 hover:bg-white/20 px-6 h-12 text-[10px] sm:text-xs font-bold uppercase tracking-widest text-zinc-200 transition-colors disabled:opacity-50 flex items-center justify-center`}
+              className={`w-full rounded-full bg-slate-900 hover:bg-slate-800 text-white px-6 h-12 text-xs font-extrabold uppercase tracking-widest transition-colors disabled:opacity-50 flex items-center justify-center shadow-md cursor-pointer`}
             >
               {upgrading === 'elite' ? <Loader2 className="animate-spin" size={16} /> : currentTier === 'elite' ? "Current Plan" : "Upgrade to Elite"}
             </button>
