@@ -19,9 +19,9 @@ export default function InteractiveMapSection() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mb-6 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-[10px] font-bold uppercase tracking-widest text-blue-400"
+            className="mb-6 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-100 border border-sky-300 text-[11px] font-black uppercase tracking-widest text-sky-800 shadow-xs"
           >
-            <MapPin size={14} />
+            <MapPin size={14} className="text-sky-600" />
             <span>Hyper-Local Matching</span>
           </motion.div>
           
@@ -30,9 +30,10 @@ export default function InteractiveMapSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-3xl md:text-5xl font-bold text-foreground mb-6 leading-tight"
+            className="text-3xl md:text-5xl font-black text-slate-950 mb-6 leading-tight"
           >
-            Real-Time Tracking <br />& Live Provider Map
+            Real-Time Tracking <br />
+            <span className="text-sky-600">& Live Provider Map</span>
           </motion.h2>
 
           <motion.p 
@@ -40,37 +41,60 @@ export default function InteractiveMapSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="text-slate-600 text-base leading-relaxed mb-8"
+            className="text-slate-700 text-base md:text-lg font-medium leading-relaxed mb-8"
           >
             Don&apos;t guess when help will arrive. Our interactive map connects you to the closest verified professionals. Watch them arrive in real-time right from your screen.
           </motion.p>
 
-          <motion.ul 
+          <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
-            className="space-y-4 text-sm font-semibold text-slate-700 dark:text-slate-200"
+            className="space-y-3.5"
           >
-            <li className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-sky-100 dark:bg-sky-900/40 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
-                <Navigation size={16} />
+            <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-white border-2 border-slate-200/80 shadow-xs hover:border-sky-300 transition-all">
+              <div className="w-10 h-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center shrink-0 shadow-xs">
+                <Navigation size={18} strokeWidth={2.5} />
               </div>
-              <span>Visual location-based GPS radius filtering</span>
-            </li>
-            <li className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                <MapPin size={16} />
+              <div>
+                <span className="text-sm font-extrabold text-slate-900 block leading-snug">
+                  Visual location-based GPS radius filtering
+                </span>
+                <span className="text-xs text-slate-500 font-medium">
+                  Matches your request with nearest active technicians
+                </span>
               </div>
-              <span>Moving radar pins showing live artisan transit ETA</span>
-            </li>
-            <li className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-                <Clock size={16} />
+            </div>
+
+            <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-white border-2 border-slate-200/80 shadow-xs hover:border-emerald-300 transition-all">
+              <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 shadow-xs">
+                <MapPin size={18} strokeWidth={2.5} />
               </div>
-              <span>Real-time dispatch status: Know exactly who is arriving</span>
-            </li>
-          </motion.ul>
+              <div>
+                <span className="text-sm font-extrabold text-slate-900 block leading-snug">
+                  Moving radar pins showing live artisan transit ETA
+                </span>
+                <span className="text-xs text-slate-500 font-medium">
+                  Live satellite route updates straight to your doorstep
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-white border-2 border-slate-200/80 shadow-xs hover:border-amber-300 transition-all">
+              <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 shadow-xs">
+                <Clock size={18} strokeWidth={2.5} />
+              </div>
+              <div>
+                <span className="text-sm font-extrabold text-slate-900 block leading-snug">
+                  Real-time dispatch status: Know exactly who is arriving
+                </span>
+                <span className="text-xs text-slate-500 font-medium">
+                  Verified photo ID, NIN badges, and customer ratings
+                </span>
+              </div>
+            </div>
+          </motion.div>
         </div>
 
         <div className="lg:w-1/2 w-full relative">
