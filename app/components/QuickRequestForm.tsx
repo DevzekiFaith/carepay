@@ -68,7 +68,11 @@ export default function QuickRequestForm({ selectedService, onServiceChange, ser
             } else {
                 const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email, password: pin });
 
-                if (signUpError && (signUpError.message.toLowerCase().includes("already") || signUpError.status === 400)) {
+                const isUserAlreadyRegistered = 
+                    Boolean(signUpError && (signUpError.message.toLowerCase().includes("already") || signUpError.status === 400)) ||
+                    Boolean(!signUpError && signUpData?.user && Array.isArray(signUpData.user.identities) && signUpData.user.identities.length === 0);
+
+                if (isUserAlreadyRegistered) {
                     const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password: pin });
                     if (signInError) {
                         toast.error("Incorrect PIN", { id: "booking-step", description: "Use the main login page if you forgot your PIN." });
@@ -81,7 +85,7 @@ export default function QuickRequestForm({ selectedService, onServiceChange, ser
                     setErrorMsg(`Auth Error: ${signUpError.message}`);
                     return;
                 } else {
-                    userId = signUpData.user?.id;
+                    userId = signUpData?.user?.id;
                 }
             }
 

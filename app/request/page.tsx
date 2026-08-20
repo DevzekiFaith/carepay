@@ -131,11 +131,13 @@ function RequestContent() {
       // If NOT logged in, perform "Seamless Auth" (Signup/Signin)
       if (!currentUserId) {
         if (!email || !pin) {
+          toast.error("Missing information", { description: "Email and 6-digit PIN are required for bookings." });
           setErrorMsg("Email and PIN are required for new bookings.");
           return;
         }
 
         if (pin.length !== 6) {
+          toast.error("Invalid PIN", { description: "PIN must be exactly 6 digits." });
           setErrorMsg("PIN must be exactly 6 digits.");
           return;
         }
@@ -146,7 +148,11 @@ function RequestContent() {
           password: pin,
         });
 
-        if (signUpError && signUpError.message.includes("already registered")) {
+        const isUserAlreadyRegistered = 
+          Boolean(signUpError && (signUpError.message.toLowerCase().includes("already") || signUpError.status === 400)) ||
+          Boolean(!signUpError && signUpData?.user && Array.isArray(signUpData.user.identities) && signUpData.user.identities.length === 0);
+
+        if (isUserAlreadyRegistered) {
           // User exists, try signing in instead
           const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
             email,
@@ -154,21 +160,24 @@ function RequestContent() {
           });
 
           if (signInError) {
-            setErrorMsg("Incorrect PIN. If you've forgotten it, please visit the login page.");
+            toast.error("Incorrect PIN", { description: "Incorrect PIN for this account. If you've forgotten it, please use the login page." });
+            setErrorMsg("Incorrect PIN for this account. If you've forgotten it, please visit the login page.");
             return;
           }
           currentUserId = signInData.user?.id;
           toast.info("Welcome back!", { description: "Resuming booking with your saved details." });
         } else if (signUpError) {
+          toast.error("Authentication Error", { description: signUpError.message });
           setErrorMsg(`Authentication Error: ${signUpError.message}`);
           return;
         } else {
-          currentUserId = signUpData.user?.id;
+          currentUserId = signUpData?.user?.id;
           toast.success("Account created!", { description: "We've saved your progress for next time." });
         }
       }
 
       if (!currentUserId) {
+        toast.error("Authentication Failed", { description: "Could not authenticate your account. Please try again." });
         setErrorMsg("Failed to authenticate user.");
         return;
       }
@@ -179,30 +188,42 @@ function RequestContent() {
         full_name: fullName || user?.user_metadata?.full_name || 'Customer',
         phone: phone || user?.user_metadata?.phone || '',
         address: address || ''
-      });
+      }, { onConflict: 'id' });
 
-      const preferredTime = appointmentDate ? new Date(new Date(appointmentDate).setHours(parseInt(appointmentTime.split(':')[0]), parseInt(appointmentTime.split(':')[1]))).toISOString() : null;
+      let preferredTime: string | null = null;
+      if (appointmentDate) {
+        try {
+          const [hours, minutes] = (appointmentTime || "09:00").split(':').map(Number);
+          const d = new Date(appointmentDate);
+          d.setHours(isNaN(hours) ? 9 : hours, isNaN(minutes) ? 0 : minutes, 0, 0);
+          preferredTime = d.toISOString();
+        } catch {
+          preferredTime = new Date().toISOString();
+        }
+      }
 
       // Handle Image Upload First
       let imageUrl = null;
       if (imageFile) {
-        const fileExt = imageFile.name.split('.').pop() || 'jpg';
-        const fileName = `${currentUserId}-${typeof window !== 'undefined' ? Date.now() : 'upload'}.${fileExt}`;
+        try {
+          const fileExt = imageFile.name.split('.').pop() || 'jpg';
+          const fileName = `${currentUserId}-${Date.now()}.${fileExt}`;
 
-        const { error: uploadError } = await supabase.storage
-          .from('job-photos')
-          .upload(fileName, imageFile, { upsert: true });
+          const { error: uploadError } = await supabase.storage
+            .from('job-photos')
+            .upload(fileName, imageFile, { upsert: true });
 
-        if (uploadError) {
-          setErrorMsg(`Failed to upload photo: ${uploadError.message}`);
-          return;
+          if (uploadError) {
+            console.warn("Storage upload warning:", uploadError.message);
+          } else {
+            const { data: publicUrlData } = supabase.storage
+              .from('job-photos')
+              .getPublicUrl(fileName);
+            imageUrl = publicUrlData?.publicUrl || null;
+          }
+        } catch (uploadErr) {
+          console.warn("Storage upload error caught:", uploadErr);
         }
-
-        const { data: publicUrlData } = supabase.storage
-          .from('job-photos')
-          .getPublicUrl(fileName);
-
-        imageUrl = publicUrlData.publicUrl;
       }
 
       // Insert Request
@@ -235,11 +256,16 @@ function RequestContent() {
         email: email || user?.email || "",
         phone: phone || user?.user_metadata?.phone || "",
         name: fullName || user?.user_metadata?.full_name || "",
-        txRef: `REQ-${typeof window !== 'undefined' ? Date.now().toString(36).toUpperCase() : 'PENDING'}`
+        txRef: `REQ-${Date.now().toString(36).toUpperCase()}`
       });
 
       setSubmitted(true);
       // Don't reset form yet so the user can pay
+    } catch (err: unknown) {
+      console.error("Booking error:", err);
+      const msg = err instanceof Error ? err.message : "An unexpected error occurred while submitting your booking. Please try again.";
+      toast.error("Submission error", { description: msg });
+      setErrorMsg(msg);
     } finally {
       setSubmitting(false);
     }

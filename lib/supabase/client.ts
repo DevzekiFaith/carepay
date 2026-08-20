@@ -21,10 +21,13 @@ export function createClient() {
                 get: (target, prop) => {
                     if (prop === 'then') {
                         // Return a function that behaves like a promise that resolves with a helpful error
-                        return (resolve: (val: any) => void) => resolve({ 
-                            data: { user: null, session: null }, 
-                            error: { message: 'Supabase configuration missing' } 
-                        });
+                        return (onFulfilled?: (val: any) => any) => {
+                            const res = { 
+                                data: { user: null, session: null }, 
+                                error: { message: 'Supabase configuration missing' } 
+                            };
+                            return Promise.resolve(onFulfilled ? onFulfilled(res) : res);
+                        };
                     }
                     if (prop === 'auth') return proxy;
                     if (prop === 'data') return { 
@@ -56,27 +59,11 @@ export function createClient() {
             auth: {
                 persistSession: true,
                 autoRefreshToken: true,
-                detectSessionInUrl: true,
-                // Custom resilient lock to eliminate "Lock broken by another request with the 'steal' option" AbortError
-                lock: typeof window !== 'undefined' ? async (name, acquireTimeout, fn) => {
-                    try {
-                        if (typeof navigator !== 'undefined' && 'locks' in navigator) {
-                            return await navigator.locks.request(name, async () => {
-                                return await fn();
-                            });
-                        }
-                        return await fn();
-                    } catch (err: unknown) {
-                        if (err instanceof Error && err.name === 'AbortError') {
-                            // Concurrently handled by another request/tab, execute safely without crashing
-                            return await fn();
-                        }
-                        throw err;
-                    }
-                } : undefined
+                detectSessionInUrl: true
             }
         }
     )
 
     return supabaseClient
 }
+
