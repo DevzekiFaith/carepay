@@ -152,11 +152,11 @@ export default function Nav() {
           {/* Admin Portal Button */}
           <Link
             href="/admin"
-            className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-slate-700 hover:text-sky-700 bg-slate-100/90 hover:bg-sky-50 border border-slate-200/80 transition-all shadow-2xs"
+            className="hidden sm:flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-slate-700 hover:text-sky-700 bg-slate-100/90 hover:bg-sky-50 border border-slate-200/80 transition-all shadow-2xs"
             title="Admin Dashboard"
           >
             <Shield size={13} className="text-sky-600" />
-            <span className="hidden sm:inline">Admin</span>
+            <span>Admin</span>
           </Link>
 
           {/* Cart Icon */}
