@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
+import "leaflet/dist/leaflet.css";
 import { motion } from "framer-motion";
 import { 
   ShieldCheck, 
@@ -21,7 +22,7 @@ import {
   FileCheck
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { getDefaultAreas } from "@/lib/cities";
+import LocationMapPicker from "@/app/components/LocationMapPicker";
 import IdVerificationStatus, { type VerificationStatus } from "@/app/components/IdVerificationStatus";
 import Logo from "@/app/components/Logo";
 import ErrorAlert from "@/app/components/ErrorAlert";
@@ -41,7 +42,7 @@ const SKILLS = [
   "General Handyman",
 ];
 
-const AREAS = getDefaultAreas();
+
 
 export default function WorkerRegisterPage() {
   const [submitting, setSubmitting] = useState(false);
@@ -61,6 +62,11 @@ export default function WorkerRegisterPage() {
   const [ninVerifyReason, setNinVerifyReason] = useState<string | undefined>(undefined);
   const [fullName, setFullName] = useState("");
   const [lockedName, setLockedName] = useState("");
+
+  // Location cascade state
+  const [selState, setSelState] = useState("");
+  const [selCity, setSelCity] = useState("");
+  const [selArea, setSelArea] = useState("");
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -547,27 +553,27 @@ export default function WorkerRegisterPage() {
                 </div>
               </div>
 
-              {/* Service Areas */}
-              <div className="space-y-2">
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  Service Areas You Can Cover
+              {/* Service Location — Cascading Selector + Live Map */}
+              <div className="space-y-3">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <MapPin size={13} className="text-sky-600" />
+                  Your Primary Service Location
                 </label>
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {AREAS.map((area) => (
-                    <label
-                      key={area}
-                      className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-sky-50 hover:border-sky-300 px-3.5 py-2 text-xs font-bold text-slate-800 transition-colors shadow-2xs"
-                    >
-                      <input
-                        type="checkbox"
-                        name="areas"
-                        value={area}
-                        className="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500 accent-sky-600"
-                      />
-                      {area}
-                    </label>
-                  ))}
-                </div>
+                <p className="text-[11px] text-slate-500 font-medium -mt-1">
+                  Select your state, city, and area. Customers in this zone will see your profile first.
+                </p>
+
+                {/* Hidden inputs so form submission picks up location */}
+                <input type="hidden" name="areas" value={selArea || selCity || selState || "Nigeria"} />
+
+                <LocationMapPicker
+                  selectedState={selState}
+                  selectedCity={selCity}
+                  selectedArea={selArea}
+                  onStateChange={v => { setSelState(v); setSelCity(""); setSelArea(""); }}
+                  onCityChange={v => { setSelCity(v); setSelArea(""); }}
+                  onAreaChange={setSelArea}
+                />
               </div>
 
               {/* Short Bio */}
