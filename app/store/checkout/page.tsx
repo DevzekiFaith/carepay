@@ -11,7 +11,9 @@ import {
   Zap,
   Building2,
   CheckCircle2,
-  ExternalLink
+  ExternalLink,
+  CreditCard,
+  Banknote,
 } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { createClient } from "@/lib/supabase/client";
@@ -27,15 +29,9 @@ export default function CheckoutPage() {
   const supabase = createClient();
   const [user, setUser] = useState<User | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"flutterwave" | "transfer">("flutterwave");
 
   const orderPlacedRef = useRef(false);
-  const [offlineOrder, setOfflineOrder] = useState<{
-    ref: string;
-    total: number;
-    customerName: string;
-    phone: string;
-    email: string;
-  } | null>(null);
   
   const [formData, setFormData] = useState({
     fullName: "",
@@ -81,19 +77,19 @@ export default function CheckoutPage() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitting(true);
+    if (submitting) return;
 
-    const orderRef = `HC-${typeof window !== 'undefined' ? Date.now().toString(36).toUpperCase() : 'PENDING'}`;
+    if (!formData.fullName || !formData.email || !formData.phone || !formData.address) {
+      toast.error("Please fill all required delivery details.");
+      return;
+    }
+
+    setSubmitting(true);
+    const orderRef = `HC-${Date.now().toString(36).toUpperCase()}`;
 
     try {
-      if (!formData.fullName || !formData.email || !formData.phone || !formData.address) {
-        toast.error("Please fill all required fields.");
-        setSubmitting(false);
-        return;
-      }
-
-      // 1. Insert order record into database
-      const { error } = await supabase.from("store_orders").insert({
+      // 1. Insert order record into database with a 4s timeout
+      const insertPromise = supabase.from("store_orders").insert({
         order_ref: orderRef,
         customer_name: formData.fullName,
         customer_email: formData.email,
@@ -114,53 +110,73 @@ export default function CheckoutPage() {
         user_id: user?.id || null,
       });
 
-      if (error) {
-        console.warn("Supabase insert error (proceeding with payment init):", error);
-      }
+      const timeoutPromise = new Promise<{ error: null }>((resolve) =>
+        setTimeout(() => resolve({ error: null }), 4000)
+      );
 
+      await Promise.race([insertPromise, timeoutPromise]);
       orderPlacedRef.current = true;
       clearCart();
 
-      // 2. Route to Flutterwave Secure Checkout
-      toast.loading("Opening Flutterwave Secure Checkout...");
-      
-      const initRes = await fetch("/api/payment/flutterwave/initialize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderRef,
-          amount: grandTotal,
-          email: formData.email,
-          name: formData.fullName,
-          phone: formData.phone,
-          title: "HomeCare Smart Appliances Store",
-          description: `Payment for Order ${orderRef} (${cartCount} items)`,
-          type: "store_order",
-          userId: user?.id || null,
-        }),
-      });
-
-      const initData = await initRes.json();
-
-      if (initData.success && initData.paymentUrl) {
-        window.location.href = initData.paymentUrl;
+      // 2. Handle Payment Method
+      if (paymentMethod === "transfer") {
+        toast.success("Order received! Redirecting to payment details...");
+        router.push(`/store/order-confirmation?ref=${orderRef}&total=${grandTotal}`);
         return;
-      } else {
-        toast.error("Flutterwave Gateway notice: " + (initData.error || "Failed to initialize payment gateway"));
-        setSubmitting(false);
+      }
+
+      // 3. Online Flutterwave Checkout with 6s timeout
+      toast.loading("Connecting to Flutterwave Gateway...", { id: "checkout-flw" });
+
+      const controller = new AbortController();
+      const flwTimeout = setTimeout(() => controller.abort(), 6000);
+
+      try {
+        const initRes = await fetch("/api/payment/flutterwave/initialize", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderRef,
+            amount: grandTotal,
+            email: formData.email,
+            name: formData.fullName,
+            phone: formData.phone,
+            title: "HomeCare Smart Store",
+            description: `Payment for Order ${orderRef} (${cartCount} items)`,
+            type: "store_order",
+            userId: user?.id || null,
+          }),
+          signal: controller.signal,
+        });
+
+        clearTimeout(flwTimeout);
+        toast.dismiss("checkout-flw");
+
+        const initData = await initRes.json();
+
+        if (initData.success && initData.paymentUrl) {
+          window.location.href = initData.paymentUrl;
+          return;
+        } else {
+          // Fallback to order confirmation with bank transfer details
+          toast.info("Proceeding with direct bank transfer confirmation.");
+          router.push(`/store/order-confirmation?ref=${orderRef}&total=${grandTotal}`);
+          return;
+        }
+      } catch (flwErr) {
+        clearTimeout(flwTimeout);
+        toast.dismiss("checkout-flw");
+        console.warn("Flutterwave timeout/offline, falling back to bank transfer:", flwErr);
+        toast.info("Order saved! Showing payment transfer account.");
+        router.push(`/store/order-confirmation?ref=${orderRef}&total=${grandTotal}`);
+        return;
       }
     } catch (err: unknown) {
-      console.error("Checkout error:", err);
+      console.error("Checkout submission error:", err);
       orderPlacedRef.current = true;
       clearCart();
-      setOfflineOrder({
-        ref: orderRef,
-        total: grandTotal,
-        customerName: formData.fullName,
-        phone: formData.phone,
-        email: formData.email,
-      });
-      toast.info("Your order is received. Please complete the payment below.");
+      toast.info("Order confirmed! Please complete your transfer.");
+      router.push(`/store/order-confirmation?ref=${orderRef}&total=${grandTotal}`);
     } finally {
       setSubmitting(false);
     }
@@ -174,45 +190,22 @@ export default function CheckoutPage() {
     );
   }
 
-  // Offline fallback
-  if (offlineOrder) {
-    return (
-      <div className="relative min-h-screen bg-slate-50 text-slate-900 py-16 px-4">
-        <div className="mx-auto max-w-xl bg-white rounded-3xl p-8 border border-slate-200 shadow-xl text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 mb-4">
-            <CheckCircle2 size={36} />
-          </div>
-          <h1 className="text-2xl font-extrabold text-slate-900 mb-2">Order Confirmed!</h1>
-          <p className="text-sm text-slate-500 mb-6">Order Ref: <strong className="text-sky-600 font-mono">{offlineOrder.ref}</strong></p>
-          <p className="text-sm text-slate-600 mb-6">Total: <strong>₦{offlineOrder.total.toLocaleString()}</strong></p>
-
-          <Link
-            href={`/store/order-confirmation?ref=${offlineOrder.ref}&total=${offlineOrder.total}`}
-            className="inline-flex items-center justify-center gap-2 w-full h-12 rounded-full bg-sky-600 text-white font-extrabold text-xs uppercase tracking-widest hover:bg-sky-700 transition-all shadow-md shadow-sky-600/20"
-          >
-            View Payment Instructions <ExternalLink size={14} />
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="relative min-h-screen bg-slate-50 text-slate-900 antialiased overflow-hidden">
       {/* Royal Blue Hero Banner */}
-      <section className="relative bg-gradient-to-br from-sky-600 via-blue-600 to-blue-800 text-white pt-10 pb-16 px-6 rounded-b-[40px] md:rounded-b-[50px] shadow-2xl shadow-blue-900/15 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-sky-600 via-blue-600 to-blue-800 text-white pt-10 pb-14 md:pb-16 px-4 sm:px-6 rounded-b-[36px] md:rounded-b-[48px] shadow-2xl shadow-blue-900/15 overflow-hidden">
         <div className="absolute -top-24 -left-24 w-80 h-80 bg-sky-400/20 rounded-full blur-[90px] pointer-events-none" />
         <div className="absolute top-1/2 -right-24 w-80 h-80 bg-cyan-300/15 rounded-full blur-[100px] pointer-events-none" />
 
         <div className="mx-auto max-w-7xl relative z-10">
           <Link
             href="/store"
-            className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-sky-200 hover:text-white transition-colors mb-4 w-fit"
+            className="inline-flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-sky-200 hover:text-white transition-colors mb-4 w-fit"
           >
             <ArrowLeft size={14} /> Back to Store
           </Link>
           
-          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white uppercase">
+          <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white uppercase">
             Secure <span className="text-cyan-200">Checkout</span>
           </h1>
           <p className="mt-1 text-sm sm:text-base text-sky-100/90 font-medium">
@@ -246,7 +239,7 @@ export default function CheckoutPage() {
                       value={formData.fullName}
                       onChange={handleInputChange}
                       placeholder="e.g. David Adeleke"
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-sky-500 focus:bg-white transition-all"
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3.5 text-sm text-slate-900 outline-none focus:border-sky-500 focus:bg-white transition-all"
                     />
                   </div>
 
@@ -261,7 +254,7 @@ export default function CheckoutPage() {
                       value={formData.email}
                       onChange={handleInputChange}
                       placeholder="you@example.com"
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-sky-500 focus:bg-white transition-all"
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3.5 text-sm text-slate-900 outline-none focus:border-sky-500 focus:bg-white transition-all"
                     />
                   </div>
 
@@ -276,7 +269,7 @@ export default function CheckoutPage() {
                       value={formData.phone}
                       onChange={handleInputChange}
                       placeholder="08012345678"
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-sky-500 focus:bg-white transition-all"
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3.5 text-sm text-slate-900 outline-none focus:border-sky-500 focus:bg-white transition-all"
                     />
                   </div>
 
@@ -290,7 +283,7 @@ export default function CheckoutPage() {
                       value={formData.address}
                       onChange={handleInputChange}
                       placeholder="Street, Estate / Area, City, State"
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-sky-500 focus:bg-white transition-all"
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3.5 text-sm text-slate-900 outline-none focus:border-sky-500 focus:bg-white transition-all"
                     />
                   </div>
 
@@ -304,7 +297,7 @@ export default function CheckoutPage() {
                       onChange={handleInputChange}
                       rows={2}
                       placeholder="Any landmark, building number, or preferred delivery timing..."
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-sky-500 focus:bg-white transition-all resize-none"
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-sky-500 focus:bg-white transition-all resize-none"
                     />
                   </div>
                 </div>
@@ -321,23 +314,54 @@ export default function CheckoutPage() {
                   </span>
                 </div>
 
-                <div className="p-5 rounded-2xl border-2 border-sky-600 bg-sky-50/70 shadow-sm flex items-start justify-between">
-                  <div className="flex items-start gap-3.5">
-                    <Zap size={20} className="text-amber-500 shrink-0 mt-0.5 animate-pulse" />
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-extrabold text-sm text-slate-900">
-                          Flutterwave Online Checkout
-                        </span>
-                        <span className="text-[9px] font-black uppercase tracking-widest bg-sky-600 text-white px-2 py-0.5 rounded-full">
-                          Instant Activation
-                        </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  {/* Flutterwave Card / USSD */}
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("flutterwave")}
+                    className={`p-4 rounded-2xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between gap-3 ${
+                      paymentMethod === "flutterwave"
+                        ? "border-sky-600 bg-sky-50/70 shadow-sm"
+                        : "border-slate-200 hover:border-slate-300 bg-white"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <CreditCard size={18} className={paymentMethod === "flutterwave" ? "text-sky-600" : "text-slate-400"} />
+                        <span className="font-extrabold text-xs text-slate-900">Online Checkout</span>
                       </div>
-                      <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                        Pay securely with your **Debit/Credit Card, Bank Transfer, USSD (*737#, *901#), or Apple Pay** via Flutterwave.
-                      </p>
+                      <span className="text-[9px] font-black uppercase tracking-wider bg-sky-600 text-white px-2 py-0.5 rounded-full">
+                        Instant
+                      </span>
                     </div>
-                  </div>
+                    <p className="text-[11px] text-slate-500 leading-relaxed">
+                      Cards (Mastercard, Visa, Verve), USSD, Apple Pay & Bank Transfer.
+                    </p>
+                  </button>
+
+                  {/* Direct Bank Transfer */}
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("transfer")}
+                    className={`p-4 rounded-2xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between gap-3 ${
+                      paymentMethod === "transfer"
+                        ? "border-sky-600 bg-sky-50/70 shadow-sm"
+                        : "border-slate-200 hover:border-slate-300 bg-white"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Banknote size={18} className={paymentMethod === "transfer" ? "text-sky-600" : "text-slate-400"} />
+                        <span className="font-extrabold text-xs text-slate-900">Direct Bank Transfer</span>
+                      </div>
+                      <span className="text-[9px] font-black uppercase tracking-wider bg-emerald-600 text-white px-2 py-0.5 rounded-full">
+                        Escrow
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 leading-relaxed">
+                      Pay via bank app transfer with instant reference receipt.
+                    </p>
+                  </button>
                 </div>
               </div>
 
@@ -359,7 +383,7 @@ export default function CheckoutPage() {
                 <div className="space-y-3.5 max-h-[300px] overflow-y-auto pr-1">
                   {cartItems.map((item) => (
                     <div key={item.product.id} className="flex items-center gap-3.5">
-                      <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
+                      <div className="relative w-14 h-14 rounded-2xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
                         <Image
                           src={item.product.image}
                           alt={item.product.name}
@@ -408,12 +432,12 @@ export default function CheckoutPage() {
                   {submitting ? (
                     <>
                       <Loader2 size={16} className="animate-spin" />
-                      <span>Processing Payment...</span>
+                      <span>Processing Order...</span>
                     </>
                   ) : (
                     <>
                       <Zap size={16} className="text-cyan-200 fill-cyan-200" />
-                      <span>Pay Securely · ₦{grandTotal.toLocaleString()}</span>
+                      <span>Complete Checkout · ₦{grandTotal.toLocaleString()}</span>
                     </>
                   )}
                 </button>

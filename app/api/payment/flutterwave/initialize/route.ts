@@ -57,30 +57,55 @@ export async function POST(req: Request) {
       }
     };
 
-    const response = await fetch("https://api.flutterwave.com/v3/payments", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${secretKey.trim()}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(flwPayload),
-    });
+    // Use 6 second abort controller to avoid hanging requests
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
 
-    const data = await response.json();
+    try {
+      const response = await fetch("https://api.flutterwave.com/v3/payments", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${secretKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(flwPayload),
+        signal: controller.signal,
+      });
 
-    if (data.status !== "success" || !data.data?.link) {
-      console.error("Flutterwave initialization failed:", data);
+      clearTimeout(timeoutId);
+      const data = await response.json();
+
+      if (data.status !== "success" || !data.data?.link) {
+        console.warn("Flutterwave initialization returned non-success:", data);
+        return NextResponse.json(
+          { 
+            error: data.message || "Failed to initialize Flutterwave payment link",
+            fallbackToTransfer: true,
+            orderRef,
+            amount: Number(amount)
+          },
+          { status: 200 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        paymentUrl: data.data.link,
+        txRef: flwPayload.tx_ref
+      });
+    } catch (fetchErr: unknown) {
+      clearTimeout(timeoutId);
+      console.warn("Flutterwave API network/timeout error:", fetchErr);
       return NextResponse.json(
-        { error: data.message || "Failed to initialize Flutterwave payment link", details: data },
-        { status: 400 }
+        { 
+          error: "Gateway timed out. Proceeding to direct bank transfer confirmation.",
+          fallbackToTransfer: true,
+          orderRef,
+          amount: Number(amount)
+        },
+        { status: 200 }
       );
     }
-
-    return NextResponse.json({
-      success: true,
-      paymentUrl: data.data.link,
-      txRef: flwPayload.tx_ref
-    });
   } catch (err: unknown) {
     console.error("Flutterwave API init error:", err);
     return NextResponse.json(
