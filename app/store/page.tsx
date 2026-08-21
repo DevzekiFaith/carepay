@@ -33,12 +33,12 @@ export default function StorePage() {
 
   const categories = [
     "All",
-    "Smart Security",
-    "Smart Climate",
-    "Smart Cleaning",
+    "Power & Protection",
+    "Fans & Cooling",
+    "Water Automation",
+    "Security & Access",
     "Smart Lighting",
-    "Smart Kitchen",
-    "Smart Automation",
+    "Kitchen Essentials",
   ];
 
   const categoryCounts = useMemo(() => {
@@ -139,13 +139,13 @@ export default function StorePage() {
             <div>
               <div className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-sky-200 bg-white/10 px-3.5 py-1.5 rounded-full border border-white/20 mb-3">
                 <Sparkles size={12} className="text-cyan-300" />
-                <span>Grade A Smart Home Appliances · Direct China Sourcing</span>
+                <span>Affordable Smart Living · Built for Nigerian Homes</span>
               </div>
               <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white uppercase">
                 HomeCare <span className="text-cyan-200">Smart Store</span>
               </h1>
               <p className="mt-2 text-sm sm:text-base text-sky-100/90 font-medium max-w-2xl leading-relaxed">
-                Premium IoT appliances, robotic vacuums, biometric security, inverter ACs, and kitchen tech with professional installation support across Nigeria.
+                Essential surge protectors, rechargeable solar fans, automatic water pump controllers, biometric locks, smart switches, and daily kitchen gear with pro installation support.
               </p>
             </div>
 
