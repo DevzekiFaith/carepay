@@ -1,10 +1,10 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
-import { MapPin } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { MapPin, Search, Loader2, CheckCircle2, X } from "lucide-react";
 
-// City coordinate data mapped by state → city → areas with lat/lng
+// ── Data Models ────────────────────────────────────────────────
 export interface AreaPoint {
   name: string;
   lat: number;
@@ -24,6 +24,7 @@ export interface StateData {
   cities: Record<string, CityData>;
 }
 
+// ── Nigeria States / Cities / Areas with coords ────────────────
 export const NIGERIA_STATES: Record<string, StateData> = {
   enugu: {
     label: "Enugu State",
@@ -132,6 +133,38 @@ export const NIGERIA_STATES: Record<string, StateData> = {
   },
 };
 
+// ── Nominatim result shape ─────────────────────────────────────
+interface NominatimResult {
+  place_id: number;
+  display_name: string;
+  lat: string;
+  lon: string;
+  address?: {
+    suburb?: string;
+    quarter?: string;
+    neighbourhood?: string;
+    city?: string;
+    state?: string;
+    county?: string;
+  };
+}
+
+// ── Helpers ─────────────────────────────────────────────────────
+/** Find the nearest area in our data to a lat/lng */
+function nearestArea(lat: number, lng: number): { stateKey: string; cityKey: string; area: AreaPoint } | null {
+  let best: { stateKey: string; cityKey: string; area: AreaPoint; dist: number } | null = null;
+  for (const [sk, sd] of Object.entries(NIGERIA_STATES)) {
+    for (const [ck, cd] of Object.entries(sd.cities)) {
+      for (const area of cd.areas) {
+        const d = Math.hypot(area.lat - lat, area.lng - lng);
+        if (!best || d < best.dist) best = { stateKey: sk, cityKey: ck, area, dist: d };
+      }
+    }
+  }
+  return best;
+}
+
+// ── Props ────────────────────────────────────────────────────────
 interface LocationMapPickerProps {
   selectedState: string;
   selectedCity: string;
@@ -141,9 +174,16 @@ interface LocationMapPickerProps {
   onAreaChange: (a: string) => void;
 }
 
-// Dynamically import the actual map (SSR-safe)
+// ── Custom map pin coords (overrides area preset) ──────────────
+interface CustomPin {
+  lat: number;
+  lng: number;
+  label: string;
+}
+
 const LeafletMap = dynamic(() => import("./LocationLeafletMap"), { ssr: false });
 
+// ── Component ────────────────────────────────────────────────────
 export default function LocationMapPicker({
   selectedState,
   selectedCity,
@@ -152,9 +192,19 @@ export default function LocationMapPicker({
   onCityChange,
   onAreaChange,
 }: LocationMapPickerProps) {
+  // Address search state
+  const [addressQuery, setAddressQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<NominatimResult[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [resolved, setResolved] = useState<string | null>(null);
+  const [customPin, setCustomPin] = useState<CustomPin | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Cascading dropdown derived data
   const stateData = selectedState ? NIGERIA_STATES[selectedState] : null;
   const cityKeys = stateData ? Object.keys(stateData.cities) : [];
-  const cityData = (stateData && selectedCity) ? stateData.cities[selectedCity] : null;
+  const cityData = stateData && selectedCity ? stateData.cities[selectedCity] : null;
   const areas = cityData?.areas ?? [];
 
   // Auto-select first city when state changes
@@ -166,22 +216,147 @@ export default function LocationMapPicker({
 
   // Auto-select first area when city changes
   useEffect(() => {
-    if (areas.length > 0 && !areas.find(a => a.name === selectedArea)) {
+    if (areas.length > 0 && !areas.find((a) => a.name === selectedArea)) {
       onAreaChange(areas[0].name);
     }
   }, [selectedCity]);
 
-  const selectedAreaPoint = areas.find(a => a.name === selectedArea) || (cityData ? { lat: cityData.lat, lng: cityData.lng, name: selectedArea } : null);
+  // Debounce Nominatim search
+  const handleAddressInput = useCallback((val: string) => {
+    setAddressQuery(val);
+    setResolved(null);
+    setSuggestions([]);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (val.trim().length < 3) return;
+
+    debounceRef.current = setTimeout(async () => {
+      setSearching(true);
+      try {
+        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val + ", Nigeria")}&format=json&addressdetails=1&limit=6&countrycodes=ng`;
+        const res = await fetch(url, {
+          headers: { "Accept-Language": "en", "User-Agent": "HomeCare-NG-App" },
+        });
+        const data: NominatimResult[] = await res.json();
+        setSuggestions(data);
+      } catch {
+        setSuggestions([]);
+      } finally {
+        setSearching(false);
+      }
+    }, 450);
+  }, []);
+
+  // When user picks a suggestion → geocode → auto-fill dropdowns + fly map
+  const handleSelectSuggestion = (result: NominatimResult) => {
+    const lat = parseFloat(result.lat);
+    const lng = parseFloat(result.lon);
+    setAddressQuery(result.display_name.split(",").slice(0, 3).join(",").trim());
+    setSuggestions([]);
+    setCustomPin({ lat, lng, label: result.display_name.split(",")[0] });
+
+    // Match nearest area in our data
+    const match = nearestArea(lat, lng);
+    if (match) {
+      onStateChange(match.stateKey);
+      setTimeout(() => {
+        onCityChange(match.cityKey);
+        setTimeout(() => {
+          onAreaChange(match.area.name);
+        }, 50);
+      }, 50);
+      setResolved(match.area.name);
+    }
+  };
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setSuggestions([]);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  // Map center: custom pin overrides area preset
+  const selectedAreaPoint =
+    customPin ??
+    areas.find((a) => a.name === selectedArea) ??
+    (cityData ? { lat: cityData.lat, lng: cityData.lng, name: selectedArea } : null);
+
+  const mapLat = selectedAreaPoint?.lat ?? cityData?.lat ?? 9.082;
+  const mapLng = selectedAreaPoint?.lng ?? cityData?.lng ?? 8.6753;
+  const mapZoom = customPin ? 15 : cityData?.zoom ?? 6;
+  const mapLabel = customPin?.label ?? selectedArea ?? cityData?.name ?? "Nigeria";
 
   return (
     <div className="space-y-4">
-      {/* Cascading Selectors */}
+
+      {/* ── Address Search Bar ──────────────────────────────────── */}
+      <div className="space-y-1" ref={dropdownRef}>
+        <label className="block text-[10px] font-black uppercase tracking-wider text-slate-500">
+          Search Your Address or Street
+        </label>
+        <div className="relative">
+          <div className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center">
+            {searching
+              ? <Loader2 size={15} className="animate-spin text-sky-500" />
+              : <Search size={15} className="text-slate-400" />}
+          </div>
+          <input
+            type="text"
+            value={addressQuery}
+            onChange={e => handleAddressInput(e.target.value)}
+            placeholder="e.g. 12 Agbani Road, Enugu or Lekki Phase 1, Lagos…"
+            className="w-full rounded-xl border border-slate-300 bg-slate-50 pl-10 pr-9 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-100 placeholder:text-slate-400"
+            autoComplete="off"
+          />
+          {addressQuery && (
+            <button
+              type="button"
+              onClick={() => { setAddressQuery(""); setSuggestions([]); setResolved(null); setCustomPin(null); }}
+              className="absolute inset-y-0 right-3 flex items-center text-slate-400 hover:text-slate-600"
+            >
+              <X size={14} />
+            </button>
+          )}
+
+          {/* Suggestions dropdown */}
+          {suggestions.length > 0 && (
+            <ul className="absolute z-50 mt-1 w-full rounded-xl border border-slate-200 bg-white shadow-xl overflow-hidden text-sm">
+              {suggestions.map((s) => (
+                <li key={s.place_id}>
+                  <button
+                    type="button"
+                    onClick={() => handleSelectSuggestion(s)}
+                    className="w-full text-left px-4 py-2.5 hover:bg-sky-50 hover:text-sky-700 transition-colors flex items-start gap-2.5 border-b border-slate-100 last:border-0"
+                  >
+                    <MapPin size={13} className="shrink-0 mt-0.5 text-sky-500" />
+                    <span className="font-medium text-slate-800 text-xs leading-relaxed line-clamp-2">
+                      {s.display_name}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Auto-fill confirmation badge */}
+        {resolved && (
+          <div className="flex items-center gap-2 text-[11px] font-bold text-emerald-700 mt-1.5">
+            <CheckCircle2 size={13} className="text-emerald-600" />
+            Location auto-filled → <span className="underline">{resolved}</span>
+          </div>
+        )}
+      </div>
+
+      {/* ── Cascading Selectors ─────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* State */}
         <div className="space-y-1">
-          <label className="block text-[10px] font-black uppercase tracking-wider text-slate-500">
-            State
-          </label>
+          <label className="block text-[10px] font-black uppercase tracking-wider text-slate-500">State</label>
           <select
             value={selectedState}
             onChange={e => onStateChange(e.target.value)}
@@ -196,9 +371,7 @@ export default function LocationMapPicker({
 
         {/* City */}
         <div className="space-y-1">
-          <label className="block text-[10px] font-black uppercase tracking-wider text-slate-500">
-            City / Zone
-          </label>
+          <label className="block text-[10px] font-black uppercase tracking-wider text-slate-500">City / Zone</label>
           <select
             value={selectedCity}
             onChange={e => onCityChange(e.target.value)}
@@ -214,12 +387,10 @@ export default function LocationMapPicker({
 
         {/* Area / LGA */}
         <div className="space-y-1">
-          <label className="block text-[10px] font-black uppercase tracking-wider text-slate-500">
-            Area / LGA
-          </label>
+          <label className="block text-[10px] font-black uppercase tracking-wider text-slate-500">Area / LGA</label>
           <select
             value={selectedArea}
-            onChange={e => onAreaChange(e.target.value)}
+            onChange={e => { onAreaChange(e.target.value); setCustomPin(null); }}
             disabled={!selectedCity}
             className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2.5 text-sm font-bold text-slate-900 outline-none transition focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-100 cursor-pointer disabled:opacity-40"
           >
@@ -231,7 +402,7 @@ export default function LocationMapPicker({
         </div>
       </div>
 
-      {/* Live Badge */}
+      {/* ── Coverage Badge ──────────────────────────────────────── */}
       {selectedArea && cityData && (
         <div className="flex items-center gap-2 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-2 rounded-xl">
           <MapPin size={13} className="shrink-0 text-emerald-600" />
@@ -241,15 +412,16 @@ export default function LocationMapPicker({
         </div>
       )}
 
-      {/* Leaflet Map */}
-      {cityData && (
-        <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm" style={{ height: 280 }}>
+      {/* ── Leaflet / Carto Map ─────────────────────────────────── */}
+      {(cityData || customPin) && (
+        <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm" style={{ height: 300 }}>
           <LeafletMap
-            lat={selectedAreaPoint?.lat ?? cityData.lat}
-            lng={selectedAreaPoint?.lng ?? cityData.lng}
-            zoom={cityData.zoom}
-            areaName={selectedArea || cityData.name}
-            allAreas={areas}
+            lat={mapLat}
+            lng={mapLng}
+            zoom={mapZoom}
+            areaName={mapLabel}
+            allAreas={customPin ? [] : areas}
+            customPin={customPin ?? undefined}
           />
         </div>
       )}

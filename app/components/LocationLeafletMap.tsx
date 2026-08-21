@@ -12,7 +12,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-// Custom emerald pin icon for selected area
+// Custom icon definitions
 const selectedIcon = new L.Icon({
   iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
@@ -22,7 +22,15 @@ const selectedIcon = new L.Icon({
   shadowSize: [41, 41],
 });
 
-// Blue icon for other areas
+const customAddressIcon = new L.Icon({
+  iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+  iconSize: [30, 48],
+  iconAnchor: [15, 48],
+  popupAnchor: [1, -42],
+  shadowSize: [48, 48],
+});
+
 const otherIcon = new L.Icon({
   iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
@@ -38,17 +46,16 @@ interface AreaPoint {
   lng: number;
 }
 
-interface FlyToProps {
+interface CustomPin {
   lat: number;
   lng: number;
-  zoom: number;
+  label: string;
 }
 
-// Inner component to animate pan on coordinate change
-function FlyTo({ lat, lng, zoom }: FlyToProps) {
+function FlyTo({ lat, lng, zoom }: { lat: number; lng: number; zoom: number }) {
   const map = useMap();
   useEffect(() => {
-    map.flyTo([lat, lng], zoom, { animate: true, duration: 0.8 });
+    map.flyTo([lat, lng], zoom, { animate: true, duration: 0.9 });
   }, [lat, lng, zoom]);
   return null;
 }
@@ -59,48 +66,62 @@ interface Props {
   zoom: number;
   areaName: string;
   allAreas: AreaPoint[];
+  customPin?: CustomPin;
 }
 
-export default function LocationLeafletMap({ lat, lng, zoom, areaName, allAreas }: Props) {
+export default function LocationLeafletMap({ lat, lng, zoom, areaName, allAreas, customPin }: Props) {
   return (
     <MapContainer
       center={[lat, lng]}
       zoom={zoom}
       scrollWheelZoom={false}
       style={{ height: "100%", width: "100%" }}
-      attributionControl={true}
     >
-      {/* Carto Voyager tile layer — clean, modern map style */}
+      {/* Carto Voyager tiles */}
       <TileLayer
         url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
         subdomains="abcd"
         maxZoom={20}
       />
 
-      {/* Fly to newly selected coordinates */}
       <FlyTo lat={lat} lng={lng} zoom={zoom} />
 
-      {/* Selected area — prominent green marker */}
-      <Marker position={[lat, lng]} icon={selectedIcon}>
-        <Popup>
-          <div style={{ fontFamily: "system-ui, sans-serif", fontSize: 12 }}>
-            <strong style={{ fontSize: 13 }}>📍 {areaName}</strong>
-            <br />
-            <span style={{ color: "#16a34a" }}>✓ HomeCare Service Zone</span>
-          </div>
-        </Popup>
-      </Marker>
+      {/* Custom address pin (red — exact geocoded location) */}
+      {customPin && (
+        <Marker position={[customPin.lat, customPin.lng]} icon={customAddressIcon}>
+          <Popup>
+            <div style={{ fontFamily: "system-ui", fontSize: 12 }}>
+              <strong style={{ fontSize: 13 }}>📍 {customPin.label}</strong><br />
+              <span style={{ color: "#dc2626" }}>✓ Your Exact Address</span><br />
+              <span style={{ color: "#6b7280", fontSize: 11 }}>
+                {customPin.lat.toFixed(5)}, {customPin.lng.toFixed(5)}
+              </span>
+            </div>
+          </Popup>
+        </Marker>
+      )}
 
-      {/* All other service areas in the city — blue markers */}
+      {/* Selected area green marker */}
+      {!customPin && (
+        <Marker position={[lat, lng]} icon={selectedIcon}>
+          <Popup>
+            <div style={{ fontFamily: "system-ui", fontSize: 12 }}>
+              <strong style={{ fontSize: 13 }}>📍 {areaName}</strong><br />
+              <span style={{ color: "#16a34a" }}>✓ HomeCare Service Zone</span>
+            </div>
+          </Popup>
+        </Marker>
+      )}
+
+      {/* Other service area markers in the city (blue) */}
       {allAreas
         .filter(a => a.name !== areaName)
         .map(area => (
           <Marker key={area.name} position={[area.lat, area.lng]} icon={otherIcon}>
             <Popup>
-              <div style={{ fontFamily: "system-ui, sans-serif", fontSize: 12 }}>
-                <strong>{area.name}</strong>
-                <br />
+              <div style={{ fontFamily: "system-ui", fontSize: 12 }}>
+                <strong>{area.name}</strong><br />
                 <span style={{ color: "#2563eb" }}>Service Area</span>
               </div>
             </Popup>
