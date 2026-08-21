@@ -58,7 +58,7 @@ export async function GET(req: Request) {
       const { error: updateError } = await supabase
         .from("store_orders")
         .update({
-          status: "paid",
+          status: "processing",
         })
         .eq("order_ref", resolvedOrderRef);
 
@@ -102,8 +102,7 @@ export async function GET(req: Request) {
       await supabase
         .from("service_requests")
         .update({
-          status: "funded",
-          payment_status: "escrow_funded",
+          status: "in_progress",
         })
         .eq("id", resolvedOrderRef);
 
@@ -114,7 +113,7 @@ export async function GET(req: Request) {
       await supabase
         .from("store_orders")
         .update({
-          status: "paid",
+          status: "processing",
         })
         .eq("order_ref", resolvedOrderRef);
 
