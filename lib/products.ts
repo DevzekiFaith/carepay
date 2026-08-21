@@ -391,20 +391,5 @@ export const PRODUCTS: Product[] = [
     sourceOrigin: "Hangzhou Vision Smart Tech",
     warrantyMonths: 24,
   },
-  {
-    id: "sp-sec-6",
-    name: "Smart Biometric Fingerprint & Keypad Door Handle Lock",
-    description: "Keyless entry for bedrooms, masters, and offices. Fast 0.3s semiconductor fingerprint scanner, PIN keypad, IC cards, and mechanical emergency backup key. Replaces standard door locks effortlessly.",
-    price: 68000,
-    image: "/products/smart-door-handle-lock.jpg",
-    category: "Security & Access",
-    serviceLink: ["Carpenter", "General Handyman"],
-    rating: 4.9,
-    reviewCount: 240,
-    badge: "Essential",
-    stock: 30,
-    sourceOrigin: "Zhongshan Lock Manufacturing Hub",
-    warrantyMonths: 24,
-  },
 
 ];
