@@ -421,7 +421,7 @@ export const PRODUCTS: Product[] = [
     name: "Tuya Smart WiFi LPG Gas Leak Detector & Auto Valve Shut-off Motor",
     description: "Life-saving kitchen safety. Detects cooking gas leakage immediately, triggers an 85dB siren, pushes high-priority phone alerts, and mechanically twists the gas cylinder valve closed automatically.",
     price: 38000,
-    image: "/products/smart-gas-detector.jpg",
+    image: "/products/smart-gas-detector.png",
     category: "Kitchen Essentials",
     serviceLink: ["Electrician", "Plumber"],
     rating: 5.0,
