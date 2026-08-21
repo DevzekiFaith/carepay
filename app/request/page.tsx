@@ -665,6 +665,9 @@ function RequestContent() {
                               onClick={async () => {
                                 try {
                                   toast.loading("Opening Flutterwave Escrow...", { id: "req-flw" });
+                                  const controller = new AbortController();
+                                  const flwTimeout = setTimeout(() => controller.abort(), 6000);
+
                                   const res = await fetch("/api/payment/flutterwave/initialize", {
                                     method: "POST",
                                     headers: { "Content-Type": "application/json" },
@@ -679,15 +682,17 @@ function RequestContent() {
                                       type: "service_request",
                                       userId: user?.id || null,
                                     }),
+                                    signal: controller.signal,
                                   });
+                                  clearTimeout(flwTimeout);
                                   const data = await res.json();
                                   if (data.success && data.paymentUrl) {
                                     window.location.href = data.paymentUrl;
                                   } else {
-                                    toast.error(data.error || "Failed to launch Flutterwave", { id: "req-flw" });
+                                    toast.info("Online gateway busy. Please complete payment using the verified bank transfer details shown above.", { id: "req-flw" });
                                   }
                                 } catch (err: unknown) {
-                                  toast.error(err instanceof Error ? err.message : "Payment error", { id: "req-flw" });
+                                  toast.info("Connection timed out. Please pay via direct bank transfer to the account above.", { id: "req-flw" });
                                 }
                               }}
                               className="h-13 rounded-full bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-sky-600/30 transition-all hover:scale-102 cursor-pointer"

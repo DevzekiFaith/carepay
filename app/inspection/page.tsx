@@ -72,29 +72,40 @@ export default function PropertyInspectionPage() {
         throw new Error(dbError.message);
       }
 
-      // 2. Initialize Flutterwave payment
-      const res = await fetch("/api/payment/flutterwave/initialize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderRef,
-          amount: totalFee,
-          email: contactEmail || user?.email || "customer@homecare.ng",
-          name: contactName || user?.user_metadata?.full_name || "Property Inspection Customer",
-          phone: contactPhone || user?.user_metadata?.phone || "08000000000",
-          title: "HomeCare Engineering Property Inspection",
-          description: `Comprehensive ${propertyType === 'bungalow' ? 'Bungalow' : 'Duplex'} inspection audit at ${address.slice(0, 30)}`,
-          type: "inspection",
-          userId: user?.id || null,
-        }),
-      });
+      // 2. Initialize Flutterwave payment with 6s timeout
+      const controller = new AbortController();
+      const flwTimeout = setTimeout(() => controller.abort(), 6000);
 
-      const data = await res.json();
+      try {
+        const res = await fetch("/api/payment/flutterwave/initialize", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderRef,
+            amount: totalFee,
+            email: contactEmail || user?.email || "customer@homecare.ng",
+            name: contactName || user?.user_metadata?.full_name || "Property Inspection Customer",
+            phone: contactPhone || user?.user_metadata?.phone || "08000000000",
+            title: "HomeCare Engineering Property Inspection",
+            description: `Comprehensive ${propertyType === 'bungalow' ? 'Bungalow' : 'Duplex'} inspection audit at ${address.slice(0, 30)}`,
+            type: "inspection",
+            userId: user?.id || null,
+          }),
+          signal: controller.signal,
+        });
 
-      if (data.success && data.paymentUrl) {
-        window.location.href = data.paymentUrl;
-      } else {
-        toast.error(data.error || "Failed to initialize payment gateway", { id: "insp-pay" });
+        clearTimeout(flwTimeout);
+        const data = await res.json();
+
+        if (data.success && data.paymentUrl) {
+          window.location.href = data.paymentUrl;
+        } else {
+          toast.info("Inspection booking recorded! Please complete bank transfer to our verified account.", { id: "insp-pay" });
+          setSubmitting(false);
+        }
+      } catch (flwErr) {
+        clearTimeout(flwTimeout);
+        toast.info("Inspection request logged! Please pay via direct bank transfer.", { id: "insp-pay" });
         setSubmitting(false);
       }
     } catch (err: unknown) {

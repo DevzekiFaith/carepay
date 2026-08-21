@@ -129,28 +129,38 @@ export default function CustomerWalletPage() {
       }
 
       toast.loading("Connecting to Flutterwave Gateway...", { id: "wallet-fund" });
+      const controller = new AbortController();
+      const flwTimeout = setTimeout(() => controller.abort(), 6000);
 
-      const res = await fetch("/api/payment/flutterwave/initialize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderRef: `WLT-${user.id.slice(0, 6).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`,
-          amount: val,
-          email: user.email,
-          name: user.user_metadata?.full_name || "HomeCare Customer",
-          phone: user.user_metadata?.phone || "08000000000",
-          title: "HomeCare Wallet Top-Up",
-          description: `Deposit of ₦${val.toLocaleString()} to HomeCare Customer Wallet`,
-          type: "wallet_topup",
-          userId: user.id,
-        }),
-      });
+      try {
+        const res = await fetch("/api/payment/flutterwave/initialize", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderRef: `WLT-${user.id.slice(0, 6).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`,
+            amount: val,
+            email: user.email,
+            name: user.user_metadata?.full_name || "HomeCare Customer",
+            phone: user.user_metadata?.phone || "08000000000",
+            title: "HomeCare Wallet Top-Up",
+            description: `Deposit of ₦${val.toLocaleString()} to HomeCare Customer Wallet`,
+            type: "wallet_topup",
+            userId: user.id,
+          }),
+          signal: controller.signal,
+        });
 
-      const data = await res.json();
-      if (data.success && data.paymentUrl) {
-        window.location.href = data.paymentUrl;
-      } else {
-        toast.error(data.error || "Failed to launch Flutterwave payment", { id: "wallet-fund" });
+        clearTimeout(flwTimeout);
+        const data = await res.json();
+        if (data.success && data.paymentUrl) {
+          window.location.href = data.paymentUrl;
+        } else {
+          toast.error(data.error || "Gateway connection busy. Please try manual bank transfer.", { id: "wallet-fund" });
+          setLoading(false);
+        }
+      } catch (flwErr) {
+        clearTimeout(flwTimeout);
+        toast.error("Gateway request timed out. Please try again or use direct transfer.", { id: "wallet-fund" });
         setLoading(false);
       }
     } catch (err: unknown) {

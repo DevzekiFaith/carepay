@@ -104,6 +104,9 @@ function OrderConfirmationContent() {
       setPayingWithFlw(true);
       toast.loading("Opening Flutterwave Gateway...", { id: "flw-pay" });
 
+      const controller = new AbortController();
+      const flwTimeout = setTimeout(() => controller.abort(), 6000);
+
       const res = await fetch("/api/payment/flutterwave/initialize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -116,17 +119,19 @@ function OrderConfirmationContent() {
           description: `Payment for Order ${orderRef}`,
           type: "store_order",
         }),
+        signal: controller.signal,
       });
 
+      clearTimeout(flwTimeout);
       const data = await res.json();
       if (data.success && data.paymentUrl) {
         window.location.href = data.paymentUrl;
       } else {
-        toast.error(data.error || "Failed to launch Flutterwave", { id: "flw-pay" });
+        toast.error(data.error || "Gateway busy. Please complete payment via Direct Bank Transfer below.", { id: "flw-pay" });
         setPayingWithFlw(false);
       }
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Payment launch failed", { id: "flw-pay" });
+      toast.error(err instanceof Error ? err.message : "Payment connection timed out. Please pay via Direct Bank Transfer below.", { id: "flw-pay" });
       setPayingWithFlw(false);
     }
   };
