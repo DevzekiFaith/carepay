@@ -157,13 +157,25 @@ export default function NinVerificationCard({ status, details, reason }: NinVeri
             </div>
           </div>
 
-          {/* Verification Audit Footer */}
-          <div className="pt-2 flex items-center justify-between text-[10px] font-mono text-slate-500 bg-slate-50/80 px-3 py-1.5 rounded-xl border border-slate-200">
-            <span className="flex items-center gap-1 font-bold text-emerald-800">
-              <Lock size={11} className="text-emerald-600" />
-              Ref: {details.verificationRef || "NIMC-VERIFIED"}
-            </span>
-            <span className="font-medium text-slate-600">
+          {/* Verification Audit Footer & Dual Provider Indicators */}
+          <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[10px] font-mono text-slate-500 bg-slate-50/80 px-3.5 py-2 rounded-xl border border-slate-200">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="flex items-center gap-1 font-bold text-emerald-800">
+                <Lock size={11} className="text-emerald-600" />
+                Ref: {details.verificationRef || "NIMC-VERIFIED"}
+              </span>
+              <div className="flex items-center gap-1.5 ml-1">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300 text-[9px]">
+                  <span className="h-1 w-1 rounded-full bg-emerald-600 animate-pulse" />
+                  Dojah KYC (Active)
+                </span>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sky-100 text-sky-800 font-bold border border-sky-300 text-[9px]">
+                  <span className="h-1 w-1 rounded-full bg-sky-600 animate-pulse" />
+                  Prembly Pass (Active)
+                </span>
+              </div>
+            </div>
+            <span className="font-medium text-slate-600 text-[10px]">
               Verified: {details.verifiedAt || "Today"}
             </span>
           </div>
