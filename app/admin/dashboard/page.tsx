@@ -480,8 +480,8 @@ export default function AdminDashboard() {
                       className="rounded-xl border border-slate-300 bg-slate-50 hover:bg-white px-3.5 py-2 text-xs font-bold text-slate-800 outline-none focus:border-sky-500 cursor-pointer shadow-xs"
                     >
                       <option value="all">All Requests ({requests.length})</option>
-                      <option value="pending">Pending ({requests.filter(r => r.status === 'pending').length})</option>
-                      <option value="matched">Matched ({requests.filter(r => r.status === 'matched').length})</option>
+                      <option value="pending">Pending ({requests.filter(r => (r.status || 'pending') === 'pending' || r.status === 'new').length})</option>
+                      <option value="in_progress">In Progress ({requests.filter(r => r.status === 'in_progress' || r.status === 'matched' || r.status === 'accepted').length})</option>
                       <option value="completed">Completed ({requests.filter(r => r.status === 'completed').length})</option>
                       <option value="cancelled">Cancelled ({requests.filter(r => r.status === 'cancelled').length})</option>
                     </select>
@@ -531,22 +531,23 @@ export default function AdminDashboard() {
                                 <td className="px-6 py-4.5 text-xs font-semibold text-slate-500">📅 {new Date(req.created_at).toLocaleDateString()}</td>
                                 <td className="px-6 py-4.5">
                                   <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                                    req.status === 'pending' ? 'border border-amber-300 bg-amber-50 text-amber-800' : 
-                                    req.status === 'matched' ? 'border border-sky-300 bg-sky-50 text-sky-800' : 
-                                    'border border-emerald-300 bg-emerald-50 text-emerald-800'
+                                    req.status === 'completed' ? 'border border-emerald-300 bg-emerald-50 text-emerald-800' :
+                                    req.status === 'cancelled' ? 'border border-rose-300 bg-rose-50 text-rose-800' :
+                                    req.status === 'in_progress' || req.status === 'matched' || req.status === 'accepted' ? 'border border-sky-300 bg-sky-50 text-sky-800' : 
+                                    'border border-amber-300 bg-amber-50 text-amber-800'
                                   }`}>
-                                    {req.status}
+                                    {req.status === 'in_progress' ? 'In Progress' : req.status || 'pending'}
                                   </span>
                                 </td>
                                 <td className="px-6 py-4.5">
                                   <select 
                                     disabled={updatingId === req.id}
-                                    value={req.status || 'pending'}
+                                    value={req.status === 'matched' || req.status === 'accepted' ? 'in_progress' : (req.status || 'pending')}
                                     onChange={(e) => updateRequestStatus(req.id, e.target.value)}
                                     className="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 outline-none focus:border-sky-500 cursor-pointer shadow-xs"
                                   >
                                     <option value="pending" className="font-bold text-amber-700">Mark: Pending</option>
-                                    <option value="matched" className="font-bold text-sky-700">Mark: Matched</option>
+                                    <option value="in_progress" className="font-bold text-sky-700">Mark: In Progress</option>
                                     <option value="completed" className="font-bold text-emerald-700">Mark: Completed</option>
                                     <option value="cancelled" className="font-bold text-rose-700">Mark: Cancelled</option>
                                   </select>

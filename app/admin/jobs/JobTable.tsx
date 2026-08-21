@@ -52,8 +52,23 @@ const STATUS_CONFIG: Record<string, { label: string; dot: string; badge: string 
     dot: "bg-amber-500",
     badge: "bg-amber-50 text-amber-800 border-amber-200" 
   },
+  new: { 
+    label: "New", 
+    dot: "bg-amber-500",
+    badge: "bg-amber-50 text-amber-800 border-amber-200" 
+  },
+  in_progress: { 
+    label: "In Progress", 
+    dot: "bg-sky-500",
+    badge: "bg-sky-50 text-sky-800 border-sky-200" 
+  },
   matched: { 
-    label: "Matched", 
+    label: "In Progress", 
+    dot: "bg-sky-500",
+    badge: "bg-sky-50 text-sky-800 border-sky-200" 
+  },
+  accepted: { 
+    label: "In Progress", 
     dot: "bg-sky-500",
     badge: "bg-sky-50 text-sky-800 border-sky-200" 
   },
@@ -150,8 +165,8 @@ export default function JobTable({ initialJobs }: { initialJobs: Job[] }) {
   const stats = useMemo(() => {
     return {
       total: jobs.length,
-      pending: jobs.filter((j) => (j.status ?? "pending") === "pending").length,
-      matched: jobs.filter((j) => j.status === "matched").length,
+      pending: jobs.filter((j) => (j.status ?? "pending") === "pending" || j.status === "new").length,
+      inProgress: jobs.filter((j) => j.status === "in_progress" || j.status === "matched" || j.status === "accepted").length,
       completed: jobs.filter((j) => j.status === "completed").length,
     };
   }, [jobs]);
@@ -163,7 +178,7 @@ export default function JobTable({ initialJobs }: { initialJobs: Job[] }) {
         {[
           { id: "all", label: "All Requests", count: stats.total, color: "text-slate-900", bg: "bg-slate-100" },
           { id: "pending", label: "Pending", count: stats.pending, color: "text-amber-700", bg: "bg-amber-100" },
-          { id: "matched", label: "Matched", count: stats.matched, color: "text-sky-700", bg: "bg-sky-100" },
+          { id: "in_progress", label: "In Progress", count: stats.inProgress, color: "text-sky-700", bg: "bg-sky-100" },
           { id: "completed", label: "Completed", count: stats.completed, color: "text-emerald-700", bg: "bg-emerald-100" },
         ].map((tab) => {
           const active = statusFilter === tab.id;
@@ -222,7 +237,7 @@ export default function JobTable({ initialJobs }: { initialJobs: Job[] }) {
             >
               <option value="all">All Statuses ({jobs.length})</option>
               <option value="pending">Pending ({stats.pending})</option>
-              <option value="matched">Matched ({stats.matched})</option>
+              <option value="in_progress">In Progress ({stats.inProgress})</option>
               <option value="completed">Completed ({stats.completed})</option>
               <option value="cancelled">Cancelled ({jobs.filter((j) => j.status === "cancelled").length})</option>
             </select>
@@ -370,12 +385,12 @@ export default function JobTable({ initialJobs }: { initialJobs: Job[] }) {
                         <div>
                           <select
                             disabled={isUpdating}
-                            value={currentStatus}
+                            value={currentStatus === "matched" || currentStatus === "accepted" ? "in_progress" : currentStatus}
                             onChange={(e) => handleStatusChange(job.id, e.target.value)}
                             className="w-full text-xs font-bold rounded-xl bg-white border border-slate-200 hover:border-sky-400 focus:border-sky-500 text-slate-800 px-3 py-2 outline-none transition-all cursor-pointer disabled:opacity-50 shadow-xs"
                           >
                             <option value="pending">Mark: Pending</option>
-                            <option value="matched">Mark: Matched</option>
+                            <option value="in_progress">Mark: In Progress</option>
                             <option value="completed">Mark: Completed</option>
                             <option value="cancelled">Mark: Cancelled</option>
                           </select>
@@ -396,7 +411,7 @@ export default function JobTable({ initialJobs }: { initialJobs: Job[] }) {
           </div>
           <div className="flex gap-4 flex-wrap">
             <span className="text-amber-700 font-bold">{stats.pending} pending</span>
-            <span className="text-sky-700 font-bold">{stats.matched} matched</span>
+            <span className="text-sky-700 font-bold">{stats.inProgress} in progress</span>
             <span className="text-emerald-700 font-bold">{stats.completed} completed</span>
           </div>
         </div>
