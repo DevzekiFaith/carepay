@@ -49,7 +49,7 @@ export default function CartDrawer() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="fixed right-0 top-0 bottom-0 z-[80] w-full max-w-md bg-white dark:bg-zinc-950 border-l border-zinc-200 dark:border-zinc-800 flex flex-col shadow-2xl"
+            className="fixed right-0 top-0 bottom-0 z-[80] w-full sm:max-w-md h-[100dvh] bg-white dark:bg-zinc-950 border-l border-zinc-200 dark:border-zinc-800 flex flex-col shadow-2xl"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 sm:p-6 border-b border-zinc-200 dark:border-zinc-800">
@@ -198,7 +198,7 @@ export default function CartDrawer() {
 
             {/* Footer / Summary */}
             {cartItems.length > 0 && (
-              <div className="border-t border-zinc-200 dark:border-zinc-800 p-4 sm:p-6 space-y-3 sm:space-y-4 bg-white dark:bg-zinc-950">
+              <div className="border-t border-zinc-200 dark:border-zinc-800 p-4 sm:p-6 pb-8 sm:pb-6 space-y-3 sm:space-y-4 bg-white dark:bg-zinc-950">
                 <div className="space-y-1.5 sm:space-y-2">
                   <div className="flex items-center justify-between text-xs sm:text-sm">
                     <span className="text-zinc-500">Subtotal</span>
