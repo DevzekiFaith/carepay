@@ -321,42 +321,69 @@ export default function WorkerRegisterPage() {
               <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-6 space-y-6">
                 {/* NIN Input & Action */}
                 <div>
-                  <label className="block text-xs font-black text-slate-900 uppercase tracking-wider">
-                    NIN (National Identity Number)
-                  </label>
-                  <p className="text-xs font-medium text-slate-500 mb-3 mt-1">
-                    Your 11-digit NIN is cross-referenced with national identity databases to ensure customer peace of mind.
+                  <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
+                    <label className="block text-xs font-black text-slate-900 uppercase tracking-wider">
+                      NIN (National Identity Number)
+                    </label>
+                    <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      Live NIMC Verification
+                    </span>
+                  </div>
+                  <p className="text-xs font-medium text-slate-500 mb-3">
+                    Enter your 11-digit NIN. Our system performs a real-time live cross-reference with the National Identity Management Commission.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3">
-                    <input
-                      required
-                      inputMode="numeric"
-                      pattern="[0-9]{11}"
-                      maxLength={11}
-                      name="nin"
-                      id="nin-input"
-                      placeholder="Enter 11-digit NIN"
-                      className="w-full max-w-sm rounded-xl border border-slate-300 bg-white px-4 py-3 text-base font-mono font-bold text-slate-900 tracking-wider outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100 shadow-2xs placeholder:text-slate-400"
-                      onChange={(e) => {
-                        if (e.target.value.length === 11) {
-                          setNinError(null);
-                        }
-                      }}
-                    />
+                    <div className="relative flex-1 max-w-sm">
+                      <input
+                        required
+                        inputMode="numeric"
+                        pattern="[0-9]{11}"
+                        maxLength={11}
+                        name="nin"
+                        id="nin-input"
+                        placeholder="e.g. 12345678901"
+                        className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base font-mono font-bold text-slate-900 tracking-wider outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100 shadow-2xs placeholder:text-slate-400"
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, "");
+                          e.target.value = val;
+                          if (val.length === 11) {
+                            setNinError(null);
+                            handleVerifyNin(val);
+                          } else if (val.length < 11 && ninStatus === "verified") {
+                            setNinStatus("idle");
+                            setNinDetails(undefined);
+                            setLockedName("");
+                          }
+                        }}
+                      />
+                    </div>
                     <button
                       type="button"
                       onClick={() => {
                         const input = document.getElementById('nin-input') as HTMLInputElement;
-                        if (input.value.length === 11) {
+                        if (input && input.value.length === 11) {
                           handleVerifyNin(input.value);
                         } else {
                           setNinError("Please enter all 11 digits to verify.");
                         }
                       }}
                       disabled={ninStatus === 'verifying'}
-                      className="h-12 px-6 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-black uppercase tracking-wider shadow-sm transition-all disabled:opacity-50 cursor-pointer shrink-0"
+                      className="h-12 px-6 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-black uppercase tracking-wider shadow-sm transition-all disabled:opacity-50 cursor-pointer shrink-0 flex items-center justify-center gap-2"
                     >
-                      {ninStatus === 'verifying' ? "Verifying..." : "Verify NIN"}
+                      {ninStatus === 'verifying' ? (
+                        <>
+                          <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                          <span>Verifying...</span>
+                        </>
+                      ) : ninStatus === 'verified' ? (
+                        <>
+                          <CheckCircle2 size={15} />
+                          <span>Verified</span>
+                        </>
+                      ) : (
+                        <span>Verify NIN</span>
+                      )}
                     </button>
                   </div>
                   {ninError && (
