@@ -5,6 +5,7 @@ import HeroSection from "./landing/HeroSection";
 
 // Critically above-the-fold
 const ServiceCategorySection = dynamic(() => import("./landing/ServiceCategorySection"));
+const SmartStorePreviewSection = dynamic(() => import("./landing/SmartStorePreviewSection"));
 const InteractiveMapSection = dynamic(() => import("./landing/InteractiveMapSection"));
 
 // Below-the-fold / Heavy sections
@@ -21,6 +22,7 @@ export default function Gateway() {
     <div className="min-h-screen bg-background text-foreground transition-all duration-300 antialiased overflow-x-hidden selection:bg-brand-primary/30 selection:text-white">
       <HeroSection />
       <ServiceCategorySection />
+      <SmartStorePreviewSection />
       <InteractiveMapSection />
       <FeaturesSection />
       <WalletEscrowSection />

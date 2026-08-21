@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import SmartStorePreviewSection from "./landing/SmartStorePreviewSection";
 import Hero from "./Hero";
 import ServiceGrid from "./ServiceGrid";
 import QuickRequestForm from "./QuickRequestForm";
@@ -36,6 +37,8 @@ export default function HomeClient() {
         selectedService={selectedService}
         onSelectService={setSelectedService}
       />
+
+      <SmartStorePreviewSection />
 
       <section className="pt-16 sm:pt-24 pb-36 relative bg-background border-t border-zinc-200/50 dark:border-zinc-800/50">
         {/* Subtle orange glow overlay for layout integration */}
