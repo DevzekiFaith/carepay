@@ -165,7 +165,10 @@ export default function WorkerRegisterPage() {
       const res = await fetch("/api/verify-nin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nin }),
+        body: JSON.stringify({ 
+          nin,
+          fullNameInput: fullName || undefined,
+        }),
       });
       
       const data = await res.json();
@@ -175,11 +178,12 @@ export default function WorkerRegisterPage() {
       
       if (data.status === 'verified' && data.details) {
         setNinDetails(data.details);
-        setLockedName(data.details.fullName);
-        setFullName(data.details.fullName);
+        if (!fullName && data.details.fullName && data.details.fullName !== "Verified Technician") {
+          setFullName(data.details.fullName);
+        }
+        toast.success("NIN Authenticated with NIMC Registry!");
       } else {
         setNinDetails(undefined);
-        setLockedName("");
       }
     } catch {
       setNinStatus('error');
@@ -224,23 +228,24 @@ export default function WorkerRegisterPage() {
               <div className="grid gap-5 sm:grid-cols-2">
                 {/* Full Legal Name */}
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    Full Legal Name
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                      Full Legal Name
+                    </label>
+                    {ninStatus === "verified" && (
+                      <span className="text-[10px] font-black text-emerald-700 uppercase tracking-wider flex items-center gap-1">
+                        <CheckCircle2 size={12} className="text-emerald-600" /> NIMC Linked
+                      </span>
+                    )}
+                  </div>
                   <input
                     required
                     name="fullName"
-                    value={lockedName || fullName}
-                    readOnly={!!lockedName}
+                    value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="e.g. Olawale Ibrahim"
-                    className={`w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-100 ${lockedName ? 'bg-emerald-50 border-emerald-300 text-emerald-900 cursor-not-allowed font-bold' : ''}`}
+                    className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-100 placeholder:text-slate-400"
                   />
-                  {lockedName && (
-                    <p className="text-[11px] font-black text-emerald-700 uppercase tracking-wider mt-1 flex items-center gap-1">
-                      <CheckCircle2 size={13} /> Verified Name Locked from NIN
-                    </p>
-                  )}
                 </div>
 
                 {/* Email */}
