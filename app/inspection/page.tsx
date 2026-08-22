@@ -11,6 +11,7 @@ import { createClient } from "@/lib/supabase/client";
 const PRICING = {
   bungalow: 50000,
   duplex: 100000,
+  commercial: 250000,
 } as const;
 
 type PropertyType = keyof typeof PRICING | "";
@@ -28,6 +29,8 @@ export default function PropertyInspectionPage() {
   const supabase = useMemo(() => createClient(), []);
 
   const totalFee = propertyType ? PRICING[propertyType] : 50000;
+
+  const propertyLabel = propertyType === 'bungalow' ? 'Bungalow' : propertyType === 'duplex' ? 'Duplex' : propertyType === 'commercial' ? 'Commercial Building' : 'Property';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +58,7 @@ export default function PropertyInspectionPage() {
         notes: `Preferred Date: ${appointmentDate ? appointmentDate.toLocaleDateString() : 'N/A'}, Time: ${appointmentTime}`,
         items: [{
           id: propertyType,
-          name: `Property Inspection (${propertyType === 'bungalow' ? 'Bungalow' : 'Duplex'})`,
+          name: `Property Inspection (${propertyLabel})`,
           price: totalFee,
           quantity: 1,
           image: "/hclogo.png",
@@ -87,7 +90,7 @@ export default function PropertyInspectionPage() {
             name: contactName || user?.user_metadata?.full_name || "Property Inspection Customer",
             phone: contactPhone || user?.user_metadata?.phone || "08000000000",
             title: "HomeCare Engineering Property Inspection",
-            description: `Comprehensive ${propertyType === 'bungalow' ? 'Bungalow' : 'Duplex'} inspection audit at ${address.slice(0, 30)}`,
+            description: `Comprehensive ${propertyLabel} inspection audit at ${address.slice(0, 30)}`,
             type: "inspection",
             userId: user?.id || null,
           }),
@@ -175,7 +178,7 @@ export default function PropertyInspectionPage() {
               ₦{totalFee.toLocaleString()}
             </p>
             <p className="text-xs text-slate-500 font-medium">
-              Standard fixed rate for {propertyType} inspection. Zero hidden fees.
+              Standard fixed rate for {propertyLabel.toLowerCase()} inspection. Zero hidden fees.
             </p>
           </div>
 
@@ -222,6 +225,7 @@ export default function PropertyInspectionPage() {
                   >
                     <option value="bungalow">Bungalow (₦50,000)</option>
                     <option value="duplex">Duplex (₦100,000)</option>
+                    <option value="commercial">Commercial Building (₦250,000)</option>
                   </select>
                 </div>
               </div>
