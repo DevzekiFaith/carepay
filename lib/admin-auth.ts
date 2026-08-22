@@ -57,13 +57,13 @@ export function lockAdmin(): void {
 // WebAuthn Hardware Biometrics (Windows Hello, Touch ID, Face ID, Android Biometrics)
 export async function authenticateWithWebAuthn(): Promise<{ success: boolean; message: string }> {
   if (typeof window === "undefined" || !window.PublicKeyCredential) {
-    return { success: false, message: "WebAuthn Biometrics is not supported on this browser." };
+    return { success: false, message: "Biometric sensor is not supported on this browser. Please use your PIN." };
   }
 
   try {
     const isAvailable = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
     if (!isAvailable) {
-      return { success: false, message: "Hardware biometric sensor not available on this device." };
+      return { success: false, message: "No hardware biometric sensor detected. Please use your 6-digit PIN." };
     }
 
     const challenge = new Uint8Array(32);
@@ -73,7 +73,7 @@ export async function authenticateWithWebAuthn(): Promise<{ success: boolean; me
     const credential = await navigator.credentials.get({
       publicKey: {
         challenge,
-        timeout: 60000,
+        timeout: 30000,
         userVerification: "required",
         rpId: window.location.hostname || "localhost",
       },
@@ -81,11 +81,17 @@ export async function authenticateWithWebAuthn(): Promise<{ success: boolean; me
 
     if (credential) {
       setAdminUnlocked();
-      return { success: true, message: "Biometric authentication successful!" };
+      return { success: true, message: "Identity verified successfully!" };
     }
-    return { success: false, message: "Biometric authentication was cancelled." };
-  } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : "Biometric authentication failed";
+    return { success: false, message: "Biometric scan was cancelled. Please try again or use your PIN." };
+  } catch (err: any) {
+    if (err.name === "NotAllowedError" || err.name === "SecurityError") {
+      return { 
+        success: false, 
+        message: "Biometric prompt timed out or cancelled. You can enter your 6-digit PIN passcode." 
+      };
+    }
+    const errorMsg = err instanceof Error ? err.message : "Biometric scan failed";
     return { success: false, message: errorMsg };
   }
 }
