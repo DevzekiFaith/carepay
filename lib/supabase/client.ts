@@ -1,50 +1,14 @@
 import { createBrowserClient } from '@supabase/ssr'
 
+const DEFAULT_SUPABASE_URL = "https://iqvizntilpgitzyxmgoa.supabase.co";
+const DEFAULT_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlxdml6bnRpbHBnaXR6eXhtZ29hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxNTM3NzYsImV4cCI6MjEwMjcyOTc3Nn0.Gy0aT7RoLZs3QN4lelKdHxbZjHGPp00ebmIb5uUZPhw";
+
 // Singleton instance to prevent multiple client instances causing concurrent auth conflicts
 let supabaseClient: ReturnType<typeof createBrowserClient> | null = null
 
 export function createClient() {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()
-
-    // If environment variables are missing during SSR or hydration, return a safe proxy
-    // that effectively "does nothing" but prevents the application from crashing.
-    if (!supabaseUrl || !supabaseAnonKey) {
-        if (typeof window !== 'undefined') {
-            console.error('Supabase: Missing env variables. Please check NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel.');
-        }
-
-        // Infinite Proxy: Any access returns a function that returns the same proxy
-        /* eslint-disable @typescript-eslint/no-explicit-any */
-        const createSafeProxy = (): any => {
-            const proxy: any = new Proxy(() => proxy, {
-                get: (target, prop) => {
-                    if (prop === 'then') {
-                        // Return a function that behaves like a promise that resolves with a helpful error
-                        return (onFulfilled?: (val: any) => any) => {
-                            const res = { 
-                                data: { user: null, session: null }, 
-                                error: { message: 'Supabase configuration missing' } 
-                            };
-                            return Promise.resolve(onFulfilled ? onFulfilled(res) : res);
-                        };
-                    }
-                    if (prop === 'auth') return proxy;
-                    if (prop === 'data') return { 
-                        user: null, 
-                        session: null,
-                        subscription: { unsubscribe: () => {} }
-                    }; // Return structured data with safe unsubscribe
-                    if (prop === 'error') return null;
-                    return proxy;
-                }
-            });
-            return proxy;
-        };
-        /* eslint-enable @typescript-eslint/no-explicit-any */
-        
-        return createSafeProxy();
-    }
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || DEFAULT_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() || DEFAULT_SUPABASE_ANON_KEY;
 
     // Return existing singleton instance if available
     if (supabaseClient) {
@@ -66,4 +30,3 @@ export function createClient() {
 
     return supabaseClient
 }
-
