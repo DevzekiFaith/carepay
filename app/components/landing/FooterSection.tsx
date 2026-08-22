@@ -19,7 +19,10 @@ export default function FooterSection() {
               <Phone size={15} className="text-cyan-400" />
               <span>+234 911 905 9859</span>
             </a>
-            <p className="flex items-center gap-2"><Mail size={15} className="text-cyan-400" /> support@homecare.ng</p>
+            <a href="mailto:support@homecare.ng" className="flex items-center gap-2 hover:text-white transition-colors">
+              <Mail size={15} className="text-cyan-400" />
+              <span>support@homecare.ng</span>
+            </a>
             <p className="flex items-center gap-2"><MapPin size={15} className="text-cyan-400" /> Lagos · Enugu · Abeokuta, Nigeria</p>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Logo from "./Logo";
-import { ArrowRight, Phone } from "lucide-react";
+import { ArrowRight, Phone, Mail } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -74,6 +74,15 @@ export default function Footer() {
                 >
                   <Phone size={14} className="text-cyan-400" />
                   <span>+234 911 905 9859</span>
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="mailto:support@homecare.ng" 
+                  className="hover:text-white transition-colors flex items-center gap-2"
+                >
+                  <Mail size={14} className="text-cyan-400" />
+                  <span>support@homecare.ng</span>
                 </a>
               </li>
               <li>

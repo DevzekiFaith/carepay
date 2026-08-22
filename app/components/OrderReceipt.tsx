@@ -139,8 +139,8 @@ export default function OrderReceipt({
               </div>
               <div className="space-y-1 text-xs font-medium" style={{ color: '#71717a' }}>
                 <p>HomeCare Nigeria</p>
-                <p>support@homecare.ng</p>
-                <p>www.homecare.ng</p>
+                <p><a href="mailto:support@homecare.ng" style={{ color: '#0284c7', textDecoration: 'underline' }}>support@homecare.ng</a></p>
+                <p>+234 911 905 9859</p>
               </div>
             </div>
             <div className="text-left sm:text-right">
