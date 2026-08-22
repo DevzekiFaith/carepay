@@ -2,17 +2,38 @@
 
 import Link from "next/link";
 import Logo from "../Logo";
-import { ShieldCheck, Phone, Mail, MapPin } from "lucide-react";
+import { ShieldCheck, Phone, Mail, MapPin, ExternalLink, SearchCheck } from "lucide-react";
 
 export default function FooterSection() {
   return (
     <footer className="bg-gradient-to-b from-sky-900 via-blue-950 to-blue-950 text-white pt-20 pb-12 px-6 relative z-10 w-full overflow-hidden">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-16 relative z-10">
         <div className="md:col-span-2">
-          <Logo size="md" className="mb-6" />
+          <Logo size="md" className="mb-6" variant="white" />
           <p className="text-sky-200/80 text-sm max-w-sm leading-relaxed mb-6">
             Connecting you to verified home repair professionals, plumbers, electricians, and artisans in minutes. Fast & Reliable.
           </p>
+
+          {/* Featured Link for Home Inspection & Fixes */}
+          <div className="mb-6 p-4 rounded-xl bg-white/5 border border-sky-400/20 backdrop-blur-sm max-w-md">
+            <div className="flex items-center gap-2 text-cyan-300 font-semibold text-xs uppercase tracking-wider mb-1">
+              <SearchCheck size={14} />
+              <span>Home Inspection & Service Fixes</span>
+            </div>
+            <p className="text-xs text-sky-200/90 mb-2">
+              Need comprehensive home inspection services, audits, or professional fixes?
+            </p>
+            <a
+              href="https://www.homecare.com.ng"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-sky-600 hover:bg-sky-500 px-3 py-1.5 rounded-lg transition-colors shadow-sm"
+            >
+              <span>Visit www.homecare.com.ng</span>
+              <ExternalLink size={12} />
+            </a>
+          </div>
+
           <div className="space-y-2.5 text-sm text-sky-100/90 font-medium">
             <p className="flex items-center gap-2"><Phone size={15} className="text-cyan-400" /> +234 706 994 8802</p>
             <p className="flex items-center gap-2"><Mail size={15} className="text-cyan-400" /> support@homecare.ng</p>
@@ -27,6 +48,18 @@ export default function FooterSection() {
             <li><Link href="/request?category=electrical" className="hover:text-white transition-colors">Electrical & Wiring</Link></li>
             <li><Link href="/request?category=ac" className="hover:text-white transition-colors">AC & Refrigeration</Link></li>
             <li><Link href="/request?category=carpentry" className="hover:text-white transition-colors">Carpentry & Furniture</Link></li>
+            <li><Link href="/inspection" className="hover:text-white transition-colors">Property Inspection</Link></li>
+            <li>
+              <a 
+                href="https://www.homecare.com.ng" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-cyan-300 hover:text-white font-semibold flex items-center gap-1 transition-colors"
+              >
+                <span>Home Inspection & Fixes (www.homecare.com.ng)</span>
+                <ExternalLink size={12} />
+              </a>
+            </li>
             <li><Link href="/store" className="hover:text-white transition-colors">Parts & Fittings Store</Link></li>
           </ul>
         </div>

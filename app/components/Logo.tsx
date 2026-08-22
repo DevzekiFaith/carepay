@@ -7,9 +7,10 @@ interface LogoProps {
   className?: string;
   size?: "sm" | "md" | "lg";
   href?: string;
+  variant?: "default" | "white";
 }
 
-export default function Logo({ className = "", size = "md", href = "/" }: LogoProps) {
+export default function Logo({ className = "", size = "md", href = "/", variant = "default" }: LogoProps) {
   const sizes = {
     sm: "text-lg gap-1.5",
     md: "text-xl gap-2",
@@ -22,6 +23,14 @@ export default function Logo({ className = "", size = "md", href = "/" }: LogoPr
     lg: 32,
   };
 
+  const textClass = variant === "white" 
+    ? "text-white" 
+    : "text-foreground";
+  
+  const careClass = variant === "white" 
+    ? "text-white" 
+    : "text-brand-primary";
+
   const Content = (
     <div className={`flex items-center font-heading font-black tracking-tighter ${sizes[size]} ${className}`}>
       <div className="relative flex items-center justify-center">
@@ -30,8 +39,8 @@ export default function Logo({ className = "", size = "md", href = "/" }: LogoPr
           <Zap size={iconSizes[size]} className="text-white fill-white" />
         </div>
       </div>
-      <span className="text-foreground">
-        Home<span className="text-brand-primary">Care</span>
+      <span className={textClass}>
+        Home<span className={careClass}>Care</span>
       </span>
     </div>
   );
