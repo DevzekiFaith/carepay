@@ -1,0 +1,179 @@
+import { Resend } from "resend";
+
+const resendApiKey = process.env.RESEND_API_KEY || "";
+const fromEmail = process.env.RESEND_FROM_EMAIL || "HomeCare Support <support@homecare.com.ng>";
+
+export const resend = resendApiKey ? new Resend(resendApiKey) : null;
+
+export interface OrderEmailItem {
+  name: string;
+  price: number;
+  quantity: number;
+}
+
+export interface OrderEmailParams {
+  toEmail: string;
+  customerName: string;
+  orderRef: string;
+  items: OrderEmailItem[];
+  subtotal: number;
+  deliveryFee: number;
+  total: number;
+  deliveryAddress: string;
+}
+
+/**
+ * Send HTML Order Receipt Email to Customer
+ */
+export async function sendOrderReceiptEmail(params: OrderEmailParams) {
+  if (!resend) {
+    console.warn("[Email] RESEND_API_KEY is not set. Email skipped.");
+    return { success: false, reason: "API key missing" };
+  }
+
+  try {
+    const itemsHtml = params.items
+      .map(
+        (i) => `
+      <tr>
+        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #0f172a;">${i.name}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center; color: #475569;">x${i.quantity}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 700; color: #0284c7;">₦${(i.price * i.quantity).toLocaleString()}</td>
+      </tr>`
+      )
+      .join("");
+
+    const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 20px; }
+        .card { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .header { background: linear-gradient(135deg, #0284c7, #1d4ed8); padding: 32px 24px; text-align: center; color: #ffffff; }
+        .header h1 { margin: 0; font-size: 24px; font-weight: 900; letter-spacing: -0.5px; text-transform: uppercase; }
+        .header p { margin: 6px 0 0 0; font-size: 13px; opacity: 0.9; }
+        .content { padding: 28px 24px; color: #334155; }
+        .ref-badge { display: inline-block; background: #f0f9ff; border: 1px solid #bae6fd; color: #0284c7; font-weight: 800; font-size: 12px; padding: 6px 14px; rounded: 20px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13px; }
+        .total-row { font-size: 16px; font-weight: 900; color: #0f172a; }
+        .footer { background: #f1f5f9; padding: 20px; text-align: center; font-size: 11px; color: #64748b; border-top: 1px solid #e2e8f0; }
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <div class="header">
+          <h1>HomeCare Smart Store</h1>
+          <p>Order Payment Receipt & Dispatch Confirmation</p>
+        </div>
+        <div class="content">
+          <p style="font-size: 15px; font-weight: 700; color: #0f172a; margin-top: 0;">Hello ${params.customerName},</p>
+          <p style="font-size: 13px; line-height: 1.6;">Thank you for shopping with HomeCare! Your payment for order <strong style="color: #0284c7;">#${params.orderRef}</strong> has been received and verified. Our logistics team is preparing your package for dispatch.</p>
+          
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin: 20px 0;">
+            <p style="margin: 0; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #64748b;">Delivery Destination</p>
+            <p style="margin: 4px 0 0 0; font-size: 13px; font-weight: 600; color: #0f172a;">${params.deliveryAddress}</p>
+          </div>
+
+          <p style="font-size: 12px; font-weight: 800; text-transform: uppercase; color: #475569; margin-bottom: 8px;">Order Items</p>
+          <table>
+            <thead>
+              <tr style="background: #f8fafc; text-align: left; text-transform: uppercase; font-size: 10px; color: #64748b;">
+                <th style="padding: 8px 10px;">Item</th>
+                <th style="padding: 8px 10px; text-align: center;">Qty</th>
+                <th style="padding: 8px 10px; text-align: right;">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsHtml}
+            </tbody>
+          </table>
+
+          <div style="margin-top: 20px; border-top: 2px solid #f1f5f9; padding-top: 12px;">
+            <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; color: #475569;">
+              <span>Subtotal</span>
+              <span>₦${params.subtotal.toLocaleString()}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 10px; color: #475569;">
+              <span>Nationwide Delivery</span>
+              <span>₦${params.deliveryFee.toLocaleString()}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 900; color: #0f172a; border-top: 1px solid #e2e8f0; padding-top: 10px;">
+              <span>Total Paid</span>
+              <span style="color: #0284c7;">₦${params.total.toLocaleString()}</span>
+            </div>
+          </div>
+        </div>
+        <div class="footer">
+          <p>© ${new Date().getFullYear()} HomeCare Technologies. Fast & Reliable Home Repairs.</p>
+          <p style="margin-top: 4px;">WhatsApp Support: +234 911 905 9859</p>
+        </div>
+      </div>
+    </body>
+    </html>
+    `;
+
+    const res = await resend.emails.send({
+      from: fromEmail,
+      to: [params.toEmail],
+      subject: `Payment Confirmed: Order #${params.orderRef} — HomeCare Smart Store`,
+      html,
+    });
+
+    return { success: true, data: res };
+  } catch (err: any) {
+    console.error("[Email] Order receipt send failed:", err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Send Service Request Confirmation Email to Customer
+ */
+export async function sendServiceBookingEmail(params: {
+  toEmail: string;
+  customerName: string;
+  serviceType: string;
+  address: string;
+  preferredTime: string;
+  orderRef: string;
+}) {
+  if (!resend) return { success: false, reason: "API key missing" };
+
+  try {
+    const html = `
+    <!DOCTYPE html>
+    <html>
+    <body style="font-family: Arial, sans-serif; background: #f8fafc; padding: 20px;">
+      <div style="max-w: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; padding: 28px; border: 1px solid #e2e8f0;">
+        <h2 style="color: #0284c7; font-weight: 900; text-transform: uppercase;">HomeCare Service Dispatch</h2>
+        <p style="font-size: 14px; color: #334155;">Hello <strong>${params.customerName}</strong>,</p>
+        <p style="font-size: 13px; color: #475569; line-height: 1.6;">Your booking for a verified <strong>${params.serviceType}</strong> has been logged under Booking Ref <strong>#${params.orderRef}</strong>.</p>
+        
+        <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 16px; margin: 16px 0;">
+          <p style="margin: 0 0 6px 0; font-size: 11px; font-weight: 800; color: #0284c7; text-transform: uppercase;">Service Address</p>
+          <p style="margin: 0; font-size: 13px; font-weight: 600; color: #0f172a;">${params.address}</p>
+          <p style="margin: 10px 0 0 0; font-size: 11px; font-weight: 800; color: #0284c7; text-transform: uppercase;">Scheduled Time</p>
+          <p style="margin: 2px 0 0 0; font-size: 13px; font-weight: 600; color: #0f172a;">${params.preferredTime}</p>
+        </div>
+
+        <p style="font-size: 12px; color: #64748b;">Our matching algorithm is pairing an accredited technician in your area. You will receive an SMS and WhatsApp notification once assigned.</p>
+      </div>
+    </body>
+    </html>
+    `;
+
+    const res = await resend.emails.send({
+      from: fromEmail,
+      to: [params.toEmail],
+      subject: `Service Request Received: ${params.serviceType} — HomeCare`,
+      html,
+    });
+
+    return { success: true, data: res };
+  } catch (err: any) {
+    console.error("[Email] Service booking email failed:", err);
+    return { success: false, error: err.message };
+  }
+}

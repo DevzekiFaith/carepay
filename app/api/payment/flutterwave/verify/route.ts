@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { sendOrderReceiptEmail } from "@/lib/email";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -55,6 +56,12 @@ export async function GET(req: Request) {
     const supabase = await createClient();
 
     if (paymentType === "store_order" && resolvedOrderRef) {
+      const { data: order } = await supabase
+        .from("store_orders")
+        .select("*")
+        .eq("order_ref", resolvedOrderRef)
+        .maybeSingle();
+
       const { error: updateError } = await supabase
         .from("store_orders")
         .update({
@@ -64,6 +71,18 @@ export async function GET(req: Request) {
 
       if (updateError) {
         console.error("Failed to update store order status:", updateError);
+      } else if (order && order.customer_email) {
+        // Send email receipt via Resend
+        sendOrderReceiptEmail({
+          toEmail: order.customer_email,
+          customerName: order.customer_name || "Valued Customer",
+          orderRef: order.order_ref,
+          items: order.items || [],
+          subtotal: order.subtotal || 0,
+          deliveryFee: order.delivery_fee || 2500,
+          total: order.total || verifiedAmount,
+          deliveryAddress: order.delivery_address || "Home Address",
+        }).catch(err => console.error("Order receipt email failed:", err));
       }
 
       return NextResponse.redirect(
