@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
@@ -13,6 +13,7 @@ import {
   ShoppingBag,
   Lock,
   ShieldCheck,
+  Home
 } from "lucide-react";
 import { motion } from "framer-motion";
 import AdminLockScreen from "@/app/components/admin/AdminLockScreen";
@@ -35,6 +36,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [unlocked, setUnlocked] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -69,16 +71,24 @@ export default function AdminLayout({
       {/* Top Header */}
       <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-xs">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => router.back()}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 text-xs font-black uppercase tracking-wider text-slate-700 transition-colors cursor-pointer"
+              title="Go back to previous page"
+            >
+              <ArrowLeft size={14} className="text-sky-600" />
+              Go Back
+            </button>
             <Link
               href="/"
-              className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-sky-600 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 transition-colors shadow-2xs"
             >
-              <ArrowLeft size={14} />
-              Back to site
+              <Home size={14} className="text-sky-600" />
+              Main Site
             </Link>
-            <span className="text-slate-300 font-bold">|</span>
-            <span className="text-xs font-black uppercase tracking-wider text-sky-600">
+            <span className="text-slate-300 font-bold hidden sm:inline">|</span>
+            <span className="text-xs font-black uppercase tracking-wider text-sky-600 hidden sm:inline">
               CarePay Admin Console
             </span>
           </div>

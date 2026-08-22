@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   KeyRound,
@@ -16,7 +17,8 @@ import {
   RefreshCw,
   Settings,
   X,
-  Sparkles
+  Sparkles,
+  ArrowLeft
 } from "lucide-react";
 import {
   verifyAdminPin,
@@ -607,10 +609,20 @@ export default function AdminLockScreen({ onUnlock }: AdminLockScreenProps) {
               className="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-extrabold uppercase tracking-wider transition-all shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 hover:scale-[1.02]"
             >
               <ScanFace size={16} />
-              {isScanningFace ? "Authenticating Face Mesh..." : "Scan Face Now"}
             </button>
           </div>
         )}
+
+        {/* Exit Console / Go Back Button */}
+        <div className="mt-6 pt-4 border-t border-white/10 text-center">
+          <Link
+            href="/"
+            className="inline-flex items-center justify-center gap-2 text-xs font-extrabold uppercase tracking-wider text-slate-400 hover:text-white transition-all py-2.5 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 w-full"
+          >
+            <ArrowLeft size={15} className="text-sky-400" />
+            <span>Exit Console & Return to Site</span>
+          </Link>
+        </div>
       </motion.div>
 
       {/* --- SETTINGS / CHANGE PASSCODE MODAL --- */}
