@@ -15,8 +15,8 @@ export default function WhatsAppButton() {
   return (
     <motion.div
       drag
-      dragConstraints={{ left: -320, right: 10, top: -650, bottom: 10 }}
-      dragElastic={0.1}
+      dragConstraints={{ left: -1400, right: 200, top: -1400, bottom: 200 }}
+      dragElastic={0.05}
       whileDrag={{ scale: 1.08, cursor: "grabbing" }}
       className="fixed bottom-20 md:bottom-8 right-4 sm:right-8 z-[65] touch-none select-none flex items-center gap-2 group cursor-grab"
       initial={{ scale: 0, opacity: 0 }}

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { sendOrderReceiptEmail, sendServiceBookingEmail } from "@/lib/email";
+import { sendOrderReceiptEmail, sendServiceBookingEmail, sendSupportTicketEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
   try {
@@ -13,6 +13,11 @@ export async function POST(req: Request) {
 
     if (type === "service_booking") {
       const res = await sendServiceBookingEmail(data);
+      return NextResponse.json(res);
+    }
+
+    if (type === "support_ticket") {
+      const res = await sendSupportTicketEmail(data);
       return NextResponse.json(res);
     }
 

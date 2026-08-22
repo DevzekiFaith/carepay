@@ -54,7 +54,6 @@ export async function sendOrderReceiptEmail(params: OrderEmailParams) {
         body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 20px; }
         .card { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
         .header { background: linear-gradient(135deg, #0284c7, #1d4ed8); padding: 32px 24px; text-align: center; color: #ffffff; }
-        .header-logo-box { display: inline-flex; items-center: center; align-items: center; justify-content: center; width: 52px; height: 52px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 16px; margin-bottom: 12px; }
         .header h1 { margin: 10px 0 0 0; font-size: 24px; font-weight: 900; letter-spacing: -0.5px; text-transform: uppercase; }
         .header p { margin: 6px 0 0 0; font-size: 13px; opacity: 0.9; }
         .content { padding: 32px 24px; color: #334155; }
@@ -215,6 +214,84 @@ export async function sendServiceBookingEmail(params: {
     return { success: true, data: res };
   } catch (err: any) {
     console.error("[Email] Service booking email failed:", err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Send Customer Support Ticket Email via Resend
+ */
+export async function sendSupportTicketEmail(params: {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}) {
+  if (!resend) return { success: false, reason: "API key missing" };
+
+  try {
+    const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 20px; }
+        .card { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
+        .header { background: linear-gradient(135deg, #0284c7, #1d4ed8); padding: 28px 24px; text-align: center; color: #ffffff; }
+        .header h1 { margin: 10px 0 0 0; font-size: 20px; font-weight: 900; letter-spacing: -0.5px; text-transform: uppercase; }
+        .content { padding: 28px 24px; color: #334155; }
+        .field { margin-bottom: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; }
+        .label { font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; margin: 0 0 4px 0; }
+        .val { font-size: 13px; font-weight: 600; color: #0f172a; margin: 0; }
+        .footer { background: #f1f5f9; padding: 20px; text-align: center; font-size: 11px; color: #64748b; border-top: 1px solid #e2e8f0; }
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <div class="header">
+          <div>
+            <img src="${logoUrl}" alt="HomeCare Logo" width="44" height="44" style="border-radius: 12px; vertical-align: middle; display: inline-block;" onError="this.style.display='none'" />
+          </div>
+          <h1>New Customer Support Ticket</h1>
+        </div>
+        <div class="content">
+          <div class="field">
+            <p class="label">Customer Name</p>
+            <p class="val">${params.name}</p>
+          </div>
+          <div class="field">
+            <p class="label">Customer Email</p>
+            <p class="val"><a href="mailto:${params.email}">${params.email}</a></p>
+          </div>
+          <div class="field">
+            <p class="label">Subject Category</p>
+            <p class="val">${params.subject}</p>
+          </div>
+          <div class="field">
+            <p class="label">Message Inquiry</p>
+            <p class="val" style="white-space: pre-wrap; line-height: 1.6;">${params.message}</p>
+          </div>
+        </div>
+        <div class="footer">
+          <p>© ${new Date().getFullYear()} HomeCare Support Ticketing System.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+    `;
+
+    const res = await resend.emails.send({
+      from: fromEmail,
+      to: ["support@homecare.ng"],
+      replyTo: params.email,
+      subject: `[Support Ticket] ${params.subject} — from ${params.name}`,
+      html,
+    });
+
+    return { success: true, data: res };
+  } catch (err: any) {
+    console.error("[Email] Support ticket failed:", err);
     return { success: false, error: err.message };
   }
 }

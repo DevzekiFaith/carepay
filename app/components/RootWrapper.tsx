@@ -8,6 +8,7 @@ import dynamic from "next/dynamic";
 const CartDrawer = dynamic(() => import("./CartDrawer"), { ssr: false });
 const PromoOverlay = dynamic(() => import("./PromoOverlay"), { ssr: false });
 const WhatsAppButton = dynamic(() => import("./WhatsAppButton"), { ssr: false });
+const SupportModal = dynamic(() => import("./SupportModal"), { ssr: false });
 
 export default function RootWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -31,6 +32,7 @@ export default function RootWrapper({ children }: { children: React.ReactNode })
       <CartDrawer />
       {isStore && <PromoOverlay />}
       <WhatsAppButton />
+      <SupportModal />
     </>
   );
 }
