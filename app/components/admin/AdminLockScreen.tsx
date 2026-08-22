@@ -425,11 +425,6 @@ export default function AdminLockScreen({ onUnlock }: AdminLockScreenProps) {
               </button>
             </div>
 
-            <div className="text-center">
-              <span className="text-[11px] text-slate-500">
-                Default Master PIN: <strong className="text-sky-400 font-mono">202688</strong>
-              </span>
-            </div>
           </div>
         )}
 
