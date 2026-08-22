@@ -2,6 +2,8 @@ import { Resend } from "resend";
 
 const resendApiKey = process.env.RESEND_API_KEY || "";
 const fromEmail = process.env.RESEND_FROM_EMAIL || "HomeCare Support <support@homecare.com.ng>";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://carepay.com.ng";
+const logoUrl = `${siteUrl}/hclogo.png`;
 
 export const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
@@ -50,20 +52,23 @@ export async function sendOrderReceiptEmail(params: OrderEmailParams) {
       <meta charset="utf-8">
       <style>
         body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 20px; }
-        .card { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .card { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
         .header { background: linear-gradient(135deg, #0284c7, #1d4ed8); padding: 32px 24px; text-align: center; color: #ffffff; }
-        .header h1 { margin: 0; font-size: 24px; font-weight: 900; letter-spacing: -0.5px; text-transform: uppercase; }
+        .header-logo-box { display: inline-flex; items-center: center; align-items: center; justify-content: center; width: 52px; height: 52px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 16px; margin-bottom: 12px; }
+        .header h1 { margin: 10px 0 0 0; font-size: 24px; font-weight: 900; letter-spacing: -0.5px; text-transform: uppercase; }
         .header p { margin: 6px 0 0 0; font-size: 13px; opacity: 0.9; }
-        .content { padding: 28px 24px; color: #334155; }
-        .ref-badge { display: inline-block; background: #f0f9ff; border: 1px solid #bae6fd; color: #0284c7; font-weight: 800; font-size: 12px; padding: 6px 14px; rounded: 20px; margin-bottom: 20px; }
+        .content { padding: 32px 24px; color: #334155; }
         table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13px; }
-        .total-row { font-size: 16px; font-weight: 900; color: #0f172a; }
-        .footer { background: #f1f5f9; padding: 20px; text-align: center; font-size: 11px; color: #64748b; border-top: 1px solid #e2e8f0; }
+        .footer { background: #f1f5f9; padding: 24px; text-align: center; font-size: 11px; color: #64748b; border-top: 1px solid #e2e8f0; }
+        .cta-btn { display: inline-block; background: #0284c7; color: #ffffff !important; text-decoration: none; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; padding: 14px 32px; border-radius: 30px; margin-top: 24px; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35); }
       </style>
     </head>
     <body>
       <div class="card">
         <div class="header">
+          <div>
+            <img src="${logoUrl}" alt="HomeCare Logo" width="48" height="48" style="border-radius: 12px; vertical-align: middle; display: inline-block;" onError="this.style.display='none'" />
+          </div>
           <h1>HomeCare Smart Store</h1>
           <p>Order Payment Receipt & Dispatch Confirmation</p>
         </div>
@@ -104,10 +109,16 @@ export async function sendOrderReceiptEmail(params: OrderEmailParams) {
               <span style="color: #0284c7;">₦${params.total.toLocaleString()}</span>
             </div>
           </div>
+
+          <!-- Return to Site CTA Button -->
+          <div style="text-align: center; margin-top: 28px;">
+            <a href="${siteUrl}/customer/dashboard" class="cta-btn">View Order on HomeCare →</a>
+          </div>
         </div>
         <div class="footer">
           <p>© ${new Date().getFullYear()} HomeCare Technologies. Fast & Reliable Home Repairs.</p>
-          <p style="margin-top: 4px;">WhatsApp Support: +234 911 905 9859</p>
+          <p style="margin-top: 6px;">WhatsApp Support: <a href="https://wa.me/2349119059859" style="color: #0284c7; text-decoration: none; font-weight: 700;">+234 911 905 9859</a></p>
+          <p style="margin-top: 8px;"><a href="${siteUrl}" style="color: #0284c7; font-weight: 700; text-decoration: none;">Visit HomeCare Website (${siteUrl})</a></p>
         </div>
       </div>
     </body>
@@ -145,20 +156,50 @@ export async function sendServiceBookingEmail(params: {
     const html = `
     <!DOCTYPE html>
     <html>
-    <body style="font-family: Arial, sans-serif; background: #f8fafc; padding: 20px;">
-      <div style="max-w: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; padding: 28px; border: 1px solid #e2e8f0;">
-        <h2 style="color: #0284c7; font-weight: 900; text-transform: uppercase;">HomeCare Service Dispatch</h2>
-        <p style="font-size: 14px; color: #334155;">Hello <strong>${params.customerName}</strong>,</p>
-        <p style="font-size: 13px; color: #475569; line-height: 1.6;">Your booking for a verified <strong>${params.serviceType}</strong> has been logged under Booking Ref <strong>#${params.orderRef}</strong>.</p>
-        
-        <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 16px; margin: 16px 0;">
-          <p style="margin: 0 0 6px 0; font-size: 11px; font-weight: 800; color: #0284c7; text-transform: uppercase;">Service Address</p>
-          <p style="margin: 0; font-size: 13px; font-weight: 600; color: #0f172a;">${params.address}</p>
-          <p style="margin: 10px 0 0 0; font-size: 11px; font-weight: 800; color: #0284c7; text-transform: uppercase;">Scheduled Time</p>
-          <p style="margin: 2px 0 0 0; font-size: 13px; font-weight: 600; color: #0f172a;">${params.preferredTime}</p>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 20px; }
+        .card { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
+        .header { background: linear-gradient(135deg, #0284c7, #1d4ed8); padding: 32px 24px; text-align: center; color: #ffffff; }
+        .header h1 { margin: 10px 0 0 0; font-size: 22px; font-weight: 900; letter-spacing: -0.5px; text-transform: uppercase; }
+        .content { padding: 32px 24px; color: #334155; }
+        .cta-btn { display: inline-block; background: #0284c7; color: #ffffff !important; text-decoration: none; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; padding: 14px 32px; border-radius: 30px; margin-top: 24px; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35); }
+        .footer { background: #f1f5f9; padding: 24px; text-align: center; font-size: 11px; color: #64748b; border-top: 1px solid #e2e8f0; }
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <div class="header">
+          <div>
+            <img src="${logoUrl}" alt="HomeCare Logo" width="48" height="48" style="border-radius: 12px; vertical-align: middle; display: inline-block;" onError="this.style.display='none'" />
+          </div>
+          <h1>HomeCare Service Dispatch</h1>
+          <p style="margin-top: 4px; font-size: 13px; opacity: 0.9;">Artisan & Service Booking Confirmation</p>
         </div>
+        <div class="content">
+          <p style="font-size: 15px; font-weight: 700; color: #0f172a; margin-top: 0;">Hello ${params.customerName},</p>
+          <p style="font-size: 13px; color: #475569; line-height: 1.6;">Your request for a verified <strong>${params.serviceType}</strong> has been logged under Booking Ref <strong style="color: #0284c7;">#${params.orderRef}</strong>.</p>
+          
+          <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 16px; margin: 20px 0;">
+            <p style="margin: 0 0 4px 0; font-size: 11px; font-weight: 800; color: #0284c7; text-transform: uppercase;">Service Address</p>
+            <p style="margin: 0; font-size: 13px; font-weight: 600; color: #0f172a;">${params.address}</p>
+            <p style="margin: 12px 0 4px 0; font-size: 11px; font-weight: 800; color: #0284c7; text-transform: uppercase;">Scheduled Time</p>
+            <p style="margin: 0; font-size: 13px; font-weight: 600; color: #0f172a;">${params.preferredTime}</p>
+          </div>
 
-        <p style="font-size: 12px; color: #64748b;">Our matching algorithm is pairing an accredited technician in your area. You will receive an SMS and WhatsApp notification once assigned.</p>
+          <p style="font-size: 12px; color: #64748b; line-height: 1.6;">Our matching algorithm is pairing an accredited technician in your area. You will receive an SMS and notification once assigned.</p>
+
+          <!-- Return to Site CTA Button -->
+          <div style="text-align: center; margin-top: 28px;">
+            <a href="${siteUrl}/customer/dashboard" class="cta-btn">Track Request on HomeCare →</a>
+          </div>
+        </div>
+        <div class="footer">
+          <p>© ${new Date().getFullYear()} HomeCare Technologies. Fast & Reliable Home Repairs.</p>
+          <p style="margin-top: 6px;">WhatsApp Support: <a href="https://wa.me/2349119059859" style="color: #0284c7; text-decoration: none; font-weight: 700;">+234 911 905 9859</a></p>
+          <p style="margin-top: 8px;"><a href="${siteUrl}" style="color: #0284c7; font-weight: 700; text-decoration: none;">Visit HomeCare Website (${siteUrl})</a></p>
+        </div>
       </div>
     </body>
     </html>
